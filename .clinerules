@@ -1,0 +1,73 @@
+# GitHub MCP Server Project Rules
+
+## Project Structure
+- Follow src/ layout pattern for all Python MCP servers
+- Keep operations modular and separated by domain (issues, repos, etc.)
+- Maintain clear separation between common utilities and domain operations
+- Use __init__.py files to expose clean public APIs
+
+## Build and Environment
+- Use uv for dependency management and virtual environments
+- Build with `uv build --no-build-isolation` flag
+- Always specify requires-python in pyproject.toml
+- Keep dependencies in virtual environment for isolation
+
+## MCP Configuration
+- Use direct venv Python interpreter in MCP settings:
+  ```json
+  {
+    "command": "/path/to/project/.venv/bin/python",
+    "args": ["-m", "package_name"]
+  }
+  ```
+- Avoid using uvx/uv run in MCP settings to prevent dependency resolution issues
+- Always include necessary environment variables (e.g., GITHUB_PERSONAL_ACCESS_TOKEN)
+
+## Development Patterns
+- Use Pydantic models for request/response validation
+- Keep operations synchronous for reliability
+- Follow consistent error handling patterns using custom exceptions
+- Document all public functions and classes thoroughly
+
+## Testing
+- Test MCP tools using MCP Inspector during development
+- Verify tool operations with real GitHub repositories
+- Test both success and error cases
+- Document example payloads that work
+
+## Documentation
+- Keep memory bank up to date with all significant changes
+- Document all implementation lessons in active_context.md
+- Include example configurations and usage patterns
+- Maintain clear next steps and progress tracking
+
+## Known Patterns
+1. Tool Registration:
+   ```python
+   @mcp.tool()
+   def tool_name(params: ParamsModel) -> dict:
+       """Tool docstring with clear Args and Returns."""
+       # Implementation
+       return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+   ```
+
+2. Error Handling:
+   ```python
+   try:
+       result = api_operation()
+       return create_tool_response(result)
+   except GitHubError as e:
+       return create_tool_response(str(e), is_error=True)
+   ```
+
+3. Resource Organization:
+   - Common utilities in common/
+   - API operations in operations/
+   - Types and models in common/types.py
+   - Error definitions in common/errors.py
+
+## Troubleshooting
+- If MCP server fails to start, verify venv Python path in settings
+- For dependency errors, ensure all requirements are installed in venv
+- For GitHub API errors, check token permissions and validity
+- For build errors, use --no-build-isolation flag with uv build
