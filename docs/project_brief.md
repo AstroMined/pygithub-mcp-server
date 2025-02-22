@@ -1,7 +1,7 @@
-# GitHub MCP Server Python Port
+# PyGithub MCP Server
 
 ## Overview
-The Python GitHub MCP Server provides a bridge between AI assistants and the GitHub API through the Model Context Protocol. The implementation is complete and functional, with a focus on expanding capabilities and improving performance.
+The PyGithub MCP Server provides a bridge between AI assistants and the GitHub API through PyGithub and the Model Context Protocol. The implementation is complete and functional, with a focus on expanding capabilities and improving performance.
 
 ## Core Requirements
 

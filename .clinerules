@@ -1,4 +1,4 @@
-# GitHub MCP Server Project Rules
+# PyGithub MCP Server Project Rules
 
 ## Project Structure
 - Follow src/ layout pattern for all Python MCP servers
@@ -8,9 +8,13 @@
 
 ## Build and Environment
 - Use uv for dependency management and virtual environments
-- Build with `uv build --no-build-isolation` flag
+- Build with `uv build` (build isolation works fine)
 - Always specify requires-python in pyproject.toml
 - Keep dependencies in virtual environment for isolation
+- Always activate virtual environment before running tools:
+  ```bash
+  source .venv/bin/activate
+  ```
 
 ## MCP Configuration
 - Use direct venv Python interpreter in MCP settings:
@@ -32,7 +36,8 @@
 ## Testing
 - Test MCP tools using MCP Inspector during development:
   ```bash
-  npx @modelcontextprotocol/inspector uv run github-mcp-server
+  source .venv/bin/activate  # Must activate venv first
+  npx @modelcontextprotocol/inspector uv run pygithub-mcp-server
   ```
 - Use MCP Inspector's Web UI to experiment with available tools
 - Verify tool operations with real GitHub repositories
@@ -105,11 +110,11 @@
 - If MCP server fails to start, verify venv Python path in settings
 - For dependency errors, ensure all requirements are installed in venv
 - For GitHub API errors, check token permissions and validity
-- For build errors, use --no-build-isolation flag with uv build
+- For build errors, ensure virtual environment is activated
 - When using MCP Inspector, ensure GITHUB_PERSONAL_ACCESS_TOKEN is set in environment
 
 ## Debugging
-- Check github_mcp_server.log for detailed error logs
+- Check pygithub_mcp_server.log for detailed error logs
 - Log file contains all API interactions and error traces
 - Both file and console logging enabled
 - Log file is created in the project root directory

@@ -1,6 +1,6 @@
-# GitHub MCP Server
+# PyGithub MCP Server
 
-A Model Context Protocol server that provides tools for interacting with the GitHub API. This server enables AI assistants to perform GitHub operations like managing issues, repositories, and pull requests.
+A Model Context Protocol server that provides tools for interacting with the GitHub API through PyGithub. This server enables AI assistants to perform GitHub operations like managing issues, repositories, and pull requests.
 
 ## Features
 
@@ -39,7 +39,7 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="your-token-here"
   "mcpServers": {
     "github": {
       "command": "/path/to/repo/.venv/bin/python",
-      "args": ["-m", "github_mcp_server"],
+      "args": ["-m", "pygithub_mcp_server"],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "your-token-here"
       }
@@ -54,7 +54,7 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="your-token-here"
 Test MCP tools during development using the MCP Inspector:
 ```bash
 source .venv/bin/activate  # Ensure venv is activated
-npx @modelcontextprotocol/inspector uv run github-mcp-server
+npx @modelcontextprotocol/inspector uv run pygithub-mcp-server
 ```
 
 Use the MCP Inspector's Web UI to:
@@ -67,7 +67,7 @@ Use the MCP Inspector's Web UI to:
 
 ```
 src/
-└── github_mcp_server/
+└── pygithub_mcp_server/
     ├── __init__.py
     ├── __main__.py
     ├── server.py
@@ -98,7 +98,7 @@ src/
 
 3. GitHub API errors:
    - Check token permissions and validity
-   - Review github_mcp_server.log for detailed error traces
+   - Review pygithub_mcp_server.log for detailed error traces
    - Verify rate limits haven't been exceeded
 
 ## Dependencies

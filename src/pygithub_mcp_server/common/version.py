@@ -1,4 +1,4 @@
-"""Version information for the GitHub MCP Server.
+"""Version information for the PyGithub MCP Server.
 
 This module provides version constants and utilities for the package.
 Version follows semantic versioning (major.minor.patch).

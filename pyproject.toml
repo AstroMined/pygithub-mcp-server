@@ -1,7 +1,7 @@
 [project]
-name = "github-mcp-server"
+name = "pygithub-mcp-server"
 version = "0.1.0"
-description = "GitHub MCP Server - Python implementation"
+description = "PyGithub MCP Server - Python implementation"
 authors = []
 requires-python = ">=3.10"
 dependencies = [
@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-github-mcp-server = "github_mcp_server.__main__:main"
+pygithub-mcp-server = "pygithub_mcp_server.__main__:main"
 
 [project.optional-dependencies]
 dev = [
@@ -33,7 +33,7 @@ build-backend = "hatchling.build"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=github_mcp_server --cov-report=term-missing"
+addopts = "-v --cov=pygithub_mcp_server --cov-report=term-missing"
 
 [tool.black]
 line-length = 88

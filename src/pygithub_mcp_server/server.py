@@ -1,4 +1,4 @@
-"""GitHub MCP Server implementation.
+"""PyGithub MCP Server implementation.
 
 This module provides a FastMCP server that exposes GitHub API operations.
 """
@@ -10,17 +10,17 @@ import sys
 import traceback
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
-from github_mcp_server.common.types import ListIssuesParams
-from github_mcp_server.common.version import VERSION
-from github_mcp_server.common.errors import GitHubError, format_github_error
-from github_mcp_server.operations import issues
+from pygithub_mcp_server.common.types import ListIssuesParams
+from pygithub_mcp_server.common.version import VERSION
+from pygithub_mcp_server.common.errors import GitHubError, format_github_error
+from pygithub_mcp_server.operations import issues
 
 # Set up logging
 log_dir = Path(__file__).parent.parent.parent / 'logs'
 if not log_dir.exists():
     os.makedirs(log_dir)
 
-log_file = log_dir / 'github_mcp_server.log'
+log_file = log_dir / 'pygithub_mcp_server.log'
 logger = logging.getLogger()  # Get root logger
 logger.setLevel(logging.DEBUG)
 logging.basicConfig(
@@ -37,7 +37,7 @@ logger.debug("Logging initialized")
 
 # Create FastMCP server instance
 mcp = FastMCP(
-    "github-mcp-server",
+    "pygithub-mcp-server",
     version=VERSION,
     description="GitHub API operations via MCP"
 )
