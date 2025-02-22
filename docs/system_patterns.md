@@ -76,6 +76,27 @@ except GithubException as e:
     raise GitHubError(str(e))
 ```
 
+4. Optional Parameter Handling
+```python
+# Pattern for handling optional parameters
+def create_something(required_param, **optional_params):
+    # Build kwargs with required parameters
+    kwargs = {"required": required_param}
+    
+    # Add optional parameters only if provided
+    if "milestone" in optional_params:
+        try:
+            kwargs["milestone"] = get_milestone_object(optional_params["milestone"])
+        except Exception as e:
+            raise GitHubError(f"Invalid milestone: {e}")
+    
+    if "labels" in optional_params and optional_params["labels"]:
+        kwargs["labels"] = optional_params["labels"]
+    
+    # Make API call with only provided parameters
+    return client.create_something(**kwargs)
+```
+
 ## System Flow
 
 ### Operation Flow
@@ -87,6 +108,8 @@ sequenceDiagram
     participant API as GitHub API
 
     MCP->>Client: Operation Request
+    Client->>Client: Build kwargs
+    Client->>Client: Convert Types
     Client->>PyGithub: Get/Create Object
     PyGithub->>API: API Request
     API-->>PyGithub: Response

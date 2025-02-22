@@ -183,6 +183,24 @@ def convert_to_schema(github_obj):
     }
 ```
 
+4. Optional Parameter Handling
+```python
+def github_operation(required_param, **optional_params):
+    # Build kwargs with required parameters
+    kwargs = {"required": required_param}
+    
+    # Add optional parameters only if provided
+    if optional_params.get("body"):
+        kwargs["body"] = optional_params["body"]
+    
+    # Convert primitive types to PyGithub objects
+    if optional_params.get("milestone"):
+        kwargs["milestone"] = get_milestone_object(optional_params["milestone"])
+    
+    # Make API call with only provided parameters
+    return client.operation(**kwargs)
+```
+
 ## Best Practices
 
 1. PyGithub Usage
@@ -190,6 +208,10 @@ def convert_to_schema(github_obj):
 - Handle pagination properly
 - Respect rate limits
 - Convert objects consistently
+- Build kwargs dynamically for optional parameters
+- Only include non-None values in method calls
+- Convert primitive types to PyGithub objects
+- Handle object conversion errors explicitly
 
 2. Error Management
 - Map exceptions properly

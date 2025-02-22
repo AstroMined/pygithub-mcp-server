@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Implemented create_issue tool with proper parameter handling
+- Added documentation for optional parameter handling patterns
+- Added environment variable setup for MCP Inspector testing
 - Improved parameter handling for PyGithub method calls
 - Updated README with accurate setup and usage instructions
 - PyGithub integration for object-oriented GitHub API interactions
@@ -18,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New documentation for PyGithub patterns and usage
 
 ### Changed
+- Updated development setup instructions with environment variables
+- Improved parameter handling documentation with kwargs pattern
 - Refactored issues module to use PyGithub (proof of concept)
 - Updated project dependencies to include PyGithub
 - Improved error handling with PyGithub's exception system

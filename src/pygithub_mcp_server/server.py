@@ -10,7 +10,7 @@ import sys
 import traceback
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
-from pygithub_mcp_server.common.types import ListIssuesParams
+from pygithub_mcp_server.common.types import ListIssuesParams, CreateIssueParams
 from pygithub_mcp_server.common.version import VERSION
 from pygithub_mcp_server.common.errors import GitHubError, format_github_error
 from pygithub_mcp_server.operations import issues
@@ -41,6 +41,53 @@ mcp = FastMCP(
     version=VERSION,
     description="GitHub API operations via MCP"
 )
+
+@mcp.tool()
+def create_issue(params: CreateIssueParams) -> dict:
+    """Create a new issue in a GitHub repository.
+    
+    Args:
+        params: Parameters for creating an issue including:
+            - owner: Repository owner (user or organization)
+            - repo: Repository name
+            - title: Issue title
+            - body: Issue description (optional)
+            - assignees: List of usernames to assign
+            - labels: List of labels to add
+            - milestone: Milestone number (optional)
+    
+    Returns:
+        Created issue details from GitHub API
+    """
+    try:
+        logger.debug(f"create_issue called with params: {params}")
+        result = issues.create_issue(
+            params.owner,
+            params.repo,
+            title=params.title,
+            body=params.body,
+            assignees=params.assignees,
+            labels=params.labels,
+            milestone=params.milestone
+        )
+        logger.debug(f"Got result: {result}")
+        response = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        logger.debug(f"Returning response: {response}")
+        return response
+    except GitHubError as e:
+        logger.error(f"GitHub error: {e}")
+        return {
+            "content": [{"type": "error", "text": format_github_error(e)}],
+            "is_error": True
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        logger.error(traceback.format_exc())
+        error_msg = str(e) if str(e) else "An unexpected error occurred"
+        return {
+            "content": [{"type": "error", "text": f"Internal server error: {error_msg}"}],
+            "is_error": True
+        }
 
 @mcp.tool()
 def list_issues(params: ListIssuesParams) -> dict:

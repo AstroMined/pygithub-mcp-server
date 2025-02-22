@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Focus
-Package renamed to pygithub-mcp-server and published to GitHub. Continuing to implement comprehensive PyGithub integration with focus on leveraging the library's object-oriented interface for improved reliability and maintainability.
+Implementing comprehensive GitHub issue operations as MCP tools, starting with create_issue. This continues our PyGithub integration work with a focus on exposing the library's object-oriented interface through well-defined MCP tools.
 
 ## Recent Changes
 - Renamed package from github-mcp-server to pygithub-mcp-server
@@ -18,7 +18,25 @@ Package renamed to pygithub-mcp-server and published to GitHub. Continuing to im
 
 ## Next Steps
 
-1. PyPI Publication
+1. GitHub Issues Tools Implementation
+   - Implement create_issue MCP tool
+     - Define Pydantic model for input validation
+     - Register tool with proper schema
+     - Test with MCP Inspector
+     - Document implementation patterns
+   - Future issue operations (next sessions)
+     - get_issue (read operation)
+     - update_issue (modify existing)
+     - Comment operations (add, list, update, delete)
+     - Label operations (add, remove)
+
+2. Testing Strategy
+   - Test each tool with MCP Inspector
+   - Verify with real GitHub repositories
+   - Plan unit tests for operations
+   - Plan integration tests with GitHub API
+
+3. PyPI Publication
    - Verify package name availability
    - Prepare for PyPI release
    - Document installation process
@@ -107,6 +125,10 @@ Package renamed to pygithub-mcp-server and published to GitHub. Continuing to im
    - Handle assertions properly
    - Use simpler parameter passing when possible
    - Validate parameters before API calls
+   - Build kwargs dynamically for optional parameters
+   - Only include non-None values in method calls
+   - Convert primitive types to PyGithub objects
+   - Handle object conversion errors explicitly
 
 2. Environment Setup
    - PyGithub dependency management

@@ -49,19 +49,25 @@ def create_issue(
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
 
-        # Get milestone object if number provided
-        milestone_obj = None
+        # Build kwargs for create_issue
+        kwargs = {"title": title}  # title is required
+
+        # Add optional parameters only if provided
+        if body is not None:
+            kwargs["body"] = body
+        if assignees:  # Only add if non-empty list
+            kwargs["assignees"] = assignees
+        if labels:  # Only add if non-empty list
+            kwargs["labels"] = labels
         if milestone is not None:
-            milestone_obj = repository.get_milestone(milestone)
+            try:
+                kwargs["milestone"] = repository.get_milestone(milestone)
+            except Exception as e:
+                logger.error(f"Failed to get milestone {milestone}: {e}")
+                raise GitHubError(f"Invalid milestone number: {milestone}")
 
         # Create issue using PyGithub
-        issue = repository.create_issue(
-            title=title,
-            body=body,
-            assignees=assignees,
-            labels=labels,
-            milestone=milestone_obj,
-        )
+        issue = repository.create_issue(**kwargs)
 
         # Convert to our schema
         return convert_issue(issue)

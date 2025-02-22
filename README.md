@@ -12,6 +12,27 @@ A Model Context Protocol server that provides tools for interacting with the Git
 - Clean API abstraction through MCP tools
 - Robust pagination handling
 - Smart parameter handling and validation for PyGithub methods
+- Dynamic kwargs handling for optional parameters
+
+## Usage Examples
+
+### Creating an Issue
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "title": "Issue Title",
+  "body": "Issue description",
+  "assignees": ["username1", "username2"],
+  "labels": ["bug", "help wanted"],
+  "milestone": 1
+}
+```
+
+All parameters except `owner`, `repo`, and `title` are optional. The server handles optional parameters intelligently:
+- Only includes provided parameters in the API call
+- Converts primitive types to GitHub objects (e.g., milestone number to Milestone object)
+- Provides clear error messages for invalid parameters
 
 ## Installation
 
@@ -49,7 +70,7 @@ uv pip install -e .
 Test MCP tools during development using the MCP Inspector:
 ```bash
 source .venv/bin/activate  # Ensure venv is activated
-npx @modelcontextprotocol/inspector uv run pygithub-mcp-server
+npx @modelcontextprotocol/inspector -e GITHUB_PERSONAL_ACCESS_TOKEN=your-token-here uv run pygithub-mcp-server
 ```
 
 Use the MCP Inspector's Web UI to:

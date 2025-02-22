@@ -37,7 +37,7 @@
 - Test MCP tools using MCP Inspector during development:
   ```bash
   source .venv/bin/activate  # Must activate venv first
-  npx @modelcontextprotocol/inspector uv run pygithub-mcp-server
+  npx @modelcontextprotocol/inspector -e GITHUB_PERSONAL_ACCESS_TOKEN=your-token-here uv run pygithub-mcp-server
   ```
 - Use MCP Inspector's Web UI to experiment with available tools
 - Verify tool operations with real GitHub repositories
@@ -105,6 +105,32 @@
    - Error definitions in common/errors.py
    - GitHub client in common/github.py
    - Object converters in common/converters.py
+
+6. Optional Parameter Handling:
+   ```python
+   # Don't pass optional parameters directly to PyGithub methods
+   # BAD - can trigger assertion errors:
+   repository.create_issue(
+       title=title,
+       body=body,  # body might be None
+       milestone=milestone,  # milestone might be None
+   )
+
+   # GOOD - build kwargs with only provided values:
+   kwargs = {"title": title}  # required params
+   if body is not None:
+       kwargs["body"] = body
+   if milestone is not None:
+       kwargs["milestone"] = get_milestone_object(milestone)
+   repository.create_issue(**kwargs)
+   ```
+
+   Key practices:
+   - Only include parameters in kwargs when they have non-None values
+   - Convert primitive types to PyGithub objects before passing (e.g., milestone number → Milestone object)
+   - Handle object conversion errors explicitly
+   - Document parameter requirements in docstrings
+   - Test with various parameter combinations
 
 ## Troubleshooting
 - If MCP server fails to start, verify venv Python path in settings

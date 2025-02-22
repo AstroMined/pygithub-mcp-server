@@ -4,6 +4,8 @@
 - Package renamed to pygithub-mcp-server
 - GitHub repository setup at github.com/AstroMined/pygithub-mcp-server
 - MIT license and .gitignore configuration
+- Implemented create_issue tool with proper parameter handling
+- Documented optional parameter handling patterns with kwargs
 - Complete Python implementation of GitHub MCP Server
 - Successful MCP server connection and tool operations
 - Core server functionality with FastMCP
@@ -91,7 +93,7 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Initial testing shows improved reliability with synchronous approach. Focus now on PyPI publication, testing, optimization, and feature expansion.
+Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Initial testing shows improved reliability with synchronous approach. The create_issue tool demonstrates our improved parameter handling patterns, using kwargs for optional parameters and proper object conversion. Focus now on implementing remaining issue operations following these established patterns, along with PyPI publication, testing, optimization, and feature expansion.
 
 ### Priorities
 1. Prepare for PyPI publication
