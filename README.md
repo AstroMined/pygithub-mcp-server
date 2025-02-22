@@ -165,6 +165,25 @@ uv pip install -e .
 
 ## Development
 
+### Testing
+The project includes a comprehensive test suite:
+
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov
+
+# Run specific test file
+pytest tests/test_operations/test_issues.py
+
+# Run tests matching a pattern
+pytest -k "test_create_issue"
+```
+
+Note: Many tests are currently failing and under investigation. This is a known issue being actively worked on.
+
 ### Testing with MCP Inspector
 Test MCP tools during development using the MCP Inspector:
 ```bash
@@ -179,6 +198,17 @@ Use the MCP Inspector's Web UI to:
 - Document working payloads
 
 ### Project Structure
+
+```
+tests/
+├── conftest.py          # Shared test fixtures
+├── test_converters.py   # Object conversion tests
+├── test_error_handling.py # Error handling tests
+├── test_github_client.py # Client tests
+└── test_operations/     # Operation-specific tests
+    └── test_issues.py   # Issue operation tests
+```
+
 
 ```
 src/

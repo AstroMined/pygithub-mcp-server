@@ -6,7 +6,7 @@ and handling GitHub API interactions through the PyGithub library.
 
 import logging
 import os
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from github import Auth, Github, GithubException
 from github.Repository import Repository

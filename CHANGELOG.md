@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Comprehensive test suite implementation:
+  - Added pytest configuration with coverage reporting
+  - Created test fixtures for GitHub objects
+  - Added unit tests for error handling
+  - Added unit tests for operations layer
+  - Added test utilities and helper functions
+
+### Changed
+- Updated project structure to include tests directory
+- Enhanced documentation with testing information
+- Improved mock object implementations
+
+### Known Issues
+- Many unit tests are currently failing
+- Test coverage needs improvement
+- Some mock objects may need refinement
 
 ## [0.2.1] - 2025-02-22
 
