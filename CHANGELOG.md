@@ -7,34 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-02-22
+
 ### Added
-- Implemented create_issue tool with proper parameter handling
-- Added documentation for optional parameter handling patterns
-- Added environment variable setup for MCP Inspector testing
-- Improved parameter handling for PyGithub method calls
-- Updated README with accurate setup and usage instructions
-- PyGithub integration for object-oriented GitHub API interactions
-- GitHubClient singleton for centralized client management
-- Object conversion utilities for GitHub types
-- Comprehensive error mapping between PyGithub and our error types
-- Proper pagination handling using PyGithub's built-in capabilities
-- New documentation for PyGithub patterns and usage
+- Complete set of GitHub issue operations:
+  - get_issue: Get issue details
+  - update_issue: Modify existing issues
+  - add_issue_comment: Add comments to issues
+  - list_issue_comments: List comments on an issue
+  - update_issue_comment: Update existing comments
+  - delete_issue_comment: Remove comments
+  - add_issue_labels: Add labels to issues
+  - remove_issue_label: Remove labels from issues
+- Improved parameter handling for all operations using kwargs pattern
+- Comprehensive docstrings and type hints for all functions
+- Additional examples in README for all issue operations
+- Enhanced error handling for comment operations
 
 ### Changed
-- Updated development setup instructions with environment variables
-- Improved parameter handling documentation with kwargs pattern
-- Refactored issues module to use PyGithub (proof of concept)
-- Updated project dependencies to include PyGithub
-- Improved error handling with PyGithub's exception system
-- Enhanced project structure with new utility modules
-- Fixed list_issues parameter handling to match PyGithub requirements
-- Updated documentation to reflect correct setup and usage patterns
+- Fixed comment operations to use issue.get_comment instead of repository.get_issue_comment
+- Updated parameter models to include issue_number for comment operations
+- Improved error messages for invalid parameters
+- Enhanced logging for better debugging
+- Updated documentation with complete usage examples
 
-### Removed
-- Direct REST API calls in issues module
-- Request-specific utility functions for GitHub API
+### Fixed
+- Comment operations now properly access comments through parent issues
+- Optional parameter handling in update_issue and list_issue_comments
+- Parameter validation for datetime fields
 
 ## [0.1.0] - Initial Release
+
+### Added
 
 ### Added
 - Basic GitHub MCP Server implementation

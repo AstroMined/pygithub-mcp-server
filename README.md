@@ -4,19 +4,30 @@ A Model Context Protocol server that provides tools for interacting with the Git
 
 ## Features
 
-- List, create, update, and manage GitHub issues
-- Handle issue comments and labels
-- Object-oriented GitHub API interactions via PyGithub
-- Centralized GitHub client management
-- Proper error handling and rate limit management
-- Clean API abstraction through MCP tools
-- Robust pagination handling
-- Smart parameter handling and validation for PyGithub methods
-- Dynamic kwargs handling for optional parameters
+- Complete GitHub Issue Management:
+  - Create and update issues
+  - Get issue details and list repository issues
+  - Add, list, update, and delete comments
+  - Manage issue labels
+  - Handle assignees and milestones
+- Smart Parameter Handling:
+  - Dynamic kwargs building for optional parameters
+  - Proper type conversion for GitHub objects
+  - Validation for all input parameters
+  - Clear error messages for invalid inputs
+- Robust Implementation:
+  - Object-oriented GitHub API interactions via PyGithub
+  - Centralized GitHub client management
+  - Proper error handling and rate limiting
+  - Clean API abstraction through MCP tools
+  - Comprehensive pagination support
+  - Detailed logging for debugging
 
 ## Usage Examples
 
-### Creating an Issue
+### Issue Operations
+
+1. Creating an Issue
 ```json
 {
   "owner": "username",
@@ -29,10 +40,88 @@ A Model Context Protocol server that provides tools for interacting with the Git
 }
 ```
 
-All parameters except `owner`, `repo`, and `title` are optional. The server handles optional parameters intelligently:
-- Only includes provided parameters in the API call
+2. Getting Issue Details
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1
+}
+```
+
+3. Updating an Issue
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "title": "Updated Title",
+  "body": "Updated description",
+  "state": "closed",
+  "labels": ["bug", "wontfix"]
+}
+```
+
+### Comment Operations
+
+1. Adding a Comment
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "body": "This is a comment"
+}
+```
+
+2. Listing Comments
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "per_page": 10
+}
+```
+
+3. Updating a Comment
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "comment_id": 123456789,
+  "body": "Updated comment text"
+}
+```
+
+### Label Operations
+
+1. Adding Labels
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "labels": ["enhancement", "help wanted"]
+}
+```
+
+2. Removing a Label
+```json
+{
+  "owner": "username",
+  "repo": "repository",
+  "issue_number": 1,
+  "label": "enhancement"
+}
+```
+
+All operations handle optional parameters intelligently:
+- Only includes provided parameters in API calls
 - Converts primitive types to GitHub objects (e.g., milestone number to Milestone object)
 - Provides clear error messages for invalid parameters
+- Handles pagination automatically where applicable
 
 ## Installation
 

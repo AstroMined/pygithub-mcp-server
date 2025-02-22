@@ -137,21 +137,28 @@ def update_issue(
         repository = client.get_repo(f"{owner}/{repo}")
         issue = repository.get_issue(issue_number)
 
-        # Get milestone object if number provided
-        milestone_obj = None
+        # Build kwargs with only provided values
+        kwargs = {}
+        
+        if title is not None:
+            kwargs["title"] = title
+        if body is not None:
+            kwargs["body"] = body
+        if state is not None:
+            kwargs["state"] = state
+        if labels is not None:
+            kwargs["labels"] = labels
+        if assignees is not None:
+            kwargs["assignees"] = assignees
         if milestone is not None:
-            milestone_obj = repository.get_milestone(milestone)
+            try:
+                kwargs["milestone"] = repository.get_milestone(milestone)
+            except Exception as e:
+                logger.error(f"Failed to get milestone {milestone}: {e}")
+                raise GitHubError(f"Invalid milestone number: {milestone}")
 
-        # Update issue using PyGithub
-        # Note: PyGithub's edit() method handles None values appropriately
-        issue.edit(
-            title=title,
-            body=body,
-            state=state,
-            labels=labels,
-            assignees=assignees,
-            milestone=milestone_obj,  # None will clear the milestone
-        )
+        # Update issue using PyGithub with only provided values
+        issue.edit(**kwargs)
 
         # Get fresh issue data after update
         updated_issue = repository.get_issue(issue_number)
@@ -322,8 +329,13 @@ def list_issue_comments(
         repository = client.get_repo(f"{owner}/{repo}")
         issue = repository.get_issue(issue_number)
 
-        # Get paginated comments
-        comments = issue.get_comments(since=since)
+        # Build kwargs for get_comments
+        kwargs = {}
+        if since is not None:
+            kwargs["since"] = since
+
+        # Get paginated comments with only provided parameters
+        comments = issue.get_comments(**kwargs)
 
         # Handle pagination
         if page is not None:
@@ -342,13 +354,14 @@ def list_issue_comments(
 
 
 def update_issue_comment(
-    owner: str, repo: str, comment_id: int, body: str
+    owner: str, repo: str, issue_number: int, comment_id: int, body: str
 ) -> Dict[str, Any]:
     """Update an issue comment.
 
     Args:
         owner: Repository owner (user or organization)
         repo: Repository name
+        issue_number: Issue number containing the comment
         comment_id: Comment ID to update
         body: New comment text
 
@@ -361,7 +374,8 @@ def update_issue_comment(
     try:
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
-        comment = repository.get_issue_comment(comment_id)
+        issue = repository.get_issue(issue_number)
+        comment = issue.get_comment(comment_id)
         comment.edit(body)
         return convert_issue_comment(comment)
     except GithubException as e:
@@ -369,12 +383,13 @@ def update_issue_comment(
         raise
 
 
-def delete_issue_comment(owner: str, repo: str, comment_id: int) -> None:
+def delete_issue_comment(owner: str, repo: str, issue_number: int, comment_id: int) -> None:
     """Delete an issue comment.
 
     Args:
         owner: Repository owner (user or organization)
         repo: Repository name
+        issue_number: Issue number containing the comment
         comment_id: Comment ID to delete
 
     Raises:
@@ -383,7 +398,8 @@ def delete_issue_comment(owner: str, repo: str, comment_id: int) -> None:
     try:
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
-        comment = repository.get_issue_comment(comment_id)
+        issue = repository.get_issue(issue_number)
+        comment = issue.get_comment(comment_id)
         comment.delete()
     except GithubException as e:
         # GitHubClient's get_repo will handle the exception

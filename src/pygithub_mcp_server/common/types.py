@@ -187,6 +187,44 @@ class GetIssueParams(RepositoryRef):
     issue_number: int = Field(..., description="Issue number to retrieve")
 
 
+class ListIssueCommentsParams(RepositoryRef):
+    """Parameters for listing comments on an issue."""
+
+    issue_number: int = Field(..., description="Issue number to list comments for")
+    since: Optional[datetime] = Field(None, description="Filter by date")
+    page: Optional[int] = Field(None, description="Page number")
+    per_page: Optional[int] = Field(None, description="Results per page")
+
+
+class UpdateIssueCommentParams(RepositoryRef):
+    """Parameters for updating an issue comment."""
+
+    issue_number: int = Field(..., description="Issue number containing the comment")
+    comment_id: int = Field(..., description="Comment ID to update")
+    body: str = Field(..., description="New comment text")
+
+
+class DeleteIssueCommentParams(RepositoryRef):
+    """Parameters for deleting an issue comment."""
+
+    issue_number: int = Field(..., description="Issue number containing the comment")
+    comment_id: int = Field(..., description="Comment ID to delete")
+
+
+class AddIssueLabelsParams(RepositoryRef):
+    """Parameters for adding labels to an issue."""
+
+    issue_number: int = Field(..., description="Issue number")
+    labels: List[str] = Field(..., description="Labels to add")
+
+
+class RemoveIssueLabelParams(RepositoryRef):
+    """Parameters for removing a label from an issue."""
+
+    issue_number: int = Field(..., description="Issue number")
+    label: str = Field(..., description="Label to remove")
+
+
 # Response types
 class ToolResponse(BaseModel):
     """Base model for tool responses."""
