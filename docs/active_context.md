@@ -1,121 +1,124 @@
 # Active Context
 
 ## Current Focus
-Restructuring and optimizing the GitHub MCP Server following official best practices, with focus on proper project structure and reliable operation.
+Implementing comprehensive PyGithub integration to replace direct API calls, with focus on leveraging the library's object-oriented interface for improved reliability and maintainability.
 
 ## Recent Changes
-- Restructured project to follow recommended uvx/MCP SDK layout
-- Moved to src-based layout with proper package structure
-- Successfully rebuilt and tested with new structure
-- Updated MCP server configuration to use venv Python interpreter
-- Verified working MCP tool operations in new structure
+- Implemented PyGithub integration for issues module as proof of concept
+- Created GitHubClient singleton for centralized PyGithub management
+- Added comprehensive object conversion utilities
+- Implemented proper pagination and error handling
+- Updated documentation with PyGithub patterns
 
 ## Next Steps
 
-1. Port Additional Operations
-   - Evaluate and port remaining operations from archive
-   - Maintain consistent structure and patterns
-   - Update documentation for new operations
+1. Schema Alignment
+   - Update Pydantic models to match PyGithub objects
+   - Document field mappings and relationships
+   - Implement conversion utilities
+   - Add validation for PyGithub-specific constraints
 
-2. Testing Implementation
+2. Client Implementation
+   - Create singleton GitHubClient class
+   - Implement PyGithub instance management
+   - Add object conversion utilities
+   - Handle pagination and rate limiting
+
+3. Operation Refactoring
+   - Convert list_issues as proof of concept
+   - Document new patterns and approaches
+   - Plan additional operation implementations
+   - Maintain FastMCP interface stability
+
+4. Testing Implementation
    - Set up pytest infrastructure
    - Create test fixtures and mocks
    - Implement unit tests for operations
    - Add integration tests for API calls
 
-3. Documentation Improvements
-   - Add more usage examples
-   - Create API reference documentation
-   - Document common patterns and best practices
-   - Add troubleshooting guide
-
-4. Feature Enhancements
-   - Add support for GraphQL API
-   - Implement webhook handling
-   - Add real-time updates support
-   - Expand search capabilities
-
 ## Active Decisions
 
 ### Technical Decisions
 
-1. Project Structure
-   - src/ layout following uvx best practices
-   - Proper package organization
-   - Clear separation of concerns
-   - Modular operation organization
+1. PyGithub Integration
+   - Using singleton pattern for client management
+   - Maintaining FastMCP interface stability
+   - Aligning schemas with PyGithub objects
+   - Leveraging PyGithub's built-in features
 
-2. Development Environment
-   - UV for dependency management
-   - Virtual environment for isolation
-   - Direct venv Python usage in MCP config
-   - Local development setup proven successful
+2. Schema Evolution
+   - Moving from REST API schema to object model
+   - Adding PyGithub-specific fields
+   - Implementing proper type validation
+   - Maintaining backward compatibility
 
-3. Core Architecture
-   - FastMCP server implementation
-   - Synchronous operations for reliability
-   - Pydantic for schema validation
-   - Clean separation of operations
+3. Implementation Strategy
+   - Starting with list_issues proof of concept
+   - Phased approach to feature implementation
+   - Focus on stability and reliability
+   - Comprehensive documentation updates
 
 ## Current Considerations
 
 ### Current Challenges
 
-1. Project Organization
-   - Maintaining clean structure
-   - Proper dependency management
-   - Consistent patterns across modules
-   - Clear documentation
+1. Schema Migration
+   - Mapping between PyGithub objects and our schemas
+   - Handling new PyGithub-specific fields
+   - Maintaining type safety
+   - Ensuring backward compatibility
 
-2. Testing Coverage
-   - Comprehensive test suite needed
-   - API mocking strategy
-   - Integration test infrastructure
+2. Testing Strategy
+   - Mocking PyGithub objects
+   - Testing pagination
    - Error condition coverage
+   - Integration test approach
 
 3. Feature Expansion
-   - GraphQL API integration
-   - Webhook support
-   - Real-time updates
-   - Advanced search features
+   - Identifying useful PyGithub features
+   - Planning feature implementation order
+   - Maintaining consistent patterns
+   - Documentation coverage
 
 ### Implementation Lessons
 1. Project Structure
-   - src/ layout provides better organization
-   - Proper package structure improves maintainability
-   - Clear separation of operations is beneficial
+   - Singleton pattern benefits for client management
+   - Clear separation of concerns in operations
+   - Importance of schema documentation
+   - Value of phased implementation
 
 2. Environment Setup
-   - UV virtual environment management works well
-   - Direct venv Python usage in MCP config is more reliable
-   - Dependencies properly isolated in venv
-   - Build process needs --no-build-isolation flag
+   - PyGithub dependency management
+   - Token-based authentication remains unchanged
+   - Testing infrastructure needs
+   - Documentation importance
 
 3. Server Operation
-   - MCP tools functioning as expected
-   - Error handling working effectively
-   - GitHub API integration stable
-   - Proper venv configuration essential
+   - FastMCP interface stability
+   - Error handling improvements
+   - Rate limiting benefits
+   - Object model advantages
 
 ## Progress Tracking
 
 ### Completed
-- Project restructuring to recommended layout
-- Core server implementation
-- Basic operations module (issues)
-- Error handling system
-- Local development setup
-- MCP tool integration and testing
+- Created ADR for PyGithub integration
+- Designed high-level architecture
+- Planned implementation phases
+- Documented technical decisions
+- Implemented GitHubClient singleton
+- Created object conversion utilities
+- Refactored issues module to use PyGithub
+- Added PyGithub patterns to documentation
 
 ### In Progress
-- Porting additional operations
+- Testing strategy development
 - Documentation updates
-- Build and deployment refinements
+- Schema migration for remaining modules
+- Operation refactoring planning
 
 ### Upcoming
-- Additional operation modules
-- Test suite development
-- Documentation expansion
-- Performance optimization
-- GraphQL API support
-- Webhook integration
+- Refactor remaining operations to use PyGithub
+- Expand test suite with PyGithub mocks
+- Add integration tests
+- Implement advanced PyGithub features

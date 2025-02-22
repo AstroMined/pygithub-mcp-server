@@ -7,8 +7,11 @@ including creation, updates, comments, and listing.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
+from github import GithubException
+
+from ..common.converters import convert_issue, convert_issue_comment, convert_label
 from ..common.errors import GitHubError
-from ..common.utils import get_session, format_query_params, process_response, build_url
+from ..common.github import GitHubClient
 
 
 def create_issue(
@@ -37,21 +40,30 @@ def create_issue(
     Raises:
         GitHubError: If the API request fails
     """
-    data = {
-        "title": title,
-        "body": body,
-        "assignees": assignees,
-        "labels": labels,
-        "milestone": milestone,
-    }
-    # Remove None values
-    data = {k: v for k, v in data.items() if v is not None}
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
 
-    with get_session() as session:
-        response = session.post(
-            build_url(f"repos/{owner}/{repo}/issues"), json=data
+        # Get milestone object if number provided
+        milestone_obj = None
+        if milestone is not None:
+            milestone_obj = repository.get_milestone(milestone)
+
+        # Create issue using PyGithub
+        issue = repository.create_issue(
+            title=title,
+            body=body,
+            assignees=assignees,
+            labels=labels,
+            milestone=milestone_obj,
         )
-        return process_response(response)
+
+        # Convert to our schema
+        return convert_issue(issue)
+
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
@@ -68,11 +80,14 @@ def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
     Raises:
         GitHubError: If the API request fails
     """
-    with get_session() as session:
-        response = session.get(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}")
-        )
-        return process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
+        return convert_issue(issue)
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def update_issue(
@@ -105,22 +120,34 @@ def update_issue(
     Raises:
         GitHubError: If the API request fails
     """
-    data = {
-        "title": title,
-        "body": body,
-        "state": state,
-        "labels": labels,
-        "assignees": assignees,
-        "milestone": milestone,
-    }
-    # Remove None values
-    data = {k: v for k, v in data.items() if v is not None}
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
 
-    with get_session() as session:
-        response = session.patch(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}"), json=data
+        # Get milestone object if number provided
+        milestone_obj = None
+        if milestone is not None:
+            milestone_obj = repository.get_milestone(milestone)
+
+        # Update issue using PyGithub
+        # Note: PyGithub's edit() method handles None values appropriately
+        issue.edit(
+            title=title,
+            body=body,
+            state=state,
+            labels=labels,
+            assignees=assignees,
+            milestone=milestone_obj,  # None will clear the milestone
         )
-        return process_response(response)
+
+        # Get fresh issue data after update
+        updated_issue = repository.get_issue(issue_number)
+        return convert_issue(updated_issue)
+
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def list_issues(
@@ -153,21 +180,36 @@ def list_issues(
     Raises:
         GitHubError: If the API request fails
     """
-    params = format_query_params(
-        state=state,
-        labels=labels,
-        sort=sort,
-        direction=direction,
-        since=since,
-        page=page,
-        per_page=per_page,
-    )
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
 
-    with get_session() as session:
-        response = session.get(
-            build_url(f"repos/{owner}/{repo}/issues"), params=params
+        # Convert labels list to comma-separated string if provided
+        label_str = ",".join(labels) if labels else None
+
+        # Get paginated issues
+        issues = repository.get_issues(
+            state=state,
+            labels=label_str,
+            sort=sort,
+            direction=direction,
+            since=since,
         )
-        return process_response(response)
+
+        # Handle pagination
+        if page is not None:
+            issues = issues.get_page(page - 1)  # PyGithub uses 0-based indexing
+        elif per_page is not None:
+            issues = list(issues[:per_page])
+        else:
+            issues = list(issues)
+
+        # Convert each issue to our schema
+        return [convert_issue(issue) for issue in issues]
+
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def add_issue_comment(
@@ -187,13 +229,15 @@ def add_issue_comment(
     Raises:
         GitHubError: If the API request fails
     """
-    data = {"body": body}
-
-    with get_session() as session:
-        response = session.post(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}/comments"), json=data
-        )
-        return process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
+        comment = issue.create_comment(body)
+        return convert_issue_comment(comment)
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def list_issue_comments(
@@ -220,14 +264,28 @@ def list_issue_comments(
     Raises:
         GitHubError: If the API request fails
     """
-    params = format_query_params(since=since, page=page, per_page=per_page)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
 
-    with get_session() as session:
-        response = session.get(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}/comments"),
-            params=params,
-        )
-        return process_response(response)
+        # Get paginated comments
+        comments = issue.get_comments(since=since)
+
+        # Handle pagination
+        if page is not None:
+            comments = comments.get_page(page - 1)  # PyGithub uses 0-based indexing
+        elif per_page is not None:
+            comments = list(comments[:per_page])
+        else:
+            comments = list(comments)
+
+        # Convert each comment to our schema
+        return [convert_issue_comment(comment) for comment in comments]
+
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def update_issue_comment(
@@ -247,13 +305,15 @@ def update_issue_comment(
     Raises:
         GitHubError: If the API request fails
     """
-    data = {"body": body}
-
-    with get_session() as session:
-        response = session.patch(
-            build_url(f"repos/{owner}/{repo}/issues/comments/{comment_id}"), json=data
-        )
-        return process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        comment = repository.get_issue_comment(comment_id)
+        comment.edit(body)
+        return convert_issue_comment(comment)
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def delete_issue_comment(owner: str, repo: str, comment_id: int) -> None:
@@ -267,11 +327,14 @@ def delete_issue_comment(owner: str, repo: str, comment_id: int) -> None:
     Raises:
         GitHubError: If the API request fails
     """
-    with get_session() as session:
-        response = session.delete(
-            build_url(f"repos/{owner}/{repo}/issues/comments/{comment_id}")
-        )
-        process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        comment = repository.get_issue_comment(comment_id)
+        comment.delete()
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def add_issue_labels(
@@ -291,12 +354,21 @@ def add_issue_labels(
     Raises:
         GitHubError: If the API request fails
     """
-    with get_session() as session:
-        response = session.post(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}/labels"),
-            json={"labels": labels},
-        )
-        return process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
+
+        # Add labels to the issue
+        issue.add_to_labels(*labels)
+
+        # Get fresh issue data to get updated labels
+        updated_issue = repository.get_issue(issue_number)
+        return [convert_label(label) for label in updated_issue.labels]
+
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise
 
 
 def remove_issue_label(
@@ -313,8 +385,11 @@ def remove_issue_label(
     Raises:
         GitHubError: If the API request fails
     """
-    with get_session() as session:
-        response = session.delete(
-            build_url(f"repos/{owner}/{repo}/issues/{issue_number}/labels/{label}")
-        )
-        process_response(response)
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{owner}/{repo}")
+        issue = repository.get_issue(issue_number)
+        issue.remove_from_labels(label)
+    except GithubException as e:
+        # GitHubClient's get_repo will handle the exception
+        raise

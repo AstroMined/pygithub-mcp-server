@@ -1,263 +1,220 @@
 # System Patterns
 
-## Core Patterns
+## Core Architecture
 
-### 1. Tool Registration
-```python
-@server.tool()
-async def tool_name(params: ToolParams) -> ToolResult:
-    """Tool documentation following Google style.
+### GitHub Integration
+```mermaid
+flowchart TD
+    A[FastMCP Server] --> B[GitHub Client]
+    B --> C[PyGithub]
+    C --> D[GitHub API]
     
-    Args:
-        params: Validated parameters for the tool
-        
-    Returns:
-        Tool execution result
-        
-    Raises:
-        GitHubError: If GitHub API operation fails
-    """
-    # Implementation
+    subgraph Client Layer
+        B
+        E[Object Conversion]
+        F[Rate Limiting]
+        G[Error Handling]
+    end
+    
+    B --> E
+    B --> F
+    B --> G
 ```
 
-### 2. Schema Definition
+### Component Relationships
+
+1. GitHub Client (Singleton)
+   - Manages PyGithub instance
+   - Handles authentication
+   - Provides conversion utilities
+   - Manages rate limiting
+   - Centralizes error handling
+
+2. Operation Modules
+   - Use GitHub client for API interactions
+   - Convert between schemas and objects
+   - Maintain consistent patterns
+   - Focus on specific domains
+   - Handle pagination
+
+3. Schema Layer
+   - Models based on PyGithub objects
+   - Pydantic validation
+   - Clear type definitions
+   - Documented relationships
+   - Conversion utilities
+
+### Implementation Patterns
+
+1. Client Usage
 ```python
-class ToolParams(BaseModel):
-    """Parameters for tool operation.
-    
-    Attributes:
-        param1: Description of first parameter
-        param2: Description of second parameter
-    """
-    param1: str
-    param2: Optional[int] = None
+# Pattern for operations
+def operation_function(params):
+    client = GitHubClient.get_instance()
+    # Use PyGithub objects
+    # Convert to our schema
+    return result
 ```
 
-### 3. Error Handling
+2. Schema Conversion
 ```python
+# Pattern for object conversion
+def convert_github_object(obj):
+    return {
+        "field": obj.field,
+        # Map PyGithub fields to our schema
+    }
+```
+
+3. Error Handling
+```python
+# Pattern for error handling
 try:
-    result = await github_api_call()
-except aiohttp.ClientError as e:
-    raise GitHubError(f"API request failed: {e}") from e
-except ValidationError as e:
-    raise GitHubValidationError(str(e)) from e
+    github_obj = client.operation()
+    return convert_github_object(github_obj)
+except GithubException as e:
+    raise GitHubError(str(e))
 ```
 
-### 4. API Response Processing
-```python
-async def process_github_response(response: aiohttp.ClientResponse) -> Any:
-    """Process GitHub API response with proper error handling.
-    
-    Args:
-        response: Raw API response
-        
-    Returns:
-        Processed response data
-        
-    Raises:
-        GitHubError: For various GitHub API errors
-    """
-    if response.status == 404:
-        raise GitHubResourceNotFoundError(await response.text())
-    # ... other status code handling
+## System Flow
+
+### Operation Flow
+```mermaid
+sequenceDiagram
+    participant MCP as FastMCP Server
+    participant Client as GitHub Client
+    participant PyGithub
+    participant API as GitHub API
+
+    MCP->>Client: Operation Request
+    Client->>PyGithub: Get/Create Object
+    PyGithub->>API: API Request
+    API-->>PyGithub: Response
+    PyGithub-->>Client: PyGithub Object
+    Client->>Client: Convert to Schema
+    Client-->>MCP: Schema Response
+```
+
+### Error Flow
+```mermaid
+sequenceDiagram
+    participant MCP as FastMCP Server
+    participant Client as GitHub Client
+    participant PyGithub
+    participant API as GitHub API
+
+    MCP->>Client: Operation Request
+    Client->>PyGithub: Get/Create Object
+    PyGithub->>API: API Request
+    API-->>PyGithub: Error Response
+    PyGithub-->>Client: GitHub Exception
+    Client->>Client: Convert to GitHubError
+    Client-->>MCP: Error Response
 ```
 
 ## Design Patterns
 
-### 1. Repository Pattern
-- Operations modules encapsulate GitHub API endpoints
-- Clean separation of concerns
-- Consistent error handling
-- Type-safe interfaces
-
-### 2. Factory Pattern
-- Tool registration via decorators
-- Automatic schema validation
-- Consistent interface generation
-
-### 3. Strategy Pattern
-- Pluggable transport layer (stdio)
-- Extensible error handling
-- Configurable API client
-
-## Implementation Patterns
-
-### 1. Async Context Management
+### 1. Singleton Pattern (GitHub Client)
 ```python
 class GitHubClient:
-    """Async context manager for GitHub API operations."""
-    
-    async def __aenter__(self) -> "GitHubClient":
-        self.session = aiohttp.ClientSession()
-        return self
-        
-    async def __aexit__(self, *exc_info) -> None:
-        await self.session.close()
+    _instance = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 ```
 
-### 2. Schema Validation
+### 2. Factory Pattern (Object Conversion)
 ```python
-class CreateIssueParams(BaseModel):
-    """Parameters for creating an issue.
-    
-    All fields are validated according to GitHub API requirements.
-    """
-    owner: str
-    repo: str
-    title: str
-    body: Optional[str] = None
-    assignees: List[str] = Field(default_factory=list)
-    labels: List[str] = Field(default_factory=list)
+class GitHubObjectFactory:
+    @staticmethod
+    def create_from_github_object(obj):
+        if isinstance(obj, github.Issue.Issue):
+            return convert_issue(obj)
+        # ... other object types
 ```
 
-### 3. Response Transformation
+### 3. Strategy Pattern (Error Handling)
 ```python
-def transform_api_response(data: Dict[str, Any]) -> ToolResult:
-    """Transform GitHub API response to tool result format.
-    
-    Args:
-        data: Raw API response data
-        
-    Returns:
-        Formatted tool result
-    """
-    return {
-        "content": [
-            {
-                "type": "text",
-                "text": json.dumps(data, indent=2)
-            }
-        ]
-    }
+class ErrorHandler:
+    def handle_error(self, error):
+        if isinstance(error, RateLimitExceededException):
+            return handle_rate_limit(error)
+        # ... other error types
 ```
 
 ## Testing Patterns
 
-### 1. Fixture Pattern
+### 1. Unit Testing
 ```python
-@pytest.fixture
-async def github_client():
-    """Provide configured GitHub client for tests."""
-    async with GitHubClient() as client:
-        yield client
+def test_issue_conversion():
+    # Given
+    mock_issue = create_mock_issue()
+    # When
+    result = convert_github_object(mock_issue)
+    # Then
+    assert_valid_schema(result)
 ```
 
-### 2. Mock Pattern
+### 2. Integration Testing
 ```python
-@pytest.mark.asyncio
-async def test_create_issue(mock_github_api):
-    """Test issue creation with mocked API."""
-    mock_github_api.post.return_value = mock_response(
-        status=201,
-        payload={"number": 1, "title": "Test Issue"}
-    )
-    result = await create_issue(owner="test", repo="test", title="Test")
-    assert result["number"] == 1
+def test_list_issues_integration():
+    # Given
+    client = GitHubClient.get_instance()
+    # When
+    issues = client.list_issues(owner, repo)
+    # Then
+    assert_valid_response(issues)
 ```
 
-### 3. Integration Pattern
+### 3. Mock Testing
 ```python
-@pytest.mark.integration
-async def test_real_api_call():
-    """Test against real GitHub API.
-    
-    Requires valid GitHub token in environment.
-    """
-    result = await create_repository(name="test-repo")
-    assert result["name"] == "test-repo"
-```
-
-## Error Handling Patterns
-
-### 1. Custom Exceptions
-```python
-class GitHubError(Exception):
-    """Base exception for GitHub API errors."""
-    pass
-
-class GitHubRateLimitError(GitHubError):
-    """Raised when GitHub API rate limit is exceeded."""
-    def __init__(self, reset_at: datetime):
-        self.reset_at = reset_at
-        super().__init__(f"Rate limit exceeded, resets at {reset_at}")
-```
-
-### 2. Error Recovery
-```python
-async def with_retry(func: Callable, *args, max_retries: int = 3) -> Any:
-    """Execute function with exponential backoff retry.
-    
-    Args:
-        func: Async function to execute
-        args: Function arguments
-        max_retries: Maximum number of retry attempts
-        
-    Returns:
-        Function result
-        
-    Raises:
-        GitHubError: If all retries fail
-    """
-    for attempt in range(max_retries):
-        try:
-            return await func(*args)
-        except GitHubError as e:
-            if attempt == max_retries - 1:
-                raise
-            await asyncio.sleep(2 ** attempt)
+def test_error_handling():
+    # Given
+    mock_github = create_mock_github_with_error()
+    # When
+    with pytest.raises(GitHubError):
+        client.operation()
 ```
 
 ## Documentation Patterns
 
-### 1. Module Documentation
+### 1. Function Documentation
 ```python
-"""GitHub MCP Server operations module.
-
-This module implements GitHub API operations following the MCP protocol.
-Each operation is exposed as a tool with proper validation and error handling.
-
-Typical usage example:
-
-    server = FastMCP("github")
-    server.add_tool(create_issue)
-    server.run()
-"""
+def operation_name(params: ParamsType) -> ResultType:
+    """Operation description.
+    
+    Args:
+        params: Parameter description
+        
+    Returns:
+        Description of return value
+        
+    Raises:
+        GitHubError: Error conditions
+    """
 ```
 
 ### 2. Class Documentation
 ```python
-class GitHubClient:
-    """GitHub API client with proper error handling.
-    
-    This class manages the HTTP session and provides methods for
-    making authenticated requests to the GitHub API.
+class ClassName:
+    """Class description.
     
     Attributes:
-        base_url: GitHub API base URL
-        session: aiohttp ClientSession instance
+        attr_name: Attribute description
+        
+    Methods:
+        method_name: Method description
     """
 ```
 
-### 3. Function Documentation
+### 3. Schema Documentation
 ```python
-async def create_issue(
-    owner: str,
-    repo: str,
-    title: str,
-    **kwargs: Any
-) -> Dict[str, Any]:
-    """Create a new issue in a GitHub repository.
+class SchemaModel(BaseModel):
+    """Schema description.
     
-    Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        title: Issue title
-        **kwargs: Additional issue parameters (body, labels, etc.)
-        
-    Returns:
-        Created issue data from GitHub API
-        
-    Raises:
-        GitHubError: If issue creation fails
-        GitHubValidationError: If parameters are invalid
+    Maps to PyGithub ObjectType.
+    See: [link to PyGithub docs]
     """

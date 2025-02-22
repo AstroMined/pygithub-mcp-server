@@ -10,8 +10,12 @@
 - Basic documentation and setup guides
 - Local development environment with UV
 - Virtual environment management
-- Synchronous GitHub API operations
-- Reliable request handling with requests library
+- PyGithub integration for issues module
+- Object-oriented GitHub API interactions
+- Centralized GitHub client management
+- Robust object conversion utilities
+- Proper pagination handling
+- Comprehensive error mapping
 
 ## What's Left to Build
 
@@ -103,7 +107,7 @@ Core implementation completed and operational with synchronous operations. Serve
 - Python 3.10+
 - MCP Python SDK
 - Pydantic
-- requests
+- PyGithub
 - pytest
 - UV package manager
 

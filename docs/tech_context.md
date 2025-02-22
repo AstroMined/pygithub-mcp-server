@@ -5,8 +5,8 @@
 ### Core Dependencies
 - Python 3.10+
 - MCP Python SDK
+- PyGithub for GitHub API interaction
 - Pydantic for schema validation
-- requests for HTTP operations
 - pytest for testing
 
 ### Development Tools
@@ -27,7 +27,8 @@ github/
   │   ├── errors.py      # Custom error classes
   │   ├── types.py       # Pydantic models and types
   │   ├── utils.py       # Utility functions
-  │   └── version.py     # Version information
+  │   ├── version.py     # Version information
+  │   └── github.py      # GitHub client singleton
   └── operations/
       ├── branches.py    # Branch operations
       ├── commits.py     # Commit operations
@@ -40,27 +41,26 @@ github/
 
 ### Key Technical Decisions
 
-1. Schema Validation
-- Using Pydantic for input/output schema validation
-- Replacing Zod schemas with Pydantic models
-- Maintaining JSON Schema compatibility
+1. PyGithub Integration
+   - Object-oriented API interaction
+   - Built-in pagination support
+   - Automatic rate limiting
+   - Rich object model
+   - Singleton client pattern
 
-2. Synchronous Implementation
-- Using synchronous requests for GitHub API calls
-- requests library for HTTP operations
-- Simple session management with context managers
-- Improved reliability and error handling
+2. Schema Design
+   - PyGithub-aligned schemas
+   - Strong type validation
+   - Clear object relationships
+   - Comprehensive field coverage
+   - Conversion utilities
 
 3. Error Handling
-- Custom exception hierarchy matching TypeScript version
-- Improved error messages and context
-- Straightforward synchronous error handling
-- Clear request/response error tracking
-
-4. Type System
-- Extensive use of Python type hints
-- mypy for static type checking
-- Runtime type validation via Pydantic
+   - PyGithub exception mapping
+   - Custom error hierarchy
+   - Consistent error patterns
+   - Clear error messages
+   - Rate limit handling
 
 ## Development Setup
 
@@ -90,51 +90,113 @@ mypy github
 1. Authentication
 - Personal Access Token required
 - Token passed via environment variable
-- Proper error handling for auth issues
-- Session-based authentication management
+- PyGithub authentication handling
+- Session management via PyGithub
 
 2. Rate Limiting
-- Respects GitHub API rate limits
-- Implements exponential backoff
-- Clear rate limit error messages
-- Session-level rate limit tracking
+- Automatic handling by PyGithub
+- Built-in retries and backoff
+- Clear rate limit errors
+- Rate limit tracking
 
 3. API Versioning
-- Uses GitHub API v3
-- Maintains compatibility with API changes
-- Version-specific error handling
+- PyGithub version compatibility
+- GitHub API v3 support
+- Consistent version handling
+- Automatic header management
 
 ## Testing Strategy
 
 1. Unit Tests
-- Individual operation testing
-- Error case coverage
+- PyGithub object mocking
 - Schema validation testing
+- Conversion testing
+- Error case coverage
 
 2. Integration Tests
-- Full API interaction tests
+- Full PyGithub interaction
 - Rate limit handling
-- Error recovery testing
-- Session management testing
+- Error recovery
+- Pagination testing
 
 3. Mock Testing
-- GitHub API response mocking
-- Error condition simulation
-- Network failure handling
+- PyGithub response mocking
+- Error simulation
+- Rate limit testing
+- Object conversion testing
 
 ## Documentation
 
 1. Code Documentation
 - Google style docstrings
 - Type hints throughout
+- PyGithub object mapping
 - Clear function/class purposes
 
 2. API Documentation
 - Tool interface documentation
 - Schema documentation
+- PyGithub object relationships
 - Error handling documentation
 
 3. Usage Examples
 - Basic usage examples
-- Common patterns
+- PyGithub patterns
 - Error handling examples
+- Pagination examples
+
+## Implementation Patterns
+
+1. Client Usage
+```python
+from github_mcp_server.common.github import GitHubClient
+
+def operation():
+    client = GitHubClient.get_instance()
+    return client.operation()
+```
+
+2. Error Handling
+```python
+try:
+    result = github_operation()
+    return convert_to_schema(result)
+except GithubException as e:
+    raise GitHubError(str(e))
+```
+
+3. Schema Conversion
+```python
+def convert_to_schema(github_obj):
+    """Convert PyGithub object to our schema."""
+    return {
+        "field": github_obj.field,
+        # ... other fields
+    }
+```
+
+## Best Practices
+
+1. PyGithub Usage
+- Use object-oriented interface
+- Handle pagination properly
+- Respect rate limits
+- Convert objects consistently
+
+2. Error Management
+- Map exceptions properly
+- Provide clear messages
+- Handle rate limits
+- Log errors appropriately
+
+3. Testing
+- Mock PyGithub objects
+- Test error cases
+- Verify conversions
+- Check pagination
+
+4. Documentation
+- Document object mappings
+- Explain conversions
+- Show usage examples
+- Note limitations

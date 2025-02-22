@@ -41,6 +41,12 @@
 - Include example configurations and usage patterns
 - Maintain clear next steps and progress tracking
 
+## Documentation
+- PyGithub documentation available in docs/PyGithub/
+- API reference in docs/PyGithub/api/
+- Examples in docs/PyGithub/examples/
+- Guides in docs/PyGithub/guides/
+
 ## Known Patterns
 1. Tool Registration:
    ```python
@@ -51,7 +57,30 @@
        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
    ```
 
-2. Error Handling:
+2. PyGithub Integration:
+   ```python
+   try:
+       client = GitHubClient.get_instance()
+       repository = client.get_repo(f"{owner}/{repo}")
+       result = repository.operation(...)  # PyGithub operation
+       return convert_object(result)  # Convert to our schema
+   except GithubException as e:
+       # GitHubClient handles exception
+       raise
+   ```
+
+3. Object Conversion:
+   ```python
+   def convert_object(obj: PyGithubObject) -> Dict[str, Any]:
+       """Convert PyGithub object to our schema."""
+       return {
+           "field": obj.field,
+           "nested": convert_nested(obj.nested),
+           "datetime": obj.datetime.isoformat() if obj.datetime else None,
+       }
+   ```
+
+4. Error Handling:
    ```python
    try:
        result = api_operation()
@@ -60,11 +89,13 @@
        return create_tool_response(str(e), is_error=True)
    ```
 
-3. Resource Organization:
+5. Resource Organization:
    - Common utilities in common/
    - API operations in operations/
    - Types and models in common/types.py
    - Error definitions in common/errors.py
+   - GitHub client in common/github.py
+   - Object converters in common/converters.py
 
 ## Troubleshooting
 - If MCP server fails to start, verify venv Python path in settings

@@ -6,8 +6,11 @@ A Model Context Protocol server that provides tools for interacting with the Git
 
 - List, create, update, and manage GitHub issues
 - Handle issue comments and labels
+- Object-oriented GitHub API interactions via PyGithub
+- Centralized GitHub client management
 - Proper error handling and rate limit management
 - Clean API abstraction through MCP tools
+- Robust pagination handling
 
 ## Installation
 
@@ -32,8 +35,8 @@ uv run github-mcp-server
 
 This project uses:
 - Python MCP SDK for server implementation
+- PyGithub for GitHub API interaction
 - Pydantic for data validation
-- Requests for GitHub API interaction
 - UV for dependency management
 
 ### Project Structure
@@ -47,6 +50,8 @@ src/
     ├── common/
     │   ├── __init__.py
     │   ├── errors.py
+    │   ├── github.py      # GitHub client singleton
+    │   ├── converters.py  # Object conversion utilities
     │   ├── types.py
     │   ├── utils.py
     │   └── version.py
