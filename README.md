@@ -23,17 +23,12 @@ source .venv/bin/activate
 
 2. Install dependencies:
 ```bash
-uv pip install --no-build-isolation -e .
+uv pip install -e .
 ```
 
 ## Configuration
 
-1. Set up environment variables:
-```bash
-export GITHUB_PERSONAL_ACCESS_TOKEN="your-token-here"
-```
-
-2. Add the server to your MCP settings (e.g., `claude_desktop_config.json` or `cline_mcp_settings.json`):
+1. Add the server to your MCP settings (e.g., `claude_desktop_config.json` or `cline_mcp_settings.json`):
 ```json
 {
   "mcpServers": {

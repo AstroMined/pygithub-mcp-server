@@ -1,15 +1,15 @@
 # Product Context
 
 ## Purpose
-The GitHub MCP Server provides a bridge between Large Language Models (LLMs) and the GitHub API, enabling AI assistants to perform GitHub operations in a standardized way through the Model Context Protocol (MCP).
+The PyGithub MCP Server provides a bridge between Large Language Models (LLMs) and the GitHub API through PyGithub, enabling AI assistants to perform GitHub operations in a standardized way through the Model Context Protocol (MCP). By leveraging PyGithub's object-oriented interface, the server provides a robust and maintainable integration with GitHub's API.
 
 ## Problems Solved
 
 ### 1. GitHub API Integration
-- Provides a standardized interface for LLMs to interact with GitHub
-- Handles authentication and rate limiting
-- Manages API versioning and compatibility
-- Provides proper error handling and recovery
+- Provides a standardized interface for LLMs to interact with GitHub through PyGithub
+- Handles authentication and rate limiting through PyGithub's built-in capabilities
+- Manages API versioning and compatibility through PyGithub
+- Provides proper error handling and recovery with PyGithub's object model
 
 ### 2. Data Validation
 - Validates all inputs before making API calls
@@ -68,10 +68,10 @@ The server registers a set of tools that map to GitHub API operations:
 
 ## Integration Points
 
-### 1. GitHub API
-- REST API v3
-- Authentication
-- Rate limiting
+### 1. GitHub API via PyGithub
+- PyGithub object-oriented interface
+- REST API v3 through PyGithub
+- Authentication and rate limiting handled by PyGithub
 - Webhooks (future)
 
 ### 2. MCP Protocol

@@ -20,23 +20,31 @@
 
 ### Component Structure
 ```
-github/
-  ├── __init__.py
-  ├── server.py           # Main server implementation
-  ├── common/
-  │   ├── errors.py      # Custom error classes
-  │   ├── types.py       # Pydantic models and types
-  │   ├── utils.py       # Utility functions
-  │   ├── version.py     # Version information
-  │   └── github.py      # GitHub client singleton
-  └── operations/
-      ├── branches.py    # Branch operations
-      ├── commits.py     # Commit operations
-      ├── files.py       # File operations
-      ├── issues.py      # Issue operations
-      ├── pulls.py       # Pull request operations
-      ├── repository.py  # Repository operations
-      └── search.py      # Search operations
+src/
+└── pygithub_mcp_server/
+    ├── __init__.py
+    ├── server.py           # Main server implementation
+    ├── common/
+    │   ├── errors.py      # Custom error classes
+    │   ├── types.py       # Pydantic models and types
+    │   ├── utils.py       # Utility functions
+    │   ├── version.py     # Version information
+    │   └── github.py      # GitHub client singleton
+    └── operations/
+        ├── branches.py    # Branch operations
+        ├── commits.py     # Commit operations
+        ├── files.py       # File operations
+        ├── issues.py      # Issue operations
+        ├── pulls.py       # Pull request operations
+        ├── repository.py  # Repository operations
+        └── search.py      # Search operations
+
+# Project Root
+├── .gitignore            # Git ignore patterns
+├── LICENSE.md            # MIT License
+├── README.md            # Project documentation
+├── pyproject.toml       # Project configuration
+└── docs/               # Documentation directory
 ```
 
 ### Key Technical Decisions
@@ -68,7 +76,7 @@ github/
 ```bash
 uv venv
 source .venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install -e .
 ```
 
 2. Testing
@@ -149,7 +157,7 @@ mypy github
 
 1. Client Usage
 ```python
-from github_mcp_server.common.github import GitHubClient
+from pygithub_mcp_server.common.github import GitHubClient
 
 def operation():
     client = GitHubClient.get_instance()
