@@ -23,6 +23,16 @@ A Model Context Protocol server that provides tools for interacting with the Git
   - Comprehensive pagination support
   - Detailed logging for debugging
 
+## Documentation
+
+Comprehensive guides are available in the docs/guides directory:
+
+- error-handling.md: Error types, handling patterns, and best practices
+- security.md: Authentication, access control, and content security
+- tool-reference.md: Detailed tool documentation with examples
+
+See these guides for detailed information about using the PyGithub MCP Server.
+
 ## Usage Examples
 
 ### Issue Operations

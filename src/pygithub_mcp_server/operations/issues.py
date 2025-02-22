@@ -73,9 +73,7 @@ def create_issue(
         return convert_issue(issue)
 
     except GithubException as e:
-        # Convert PyGithub exception to our error type
-        error = GitHubClient.get_instance()._handle_github_exception(e)
-        raise error
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
@@ -98,8 +96,7 @@ def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
         issue = repository.get_issue(issue_number)
         return convert_issue(issue)
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def update_issue(

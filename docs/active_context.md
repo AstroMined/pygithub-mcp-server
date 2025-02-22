@@ -1,9 +1,18 @@
 # Active Context
 
 ## Current Focus
-Completed implementation of comprehensive GitHub issue operations as MCP tools. All core issue functionality is now exposed through well-defined MCP tools with proper parameter validation, error handling, and logging.
+Improving error handling consistency and documentation coverage across the project. Enhanced error handling and documentation make the server more reliable and easier to use.
 
 ## Recent Changes
+- Standardized error handling across all operations
+- Added comprehensive error message formatting
+- Created new documentation guides:
+  - error-handling.md: Error types and handling patterns
+  - security.md: Authentication and content security
+  - tool-reference.md: Detailed tool documentation
+- Improved resource type detection in error messages
+- Enhanced validation error formatting
+
 - Implemented all GitHub issue operations as MCP tools:
   - get_issue: Get details about a specific issue
   - update_issue: Update an existing issue
@@ -117,7 +126,22 @@ Completed implementation of comprehensive GitHub issue operations as MCP tools. 
    - Documentation coverage
 
 ### Implementation Lessons
-1. Project Structure
+1. Error Handling
+   - Standardized error handling improves maintainability
+   - Clear error messages help with debugging
+   - Resource type detection provides better context
+   - Validation errors should be actionable
+   - Consistent patterns across operations
+   - Security implications must be considered
+
+2. Documentation
+   - Comprehensive guides improve usability
+   - Security considerations must be documented
+   - Examples help clarify usage patterns
+   - Tool reference must be detailed
+   - Error handling deserves special attention
+
+3. Project Structure
    - Singleton pattern benefits for client management
    - Clear separation of concerns in operations
    - Importance of schema documentation

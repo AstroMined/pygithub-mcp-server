@@ -110,23 +110,88 @@ class GitHubClient:
         data = error.data if hasattr(error, "data") else None
         logger.error(f"Handling GitHub exception: status={error.status}, data={data}")
 
+        # Extract useful information from the error message
+        error_msg = str(error)
+        resource_type = None
+        
+        # Try to identify the resource type from the error message or data
+        if data and "resource" in data:
+            resource_type = data["resource"]
+        elif "issue" in error_msg.lower():
+            resource_type = "issue"
+        elif "repository" in error_msg.lower():
+            resource_type = "repository"
+        elif "comment" in error_msg.lower():
+            resource_type = "comment"
+        elif "label" in error_msg.lower():
+            resource_type = "label"
+
         if error.status == 401:
             logger.error("Authentication error")
-            return GitHubAuthenticationError(str(error), data)
+            return GitHubAuthenticationError(
+                "Authentication failed. Please verify your GitHub token.",
+                data
+            )
         elif error.status == 403:
-            if "rate limit" in str(error).lower():
+            if "rate limit" in error_msg.lower():
                 logger.error("Rate limit exceeded")
-                # Note: PyGithub provides rate limit info in error.headers
-                # but we're keeping the simple message for now
-                return GitHubRateLimitError(str(error), error.headers.get("X-RateLimit-Reset"), data)
+                reset_time = error.headers.get("X-RateLimit-Reset") if hasattr(error, "headers") else None
+                return GitHubRateLimitError(
+                    "API rate limit exceeded. Please wait before making more requests.",
+                    reset_time,
+                    data
+                )
             logger.error("Permission denied")
-            return GitHubPermissionError(str(error), data)
+            return GitHubPermissionError(
+                "You don't have permission to perform this operation.",
+                data
+            )
         elif error.status == 404:
             logger.error("Resource not found")
-            return GitHubResourceNotFoundError(str(error), data)
+            msg = "Resource not found"
+            if resource_type:
+                msg = f"{resource_type.title()} not found"
+            return GitHubResourceNotFoundError(msg, data)
         elif error.status == 422:
             logger.error("Validation error")
-            return GitHubValidationError(str(error), data)
+            return GitHubValidationError(
+                self._format_validation_error(error_msg, data),
+                data
+            )
         else:
             logger.error(f"Unknown GitHub error: {error.status}")
-            return GitHubError(f"GitHub API error ({error.status}): {str(error)}", data)
+            return GitHubError(
+                f"GitHub API error (HTTP {error.status}): {error_msg}",
+                data
+            )
+
+    def _format_validation_error(self, error_msg: str, data: Optional[Dict[str, Any]]) -> str:
+        """Format validation error message to be more user-friendly.
+
+        Args:
+            error_msg: Original error message
+            data: Error response data
+
+        Returns:
+            Formatted error message
+        """
+        if not data:
+            return error_msg
+
+        # Extract validation errors from response data
+        errors = data.get("errors", [])
+        if not errors:
+            return error_msg
+
+        # Format each validation error
+        formatted_errors = []
+        for error in errors:
+            if "field" in error:
+                field = error["field"]
+                code = error.get("code", "invalid")
+                message = error.get("message", "is invalid")
+                formatted_errors.append(f"- {field}: {message} ({code})")
+
+        if formatted_errors:
+            return "Validation failed:\n" + "\n".join(formatted_errors)
+        return error_msg

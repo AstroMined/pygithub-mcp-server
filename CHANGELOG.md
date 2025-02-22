@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-02-22
+
+### Added
+- New documentation guides:
+  - error-handling.md: Comprehensive error handling documentation
+  - security.md: Security best practices and considerations
+  - tool-reference.md: Detailed tool reference with examples
+- Enhanced error handling with resource type detection
+- Improved validation error formatting
+
+### Changed
+- Standardized error handling across all operations
+- Improved error message clarity and usefulness
+- Enhanced error response formatting
+
 ## [0.2.0] - 2025-02-22
 
 ### Added
