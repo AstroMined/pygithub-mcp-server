@@ -4,10 +4,36 @@ This module provides a FastMCP server that exposes GitHub API operations.
 """
 
 import json
+import logging
+import os
+import sys
+import traceback
+from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 from github_mcp_server.common.types import ListIssuesParams
 from github_mcp_server.common.version import VERSION
+from github_mcp_server.common.errors import GitHubError, format_github_error
 from github_mcp_server.operations import issues
+
+# Set up logging
+log_dir = Path(__file__).parent.parent.parent / 'logs'
+if not log_dir.exists():
+    os.makedirs(log_dir)
+
+log_file = log_dir / 'github_mcp_server.log'
+logger = logging.getLogger()  # Get root logger
+logger.setLevel(logging.DEBUG)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler(sys.stderr)
+    ],
+    force=True
+)
+logger = logging.getLogger(__name__)
+logger.debug("Logging initialized")
 
 # Create FastMCP server instance
 mcp = FastMCP(
@@ -35,18 +61,37 @@ def list_issues(params: ListIssuesParams) -> dict:
     Returns:
         List of issues from GitHub API
     """
-    result = issues.list_issues(
-        params.owner,
-        params.repo,
-        state=params.state,
-        labels=params.labels,
-        sort=params.sort,
-        direction=params.direction,
-        since=params.since,
-        page=params.page,
-        per_page=params.per_page
-    )
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    try:
+        logger.debug(f"list_issues called with params: {params}")
+        result = issues.list_issues(
+            params.owner,
+            params.repo,
+            state=params.state,
+            labels=params.labels,
+            sort=params.sort,
+            direction=params.direction,
+            since=params.since,
+            page=params.page,
+            per_page=params.per_page
+        )
+        logger.debug(f"Got result: {result}")
+        response = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+        logger.debug(f"Returning response: {response}")
+        return response
+    except GitHubError as e:
+        logger.error(f"GitHub error: {e}")
+        return {
+            "content": [{"type": "error", "text": format_github_error(e)}],
+            "is_error": True
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        logger.error(traceback.format_exc())
+        error_msg = str(e) if str(e) else "An unexpected error occurred"
+        return {
+            "content": [{"type": "error", "text": f"Internal server error: {error_msg}"}],
+            "is_error": True
+        }
 
 if __name__ == "__main__":
     mcp.run()

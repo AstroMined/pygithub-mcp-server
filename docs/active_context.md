@@ -9,6 +9,8 @@ Implementing comprehensive PyGithub integration to replace direct API calls, wit
 - Added comprehensive object conversion utilities
 - Implemented proper pagination and error handling
 - Updated documentation with PyGithub patterns
+- Fixed list_issues parameter handling to match PyGithub requirements
+- Improved error handling for PyGithub assertions
 
 ## Next Steps
 
@@ -86,6 +88,13 @@ Implementing comprehensive PyGithub integration to replace direct API calls, wit
    - Clear separation of concerns in operations
    - Importance of schema documentation
    - Value of phased implementation
+   - Match library requirements for parameter handling
+
+2. PyGithub Integration
+   - Follow library examples for parameter patterns
+   - Handle assertions properly
+   - Use simpler parameter passing when possible
+   - Validate parameters before API calls
 
 2. Environment Setup
    - PyGithub dependency management

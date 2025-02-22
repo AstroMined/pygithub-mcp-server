@@ -4,11 +4,15 @@ This module provides a singleton class for managing the PyGithub instance
 and handling GitHub API interactions through the PyGithub library.
 """
 
+import logging
 import os
 from typing import Optional
 
 from github import Auth, Github, GithubException
 from github.Repository import Repository
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 from .errors import (
     GitHubAuthenticationError,
@@ -49,11 +53,15 @@ class GitHubClient:
     def _init_client(self) -> None:
         """Initialize PyGithub client with token authentication."""
         token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+        logger.debug("Initializing GitHub client")
         if not token:
+            logger.error("GITHUB_PERSONAL_ACCESS_TOKEN not set")
             raise GitHubError("GITHUB_PERSONAL_ACCESS_TOKEN environment variable not set")
 
+        logger.debug("Token found, creating GitHub client")
         auth = Auth.Token(token)
         self._github = Github(auth=auth)
+        logger.debug("GitHub client initialized successfully")
 
     @property
     def github(self) -> Github:
@@ -81,33 +89,44 @@ class GitHubClient:
         Raises:
             GitHubError: If repository access fails
         """
+        logger.debug(f"Getting repository: {full_name}")
         try:
-            return self.github.get_repo(full_name)
+            repo = self.github.get_repo(full_name)
+            logger.debug(f"Successfully got repository: {full_name}")
+            return repo
         except GithubException as e:
-            self._handle_github_exception(e)
+            logger.error(f"GitHub exception when getting repo {full_name}: {str(e)}")
+            raise self._handle_github_exception(e)
 
-    def _handle_github_exception(self, error: GithubException) -> None:
+    def _handle_github_exception(self, error: GithubException) -> GitHubError:
         """Map PyGithub exceptions to our error types.
 
         Args:
             error: PyGithub exception
 
-        Raises:
-            GitHubError: Appropriate error type based on exception
+        Returns:
+            Appropriate GitHubError subclass instance
         """
         data = error.data if hasattr(error, "data") else None
+        logger.error(f"Handling GitHub exception: status={error.status}, data={data}")
 
         if error.status == 401:
-            raise GitHubAuthenticationError(str(error), data)
+            logger.error("Authentication error")
+            return GitHubAuthenticationError(str(error), data)
         elif error.status == 403:
             if "rate limit" in str(error).lower():
+                logger.error("Rate limit exceeded")
                 # Note: PyGithub provides rate limit info in error.headers
                 # but we're keeping the simple message for now
-                raise GitHubRateLimitError(str(error), error.headers.get("X-RateLimit-Reset"), data)
-            raise GitHubPermissionError(str(error), data)
+                return GitHubRateLimitError(str(error), error.headers.get("X-RateLimit-Reset"), data)
+            logger.error("Permission denied")
+            return GitHubPermissionError(str(error), data)
         elif error.status == 404:
-            raise GitHubResourceNotFoundError(str(error), data)
+            logger.error("Resource not found")
+            return GitHubResourceNotFoundError(str(error), data)
         elif error.status == 422:
-            raise GitHubValidationError(str(error), data)
+            logger.error("Validation error")
+            return GitHubValidationError(str(error), data)
         else:
-            raise GitHubError(f"GitHub API error ({error.status}): {str(error)}", data)
+            logger.error(f"Unknown GitHub error: {error.status}")
+            return GitHubError(f"GitHub API error ({error.status}): {str(error)}", data)

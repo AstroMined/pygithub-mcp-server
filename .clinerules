@@ -30,7 +30,11 @@
 - Document all public functions and classes thoroughly
 
 ## Testing
-- Test MCP tools using MCP Inspector during development
+- Test MCP tools using MCP Inspector during development:
+  ```bash
+  npx @modelcontextprotocol/inspector uv run github-mcp-server
+  ```
+- Use MCP Inspector's Web UI to experiment with available tools
 - Verify tool operations with real GitHub repositories
 - Test both success and error cases
 - Document example payloads that work
@@ -102,3 +106,11 @@
 - For dependency errors, ensure all requirements are installed in venv
 - For GitHub API errors, check token permissions and validity
 - For build errors, use --no-build-isolation flag with uv build
+- When using MCP Inspector, ensure GITHUB_PERSONAL_ACCESS_TOKEN is set in environment
+
+## Debugging
+- Check github_mcp_server.log for detailed error logs
+- Log file contains all API interactions and error traces
+- Both file and console logging enabled
+- Log file is created in the project root directory
+- Log format includes timestamps and module names for tracing

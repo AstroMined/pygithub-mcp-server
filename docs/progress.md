@@ -16,6 +16,8 @@
 - Robust object conversion utilities
 - Proper pagination handling
 - Comprehensive error mapping
+- Robust parameter handling for PyGithub methods
+- Proper assertion error handling
 
 ## What's Left to Build
 

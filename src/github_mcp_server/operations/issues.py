@@ -4,14 +4,19 @@ This module provides functions for working with issues in GitHub repositories,
 including creation, updates, comments, and listing.
 """
 
+import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 from github import GithubException
+from github.PaginatedList import PaginatedList
 
 from ..common.converters import convert_issue, convert_issue_comment, convert_label
 from ..common.errors import GitHubError
 from ..common.github import GitHubClient
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 
 def create_issue(
@@ -62,8 +67,9 @@ def create_issue(
         return convert_issue(issue)
 
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        # Convert PyGithub exception to our error type
+        error = GitHubClient.get_instance()._handle_github_exception(e)
+        raise error
 
 
 def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
@@ -181,35 +187,76 @@ def list_issues(
         GitHubError: If the API request fails
     """
     try:
+        # Validate parameters
+        valid_states = {'open', 'closed', 'all'}
+        # Default to 'open' if state is None
+        if state is None:
+            state = 'open'
+        elif state not in valid_states:
+            raise GitHubError(f"Invalid state: {state}. Must be one of: {valid_states}")
+
+        valid_sorts = {'created', 'updated', 'comments'}
+        if sort is not None and sort not in valid_sorts:
+            raise GitHubError(f"Invalid sort: {sort}. Must be one of: {valid_sorts}")
+
+        valid_directions = {'asc', 'desc'}
+        if direction is not None and direction not in valid_directions:
+            raise GitHubError(f"Invalid direction: {direction}. Must be one of: {valid_directions}")
+
+        # Handle labels parameter - pass through as is since PyGithub accepts None
+        if labels is not None:
+            if not isinstance(labels, list):
+                raise GitHubError("Labels must be a list of strings")
+            if not all(isinstance(label, str) for label in labels):
+                raise GitHubError("All labels must be strings")
+
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
 
-        # Convert labels list to comma-separated string if provided
-        label_str = ",".join(labels) if labels else None
-
         # Get paginated issues
-        issues = repository.get_issues(
-            state=state,
-            labels=label_str,
-            sort=sort,
-            direction=direction,
-            since=since,
-        )
+        logger.debug(f"Getting issues for {owner}/{repo} with state={state}, labels={labels}, sort={sort}, direction={direction}")
+        try:
+            # Start with just the required state parameter
+            paginated_issues = repository.get_issues(state=state)
+            logger.debug(f"Got PaginatedList of issues: {paginated_issues}")
+        except AssertionError as e:
+            logger.error(f"PyGithub assertion error: {e}")
+            logger.error(f"Error type: {type(e)}")
+            logger.error(f"Error args: {e.args}")
+            raise GitHubError("Invalid parameter values for get_issues")
+        except Exception as e:
+            logger.error(f"Error getting issues: {e}")
+            logger.error(f"Error type: {type(e)}")
+            logger.error(f"Error args: {e.args}")
+            raise GitHubError(f"Failed to get issues: {str(e)}")
 
-        # Handle pagination
-        if page is not None:
-            issues = issues.get_page(page - 1)  # PyGithub uses 0-based indexing
-        elif per_page is not None:
-            issues = list(issues[:per_page])
-        else:
-            issues = list(issues)
+        try:
+            # Handle pagination
+            if page is not None:
+                logger.debug(f"Getting page {page}")
+                issues = paginated_issues.get_page(page - 1)  # PyGithub uses 0-based indexing
+            elif per_page is not None:
+                logger.debug(f"Getting first {per_page} issues")
+                issues = list(paginated_issues[:per_page])
+            else:
+                logger.debug("Getting all issues")
+                issues = list(paginated_issues)
+            
+            logger.debug(f"Retrieved {len(issues)} issues")
 
-        # Convert each issue to our schema
-        return [convert_issue(issue) for issue in issues]
+            # Convert each issue to our schema
+            converted_issues = [convert_issue(issue) for issue in issues]
+            logger.debug(f"Converted {len(converted_issues)} issues to schema")
+            return converted_issues
+
+        except Exception as e:
+            logger.error(f"Error handling pagination: {str(e)}")
+            raise GitHubError(f"Error retrieving issues: {str(e)}")
 
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        # Convert PyGithub exception to our error type
+        error = GitHubClient.get_instance()._handle_github_exception(e)
+        raise error
 
 
 def add_issue_comment(

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Improved parameter handling for PyGithub method calls
+- Updated README with accurate setup and usage instructions
 - PyGithub integration for object-oriented GitHub API interactions
 - GitHubClient singleton for centralized client management
 - Object conversion utilities for GitHub types
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated project dependencies to include PyGithub
 - Improved error handling with PyGithub's exception system
 - Enhanced project structure with new utility modules
+- Fixed list_issues parameter handling to match PyGithub requirements
+- Updated documentation to reflect correct setup and usage patterns
 
 ### Removed
 - Direct REST API calls in issues module
