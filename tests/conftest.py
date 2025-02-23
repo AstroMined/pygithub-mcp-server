@@ -34,12 +34,55 @@ class MockRepository(Repository):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        
+        # Initialize all required attributes
+        self._name = self._attributes.get('name')
         self._full_name = self._attributes.get('full_name')
+        self._description = self._attributes.get('description')
+        self._private = self._attributes.get('private', False)
+        self._fork = self._attributes.get('fork', False)
+        self._url = self._attributes.get('url')
+        self._html_url = self._attributes.get('html_url')
+        self._owner = None  # Set via property mock
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def name(self):
+        """Get repository name."""
+        return self._completeIfNotSet(self._name)
 
     @property
     def full_name(self):
         """Get repository full name."""
-        return self._full_name
+        return self._completeIfNotSet(self._full_name)
+
+    @property
+    def description(self):
+        """Get repository description."""
+        return self._completeIfNotSet(self._description)
+
+    @property
+    def private(self):
+        """Get repository private status."""
+        return self._completeIfNotSet(self._private)
+
+    @property
+    def fork(self):
+        """Get repository fork status."""
+        return self._completeIfNotSet(self._fork)
+
+    @property
+    def url(self):
+        """Get repository API URL."""
+        return self._completeIfNotSet(self._url)
+
+    @property
+    def html_url(self):
+        """Get repository HTML URL."""
+        return self._completeIfNotSet(self._html_url)
 
 class MockNamedUser(NamedUser):
     """Mock class that inherits from NamedUser."""
@@ -48,6 +91,34 @@ class MockNamedUser(NamedUser):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        self._login = self._attributes.get('login')
+        self._id = self._attributes.get('id')
+        self._type = self._attributes.get('type')
+        self._site_admin = self._attributes.get('site_admin')
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def login(self):
+        """Get user login."""
+        return self._completeIfNotSet(self._login)
+
+    @property
+    def id(self):
+        """Get user ID."""
+        return self._completeIfNotSet(self._id)
+
+    @property
+    def type(self):
+        """Get user type."""
+        return self._completeIfNotSet(self._type)
+
+    @property
+    def site_admin(self):
+        """Get user site admin status."""
+        return self._completeIfNotSet(self._site_admin)
 
 class MockIssue(Issue):
     """Mock class that inherits from Issue."""
@@ -56,6 +127,7 @@ class MockIssue(Issue):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        self._repository = kwargs.get('repository')
         
         # Initialize all required attributes
         self._id = self._attributes.get('id')
@@ -188,6 +260,11 @@ class MockIssue(Issue):
         """Get author association."""
         return self._completeIfNotSet(self._author_association)
 
+    @property
+    def repository(self):
+        """Get issue repository."""
+        return self._completeIfNotSet(self._repository)
+
 class MockLabel(Label):
     """Mock class that inherits from Label."""
     def __init__(self, *args, **kwargs):
@@ -195,6 +272,34 @@ class MockLabel(Label):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        self._id = self._attributes.get('id')
+        self._name = self._attributes.get('name')
+        self._description = self._attributes.get('description')
+        self._color = self._attributes.get('color')
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def id(self):
+        """Get label ID."""
+        return self._completeIfNotSet(self._id)
+
+    @property
+    def name(self):
+        """Get label name."""
+        return self._completeIfNotSet(self._name)
+
+    @property
+    def description(self):
+        """Get label description."""
+        return self._completeIfNotSet(self._description)
+
+    @property
+    def color(self):
+        """Get label color."""
+        return self._completeIfNotSet(self._color)
 
 class MockMilestone(Milestone):
     """Mock class that inherits from Milestone."""
@@ -203,6 +308,60 @@ class MockMilestone(Milestone):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        
+        # Initialize all required attributes
+        self._id = self._attributes.get('id')
+        self._number = self._attributes.get('number')
+        self._title = self._attributes.get('title')
+        self._description = self._attributes.get('description')
+        self._state = self._attributes.get('state')
+        self._created_at = self._attributes.get('created_at')
+        self._updated_at = self._attributes.get('updated_at')
+        self._due_on = self._attributes.get('due_on')
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def id(self):
+        """Get milestone ID."""
+        return self._completeIfNotSet(self._id)
+
+    @property
+    def number(self):
+        """Get milestone number."""
+        return self._completeIfNotSet(self._number)
+
+    @property
+    def title(self):
+        """Get milestone title."""
+        return self._completeIfNotSet(self._title)
+
+    @property
+    def description(self):
+        """Get milestone description."""
+        return self._completeIfNotSet(self._description)
+
+    @property
+    def state(self):
+        """Get milestone state."""
+        return self._completeIfNotSet(self._state)
+
+    @property
+    def created_at(self):
+        """Get milestone creation date."""
+        return self._completeIfNotSet(self._created_at)
+
+    @property
+    def updated_at(self):
+        """Get milestone update date."""
+        return self._completeIfNotSet(self._updated_at)
+
+    @property
+    def due_on(self):
+        """Get milestone due date."""
+        return self._completeIfNotSet(self._due_on)
 
 class MockIssueComment(IssueComment):
     """Mock class that inherits from IssueComment."""
@@ -211,6 +370,52 @@ class MockIssueComment(IssueComment):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        self._id = self._attributes.get('id')
+        self._body = self._attributes.get('body')
+        self._user = self._attributes.get('user')
+        self._created_at = self._attributes.get('created_at')
+        self._updated_at = self._attributes.get('updated_at')
+        self._url = self._attributes.get('url')
+        self._html_url = self._attributes.get('html_url')
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def id(self):
+        """Get comment ID."""
+        return self._completeIfNotSet(self._id)
+
+    @property
+    def body(self):
+        """Get comment body."""
+        return self._completeIfNotSet(self._body)
+
+    @property
+    def user(self):
+        """Get comment author."""
+        return self._completeIfNotSet(self._user)
+
+    @property
+    def created_at(self):
+        """Get comment creation date."""
+        return self._completeIfNotSet(self._created_at)
+
+    @property
+    def updated_at(self):
+        """Get comment update date."""
+        return self._completeIfNotSet(self._updated_at)
+
+    @property
+    def url(self):
+        """Get comment API URL."""
+        return self._completeIfNotSet(self._url)
+
+    @property
+    def html_url(self):
+        """Get comment HTML URL."""
+        return self._completeIfNotSet(self._html_url)
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -300,7 +505,7 @@ def mock_user():
 
 
 @pytest.fixture(scope="function")
-def mock_repo(mock_user, mock_issue, mock_milestone):
+def mock_repo(mock_user):
     """Create a mock GitHub repository."""
     repo = MockRepository(attributes={
         "full_name": "owner/repo",
@@ -311,17 +516,21 @@ def mock_repo(mock_user, mock_issue, mock_milestone):
     owner = MockNamedUser(attributes={"login": "owner"})
     type(repo).owner = PropertyMock(return_value=owner)
     
-    # Configure methods with proper mocking while preserving inheritance
-    repo.create_issue = Mock(spec=repo.create_issue, return_value=mock_issue)
-    repo.get_issue = Mock(spec=repo.get_issue, return_value=mock_issue)
-    repo.get_milestone = Mock(spec=repo.get_milestone, return_value=mock_milestone)
+    return repo
+
+
+@pytest.fixture(scope="function", autouse=True)
+def configure_mock_repo(mock_repo, mock_issue, mock_milestone):
+    """Configure mock repository methods after issue is created."""
+    # Configure methods with proper mocking
+    mock_repo.create_issue = Mock(spec=mock_repo.create_issue, return_value=mock_issue)
+    mock_repo.get_issue = Mock(spec=mock_repo.get_issue, return_value=mock_issue)
+    mock_repo.get_milestone = Mock(spec=mock_repo.get_milestone, return_value=mock_milestone)
     
     # Configure get_issues for pagination tests
     mock_paginated = Mock(spec=PaginatedList)
     mock_paginated.get_page = Mock(return_value=[])
-    repo.get_issues = Mock(return_value=mock_paginated)
-    
-    return repo
+    mock_repo.get_issues = Mock(return_value=mock_paginated)
 
 
 @pytest.fixture(scope="function")
@@ -353,9 +562,11 @@ def mock_milestone(mock_datetime):
 
 
 @pytest.fixture(scope="function")
-def mock_issue(mock_user, mock_label, mock_milestone, mock_datetime):
+def mock_issue(mock_user, mock_label, mock_milestone, mock_datetime, mock_repo):
     """Create a mock GitHub issue."""
-    issue = MockIssue(attributes={
+    issue = MockIssue(
+        repository=mock_repo,
+        attributes={
         "id": 11111,
         "number": 42,
         "title": "Test Issue",
