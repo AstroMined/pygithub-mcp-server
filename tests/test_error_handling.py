@@ -139,7 +139,7 @@ def test_rate_limit_error_without_reset():
     formatted = format_github_error(error)
     assert "Rate Limit Exceeded" in formatted
     assert "Rate limit exceeded" in formatted
-    assert "Resets at: None" in formatted
+    assert "Resets at: unknown" in formatted
 
 
 def test_error_inheritance():

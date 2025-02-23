@@ -4,6 +4,11 @@
 Implementing and improving the test suite for the project. While initial test infrastructure is in place, many tests are failing and need attention. This focus on testing will help ensure reliability and catch potential issues early.
 
 ## Recent Changes
+- Fixed rate limit error handling to properly handle missing reset times:
+  - Made reset_at parameter optional in GitHubRateLimitError
+  - Updated error formatting to show "unknown" for missing reset times
+  - Added test coverage for None reset time case
+
 - Implemented comprehensive test suite:
   - Set up pytest configuration with coverage reporting
   - Created test fixtures for GitHub objects
@@ -116,13 +121,7 @@ Implementing and improving the test suite for the project. While initial test in
 
 ### Current Challenges
 
-1. Test Failures
-   - Many unit tests are currently failing
-   - Need to investigate each failure
-   - Some mocks may need refinement
-   - Coverage needs improvement
-
-2. Schema Migration
+1. Schema Migration
    - Mapping between PyGithub objects and our schemas
    - Handling new PyGithub-specific fields
    - Maintaining type safety
@@ -142,7 +141,14 @@ Implementing and improving the test suite for the project. While initial test in
 
 ### Implementation Lessons
 
-1. Testing Strategy
+1. Error Handling Patterns
+   - Handle optional datetime fields defensively
+   - Use clear placeholder text for missing values
+   - Consider edge cases in error formatting
+   - Test both presence and absence of optional data
+   - Document expected behavior for missing fields
+
+2. Testing Strategy
    - Comprehensive test suite is essential
    - Mocking GitHub objects requires careful attention
    - Test fixtures improve test maintainability

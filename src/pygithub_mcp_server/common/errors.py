@@ -50,13 +50,13 @@ class GitHubRateLimitError(GitHubError):
     """Raised when GitHub API rate limit is exceeded."""
 
     def __init__(
-        self, message: str, reset_at: datetime, response: Optional[Dict[str, Any]] = None
+        self, message: str, reset_at: Optional[datetime] = None, response: Optional[Dict[str, Any]] = None
     ) -> None:
         """Initialize rate limit error.
 
         Args:
             message: Error message
-            reset_at: When the rate limit will reset
+            reset_at: When the rate limit will reset, or None if unknown
             response: Optional raw API response data
         """
         super().__init__(message, response)
@@ -91,7 +91,8 @@ def format_github_error(error: GitHubError) -> str:
     elif isinstance(error, GitHubPermissionError):
         message = f"Permission Denied: {str(error)}"
     elif isinstance(error, GitHubRateLimitError):
-        message = f"Rate Limit Exceeded: {str(error)}\nResets at: {error.reset_at.isoformat()}"
+        reset_info = f"Resets at: {error.reset_at.isoformat() if error.reset_at else 'unknown'}"
+        message = f"Rate Limit Exceeded: {str(error)}\n{reset_info}"
     elif isinstance(error, GitHubConflictError):
         message = f"Conflict: {str(error)}"
 
