@@ -248,6 +248,9 @@ def list_issues(
             logger.error(f"Error type: {type(e)}")
             logger.error(f"Error args: {e.args}")
             raise GitHubError("Invalid parameter values for get_issues")
+        except GithubException as e:
+            # Let the GitHub client handle the exception properly
+            raise GitHubClient.get_instance()._handle_github_exception(e)
         except Exception as e:
             logger.error(f"Error getting issues: {e}")
             logger.error(f"Error type: {type(e)}")

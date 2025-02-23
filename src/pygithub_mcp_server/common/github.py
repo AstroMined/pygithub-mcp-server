@@ -138,18 +138,24 @@ class GitHubClient:
             # Handle RateLimitExceededException specifically
             if isinstance(error, RateLimitExceededException):
                 logger.error("Rate limit exceeded")
-                if hasattr(error, 'rate') and error.rate:
-                    rate = error.rate
-                    reset_time = rate.reset if hasattr(rate, 'reset') else None
-                    remaining = rate.remaining if hasattr(rate, 'remaining') else 0
-                    limit = rate.limit if hasattr(rate, 'limit') else None
-                    
-                    msg = f"API rate limit exceeded ({remaining}/{limit} calls remaining)"
-                    if reset_time:
+                rate = getattr(error, 'rate', None)
+                reset_time = None
+                remaining = 0
+                limit = None
+                
+                if rate:
+                    reset_time = getattr(rate, 'reset', None)
+                    remaining = getattr(rate, 'remaining', 0)
+                    limit = getattr(rate, 'limit', None)
+                
+                msg = f"API rate limit exceeded ({remaining}/{limit} calls remaining)"
+                if reset_time:
+                    try:
                         msg += f". Reset at {reset_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
-                    return GitHubRateLimitError(msg, reset_time, None)
-                else:
-                    return GitHubRateLimitError("API rate limit exceeded", None, None)
+                    except (AttributeError, TypeError):
+                        # Handle case where reset_time doesn't have strftime or isn't a datetime
+                        msg += f". Reset at {reset_time}"
+                return GitHubRateLimitError(msg, reset_time, None)
 
             data = error.data if hasattr(error, "data") else {}
             if isinstance(data, str):
@@ -197,7 +203,7 @@ class GitHubClient:
                     return GitHubRateLimitError(msg, reset_time, data)
                 logger.error("Permission denied")
                 return GitHubPermissionError(
-                    f"Resource not accessible by integration",
+                    f"Permission denied: Resource not accessible by integration",
                     data
                 )
             elif error.status == 404:
@@ -211,7 +217,7 @@ class GitHubClient:
                 return GitHubValidationError(error_msg, data)
             else:
                 logger.error(f"Unknown GitHub error: {error.status}")
-                return GitHubError(error_msg, data)
+                return GitHubError(f"GitHub API Error ({error.status}): {error_msg}", data)
         except Exception as e:
             logger.error(f"Error handling GitHub exception: {e}")
             return GitHubError(str(error), None)

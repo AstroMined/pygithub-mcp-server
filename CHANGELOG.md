@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Enhanced error handling and message formatting:
+  - Added 'permission' word to permission error messages for better clarity
+  - Included status code in unknown error messages for easier debugging
+  - Fixed rate limit error handling in issues.py to properly propagate errors
+  - Improved error message formatting across all error types
+  - All error-related tests now passing
+
 - Improved rate limit error handling:
   - Enhanced RateLimitExceededException handling in GitHubClient
   - Added proper data formatting for rate limit errors

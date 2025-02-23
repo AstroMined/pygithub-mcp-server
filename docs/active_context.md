@@ -10,6 +10,14 @@ Expanding test coverage systematically across the codebase. Current coverage ana
 A phased approach has been planned to improve coverage while maintaining existing test stability and patterns.
 
 ## Recent Changes
+- Enhanced error handling and message formatting:
+  - Added 'permission' word to permission error messages for clarity
+  - Included status code in unknown error messages
+  - Fixed rate limit error handling in issues.py
+  - Improved error message formatting across all error types
+  - Enhanced test coverage for error scenarios
+  - All error-related tests now passing
+
 - Improved rate limit error handling:
   - Enhanced RateLimitExceededException handling in GitHubClient
   - Added proper data formatting for rate limit errors
@@ -200,7 +208,15 @@ A phased approach has been planned to improve coverage while maintaining existin
 
 ### Implementation Lessons
 
-1. Rate Limit Error Handling
+1. Error Message Formatting
+   - Include descriptive words in error messages (e.g., 'permission' in permission errors)
+   - Add technical details like status codes for debugging
+   - Format messages consistently across error types
+   - Consider both user experience and debugging needs
+   - Test error message content explicitly
+   - Ensure error messages are actionable
+
+2. Rate Limit Error Handling
    - Properly mock PyGithub's RateLimitExceededException structure
    - Include rate details (remaining/limit) in error messages
    - Handle missing rate attributes defensively

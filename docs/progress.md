@@ -1,6 +1,13 @@
 # Project Progress
 
 ## What Works
+- Error handling improvements:
+  - Enhanced error message formatting:
+    - Added 'permission' word to permission error messages
+    - Included status code in unknown error messages
+    - Fixed rate limit error handling in issues.py
+    - All error-related tests now passing
+  
 - Rate limit error handling improvements:
   - Enhanced RateLimitExceededException handling
   - Added proper data formatting for rate limit errors
@@ -152,11 +159,10 @@ Core implementation completed and operational with synchronous operations. Packa
 7. Add monitoring and logging
 
 ## Known Issues
-1. Test coverage needs improvement in some modules
-2. Documentation could be more comprehensive
-3. Performance could be optimized
-4. Need to document synchronous operation benefits
-5. Need to update API examples for synchronous usage
+1. Documentation could be more comprehensive
+2. Performance could be optimized
+3. Need to document synchronous operation benefits
+4. Need to update API examples for synchronous usage
 
 ## Next Actions
 1. Continue test coverage improvements
