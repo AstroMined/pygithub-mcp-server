@@ -34,6 +34,8 @@
 - Document all public functions and classes thoroughly
 
 ## Testing
+
+### MCP Tool Testing
 - Test MCP tools using MCP Inspector during development:
   ```bash
   source .venv/bin/activate  # Must activate venv first
@@ -43,6 +45,19 @@
 - Verify tool operations with real GitHub repositories
 - Test both success and error cases
 - Document example payloads that work
+
+### Pytest Usage
+- Run tests efficiently without verbose output by default:
+  ```bash
+  pytest tests/test_file.py -q --tb=no --cov=path/to/coverage
+  ```
+- Only use verbose mode (-v) for debugging specific failing tests:
+  ```bash
+  pytest tests/test_file.py::test_specific_function -v
+  ```
+- Keep test output clean and manageable
+- Use coverage reporting to identify gaps
+- Run specific test functions when debugging issues
 
 ## Documentation
 - Keep memory bank up to date with all significant changes

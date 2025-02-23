@@ -1,7 +1,13 @@
 # Active Context
 
 ## Current Focus
-Implementing and improving the test suite for the project. While initial test infrastructure is in place, many tests are failing and need attention. This focus on testing will help ensure reliability and catch potential issues early.
+Expanding test coverage systematically across the codebase. Current coverage analysis shows several areas needing attention:
+- utils.py (17% coverage)
+- server.py (23% coverage)
+- operations/issues.py (71% coverage)
+- __main__.py (0% coverage)
+
+A phased approach has been planned to improve coverage while maintaining existing test stability and patterns.
 
 ## Recent Changes
 - Removed test mode functionality:
@@ -75,11 +81,34 @@ Implementing and improving the test suite for the project. While initial test in
 
 ## Next Steps
 
-1. Testing Implementation
-   - Test each issue tool with MCP Inspector
-   - Verify operations with real GitHub repositories
-   - Document example payloads that work
-   - Add test cases for error conditions
+1. Phase 1: Core Utilities (utils.py)
+   - Create test_utils.py with utility categories
+   - Implement parameter validation tests
+   - Add error handling test coverage
+   - Test type conversion utilities
+   - Cover resource management functions
+   - Target: Increase coverage from 17% to 90%+
+
+2. Phase 2: Issue Operations (issues.py)
+   - Extend test_issues.py with error scenarios
+   - Implement rate limit test fixtures
+   - Add resource lifecycle tests
+   - Cover label management functions
+   - Test comment validation
+   - Target: Increase coverage from 71% to 95%+
+
+3. Phase 3: Server Core (server.py)
+   - Create test_server.py
+   - Test server lifecycle events
+   - Cover request/response handling
+   - Verify resource management
+   - Test tool registration
+   - Target: Increase coverage from 23% to 85%+
+
+4. Phase 4: Entry Point (__main__.py)
+   - Test initialization flow
+   - Cover argument handling
+   - Target: Increase coverage from 0% to 100%
 
 2. Testing Strategy
    - Test each tool with MCP Inspector
@@ -163,7 +192,15 @@ Implementing and improving the test suite for the project. While initial test in
 
 ### Implementation Lessons
 
-1. Production Code Purity
+1. Test Coverage Strategy
+   - Focus on core utilities first to establish patterns
+   - Build test coverage incrementally and systematically
+   - Maintain existing test stability while expanding coverage
+   - Use pytest.parametrize for comprehensive validation testing
+   - Follow established mocking patterns from mocking_patterns.md
+   - Balance between test coverage and maintainability
+
+2. Production Code Purity
    - Avoid test-specific code paths in production code
    - Use proper mocking instead of test mode flags
    - Keep production code focused on real use cases

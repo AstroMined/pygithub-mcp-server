@@ -111,8 +111,8 @@ def process_error_response(
     if response.status_code == 401:
         raise GitHubAuthenticationError(message, error_data)
     elif response.status_code == 403:
-        remaining, reset_time = parse_rate_limit_headers(response)
-        if remaining == 0:
+        if "rate limit exceeded" in message.lower():
+            remaining, reset_time = parse_rate_limit_headers(response)
             raise GitHubRateLimitError(message, reset_time, error_data)
         raise GitHubPermissionError(message, error_data)
     elif response.status_code == 404:

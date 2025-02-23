@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Improved error handling in utils.py:
+  - Enhanced rate limit detection logic
+  - Fixed permission error vs rate limit error classification
+  - Improved error message pattern matching
+
+### Added
+- Comprehensive test suite for utils.py:
+  - Increased coverage from 17% to 95%
+  - Added parameter validation tests
+  - Enhanced error handling tests
+  - Added rate limit handling tests
+  - Improved response processing tests
+
+### Changed
 - Removed test mode functionality from GitHubClient
 - Simplified test environment by removing test-specific code paths
 - Optimized update_issue to avoid unnecessary API calls when no changes provided
