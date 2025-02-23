@@ -9,7 +9,7 @@ import os
 import sys
 from typing import Optional, Dict, Any
 
-from github import Auth, Github, GithubException
+from github import Auth, Github, GithubException, RateLimitExceededException
 from github.Repository import Repository
 
 # Get logger
@@ -134,65 +134,87 @@ class GitHubClient:
         Returns:
             Appropriate GitHubError subclass instance
         """
-        data = error.data if hasattr(error, "data") else None
-        logger.error(f"Handling GitHub exception: status={error.status}, data={data}")
-
-        # Extract useful information from the error message
-        error_msg = str(error)
-        
-        # Determine resource type, prioritizing the hint
-        resource_type = resource_hint
-        if not resource_type:
-            if data and "resource" in data:
-                resource_type = data["resource"]
-            elif "issue" in error_msg.lower():
-                resource_type = "issue"
-            elif "repository" in error_msg.lower():
-                resource_type = "repository"
-            elif "comment" in error_msg.lower():
-                resource_type = "comment"
-            elif "label" in error_msg.lower():
-                resource_type = "label"
-
-        if error.status == 401:
-            logger.error("Authentication error")
-            return GitHubAuthenticationError(
-                "Authentication failed. Please verify your GitHub token.",
-                data
-            )
-        elif error.status == 403:
-            if "rate limit" in error_msg.lower():
+        try:
+            # Handle RateLimitExceededException specifically
+            if isinstance(error, RateLimitExceededException):
                 logger.error("Rate limit exceeded")
-                headers = getattr(error, "headers", {}) or {}
-                reset_time = headers.get("X-RateLimit-Reset")
-                return GitHubRateLimitError(
-                    "API rate limit exceeded. Please wait before making more requests.",
-                    reset_time,
+                if hasattr(error, 'rate') and error.rate:
+                    rate = error.rate
+                    reset_time = rate.reset if hasattr(rate, 'reset') else None
+                    remaining = rate.remaining if hasattr(rate, 'remaining') else 0
+                    limit = rate.limit if hasattr(rate, 'limit') else None
+                    
+                    msg = f"API rate limit exceeded ({remaining}/{limit} calls remaining)"
+                    if reset_time:
+                        msg += f". Reset at {reset_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                    return GitHubRateLimitError(msg, reset_time, None)
+                else:
+                    return GitHubRateLimitError("API rate limit exceeded", None, None)
+
+            data = error.data if hasattr(error, "data") else {}
+            if isinstance(data, str):
+                try:
+                    import json
+                    data = json.loads(data)
+                except:
+                    data = {"message": data}
+            
+            logger.error(f"Handling GitHub exception: status={error.status}, data={data}")
+
+            # Extract error message
+            error_msg = data.get("message", str(error)) if data else str(error)
+            
+            # Determine resource type, prioritizing the hint
+            resource_type = resource_hint
+            if not resource_type:
+                if data and "resource" in data:
+                    resource_type = data["resource"]
+                elif "issue" in error_msg.lower():
+                    resource_type = "issue"
+                elif "repository" in error_msg.lower():
+                    resource_type = "repository"
+                elif "comment" in error_msg.lower():
+                    resource_type = "comment"
+                elif "label" in error_msg.lower():
+                    resource_type = "label"
+
+            if error.status == 401:
+                logger.error("Authentication error")
+                return GitHubAuthenticationError(
+                    "Authentication failed. Please verify your GitHub token.",
                     data
                 )
-            logger.error("Permission denied")
-            return GitHubPermissionError(
-                "You don't have permission to perform this operation.",
-                data
-            )
-        elif error.status == 404:
-            logger.error("Resource not found")
-            msg = "Resource not found"
-            if resource_type:
-                msg = f"{resource_type.title()} not found"
-            return GitHubResourceNotFoundError(msg, data)
-        elif error.status == 422:
-            logger.error("Validation error")
-            return GitHubValidationError(
-                self._format_validation_error(error_msg, data),
-                data
-            )
-        else:
-            logger.error(f"Unknown GitHub error: {error.status}")
-            return GitHubError(
-                f"GitHub API error (HTTP {error.status}): {error_msg}",
-                data
-            )
+            elif error.status == 403:
+                if "rate limit" in error_msg.lower():
+                    logger.error("Rate limit exceeded")
+                    headers = getattr(error, "headers", {}) or {}
+                    reset_time = headers.get("X-RateLimit-Reset")
+                    msg = "API rate limit exceeded"
+                    if reset_time:
+                        from datetime import datetime
+                        reset_dt = datetime.fromtimestamp(int(reset_time))
+                        msg += f". Reset at {reset_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                    return GitHubRateLimitError(msg, reset_time, data)
+                logger.error("Permission denied")
+                return GitHubPermissionError(
+                    f"Resource not accessible by integration",
+                    data
+                )
+            elif error.status == 404:
+                logger.error("Resource not found")
+                msg = "Not Found"
+                if resource_type:
+                    msg = f"{resource_type.title()} not found"
+                return GitHubResourceNotFoundError(msg, data)
+            elif error.status == 422:
+                logger.error("Validation error")
+                return GitHubValidationError(error_msg, data)
+            else:
+                logger.error(f"Unknown GitHub error: {error.status}")
+                return GitHubError(error_msg, data)
+        except Exception as e:
+            logger.error(f"Error handling GitHub exception: {e}")
+            return GitHubError(str(error), None)
 
     def _format_validation_error(self, error_msg: str, data: Optional[Dict[str, Any]]) -> str:
         """Format validation error message to be more user-friendly.

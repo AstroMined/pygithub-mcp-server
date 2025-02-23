@@ -166,8 +166,7 @@ def update_issue(
         return convert_issue(updated_issue)
 
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def list_issues(
@@ -217,12 +216,23 @@ def list_issues(
         if direction is not None and direction not in valid_directions:
             raise GitHubError(f"Invalid direction: {direction}. Must be one of: {valid_directions}")
 
-        # Handle labels parameter - pass through as is since PyGithub accepts None
+        # Validate page and per_page
+        if page is not None:
+            if not isinstance(page, int) or page < 1:
+                raise GitHubError("Invalid page number. Must be a positive integer.")
+
+        if per_page is not None:
+            if not isinstance(per_page, int) or per_page < 1:
+                raise GitHubError("Invalid per_page value. Must be a positive integer.")
+            if per_page > 100:
+                raise GitHubError("per_page cannot exceed 100")
+
+        # Handle labels parameter
         if labels is not None:
             if not isinstance(labels, list):
-                raise GitHubError("Labels must be a list of strings")
+                raise GitHubError("Labels must be a list")
             if not all(isinstance(label, str) for label in labels):
-                raise GitHubError("All labels must be strings")
+                raise GitHubError("Labels must be a list of strings")
 
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
@@ -297,8 +307,7 @@ def add_issue_comment(
         comment = issue.create_comment(body)
         return convert_issue_comment(comment)
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def list_issue_comments(
@@ -350,8 +359,7 @@ def list_issue_comments(
         return [convert_issue_comment(comment) for comment in comments]
 
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def update_issue_comment(
@@ -380,8 +388,7 @@ def update_issue_comment(
         comment.edit(body)
         return convert_issue_comment(comment)
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def delete_issue_comment(owner: str, repo: str, issue_number: int, comment_id: int) -> None:
@@ -403,8 +410,7 @@ def delete_issue_comment(owner: str, repo: str, issue_number: int, comment_id: i
         comment = issue.get_comment(comment_id)
         comment.delete()
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def add_issue_labels(
@@ -437,8 +443,7 @@ def add_issue_labels(
         return [convert_label(label) for label in updated_issue.labels]
 
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
 def remove_issue_label(
@@ -461,5 +466,4 @@ def remove_issue_label(
         issue = repository.get_issue(issue_number)
         issue.remove_from_labels(label)
     except GithubException as e:
-        # GitHubClient's get_repo will handle the exception
-        raise
+        raise GitHubClient.get_instance()._handle_github_exception(e)

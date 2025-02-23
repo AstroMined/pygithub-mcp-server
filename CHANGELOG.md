@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Improved rate limit error handling:
+  - Enhanced RateLimitExceededException handling in GitHubClient
+  - Added proper data formatting for rate limit errors
+  - Fixed mock fixtures for rate limit testing
+  - Improved error message formatting with rate details
+  - Added rate limit information (remaining/limit) to error messages
+  - Enhanced test coverage for rate limit scenarios
+
+### Fixed
+- Rate limit test fixtures now properly mock PyGithub's exception structure
+- Error handling in GitHubClient now properly formats rate limit messages
+- Mock objects now correctly handle rate limit attributes
+
+### Changed
 - Improved error handling in utils.py:
   - Enhanced rate limit detection logic
   - Fixed permission error vs rate limit error classification
