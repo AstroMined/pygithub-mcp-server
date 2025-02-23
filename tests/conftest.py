@@ -7,9 +7,9 @@ the PyGithub MCP Server.
 import os
 import pytest
 from datetime import datetime
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock, PropertyMock, patch
 
-from github import Github, GithubException
+from github import Github, GithubException, Auth
 from github.Issue import Issue
 from github.IssueComment import IssueComment
 from github.Label import Label
@@ -20,21 +20,111 @@ from github.Repository import Repository
 from pygithub_mcp_server.common.github import GitHubClient
 
 
-@pytest.fixture(autouse=True)
+# Mock classes that inherit from GitHub classes
+class MockGithub(Github):
+    """Mock class that inherits from Github."""
+    def __init__(self, *args, **kwargs):
+        pass
+
+class MockRepository(Repository):
+    """Mock class that inherits from Repository."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+class MockNamedUser(NamedUser):
+    """Mock class that inherits from NamedUser."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+class MockIssue(Issue):
+    """Mock class that inherits from Issue."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+class MockLabel(Label):
+    """Mock class that inherits from Label."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+class MockMilestone(Milestone):
+    """Mock class that inherits from Milestone."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+class MockIssueComment(IssueComment):
+    """Mock class that inherits from IssueComment."""
+    def __init__(self, *args, **kwargs):
+        self._requester = None
+        self._headers = {}
+        self._attributes = kwargs.get('attributes', {})
+        self._completed = True
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_environment(monkeypatch):
+    """Set up test environment with mock token."""
+    monkeypatch.setenv("GITHUB_PERSONAL_ACCESS_TOKEN", "test-token")
+    yield
+
+
+@pytest.fixture(scope="function")
+def mock_auth(monkeypatch):
+    """Mock Github Auth.Token while preserving module structure."""
+    # Create a dummy token instance that passes isinstance(auth, Auth.Auth)
+    mock_token_instance = Mock(spec=Auth.Auth, name="mock_auth_token")
+    
+    # Create a Token factory that returns this dummy token instance
+    token_factory_mock = Mock(return_value=mock_token_instance)
+    
+    # Create a dummy module to replace Auth in our module under test
+    mock_auth_module = type("MockAuthModule", (), {})()
+    mock_auth_module.Token = token_factory_mock
+    
+    # Patch the Auth in the module under test
+    monkeypatch.setattr("pygithub_mcp_server.common.github.Auth", mock_auth_module)
+    
+    return mock_auth_module
+
+
+@pytest.fixture(scope="function", autouse=True)
 def reset_github_client():
     """Reset GitHubClient singleton between tests."""
-    # Store original state
-    original_instance = GitHubClient._instance
-    original_github = GitHubClient._github
-    
+    GitHubClient._instance = None
+    GitHubClient._github = None
     yield
-    
-    # Restore original state
-    GitHubClient._instance = original_instance
-    GitHubClient._github = original_github
+    GitHubClient._instance = None
+    GitHubClient._github = None
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
+def mock_github_class(monkeypatch):
+    """Mock Github class in the module under test."""
+    mock = Mock(wraps=MockGithub)
+    mock_instance = MockGithub()
+    mock.return_value = mock_instance
+    mock_instance.get_repo = Mock(return_value=None)  # Can be overridden in tests
+
+    # Patch Github in the module under test
+    monkeypatch.setattr("pygithub_mcp_server.common.github.Github", mock)
+    return mock
+
+
+@pytest.fixture(scope="function")
 def mock_github_exception():
     """Create a mock GithubException factory."""
     def _create_exception(status, data=None, headers=None):
@@ -45,113 +135,112 @@ def mock_github_exception():
     return _create_exception
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_datetime():
     """Create a fixed datetime for testing."""
     return datetime(2025, 2, 22, 12, 0)
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_user():
     """Create a mock GitHub user."""
-    user = Mock(spec=NamedUser)
-    user.login = "testuser"
-    user.id = 12345
-    user.type = "User"
-    user.site_admin = False
+    user = MockNamedUser(attributes={
+        "login": "testuser",
+        "id": 12345,
+        "type": "User",
+        "site_admin": False
+    })
     return user
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_repo(mock_user):
     """Create a mock GitHub repository."""
-    repo = Mock(spec=Repository)
-    repo.full_name = "owner/repo"
-    repo.name = "repo"
+    repo = MockRepository(attributes={
+        "full_name": "owner/repo",
+        "name": "repo"
+    })
     
     # Mock the owner
-    owner = Mock(spec=NamedUser)
-    owner.login = "owner"
+    owner = MockNamedUser(attributes={"login": "owner"})
     type(repo).owner = PropertyMock(return_value=owner)
     
     return repo
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_label():
     """Create a mock GitHub label."""
-    label = Mock(spec=Label)
-    label.id = 98765
-    label.name = "bug"
-    label.description = "Bug report"
-    label.color = "ff0000"
+    label = MockLabel(attributes={
+        "id": 98765,
+        "name": "bug",
+        "description": "Bug report",
+        "color": "ff0000"
+    })
     return label
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_milestone(mock_datetime):
     """Create a mock GitHub milestone."""
-    milestone = Mock(spec=Milestone)
-    milestone.id = 54321
-    milestone.number = 1
-    milestone.title = "v1.0"
-    milestone.description = "First release"
-    milestone.state = "open"
-    milestone.created_at = mock_datetime
-    milestone.updated_at = mock_datetime
-    milestone.due_on = mock_datetime
+    milestone = MockMilestone(attributes={
+        "id": 54321,
+        "number": 1,
+        "title": "v1.0",
+        "description": "First release",
+        "state": "open",
+        "created_at": mock_datetime,
+        "updated_at": mock_datetime,
+        "due_on": mock_datetime
+    })
     return milestone
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_issue(mock_user, mock_label, mock_milestone, mock_repo, mock_datetime):
     """Create a mock GitHub issue."""
-    issue = Mock(spec=Issue)
-    issue.id = 11111
-    issue.number = 42
-    issue.title = "Test Issue"
-    issue.body = "Issue description"
-    issue.state = "open"
-    issue.state_reason = None
-    issue.locked = False
-    issue.active_lock_reason = None
-    issue.comments = 2
-    issue.created_at = mock_datetime
-    issue.updated_at = mock_datetime
-    issue.closed_at = None
-    issue.author_association = "OWNER"
-    issue.user = mock_user
-    issue.assignee = mock_user
-    issue.assignees = [mock_user]
-    issue.milestone = mock_milestone
-    issue.labels = [mock_label]
-    issue.url = "https://api.github.com/repos/owner/repo/issues/42"
-    issue.html_url = "https://github.com/owner/repo/issues/42"
-    issue.repository = mock_repo
+    issue = MockIssue(attributes={
+        "id": 11111,
+        "number": 42,
+        "title": "Test Issue",
+        "body": "Issue description",
+        "state": "open",
+        "state_reason": None,
+        "locked": False,
+        "active_lock_reason": None,
+        "comments": 2,
+        "created_at": mock_datetime,
+        "updated_at": mock_datetime,
+        "closed_at": None,
+        "author_association": "OWNER",
+        "user": mock_user,
+        "assignee": mock_user,
+        "assignees": [mock_user],
+        "milestone": mock_milestone,
+        "labels": [mock_label],
+        "url": "https://api.github.com/repos/owner/repo/issues/42",
+        "html_url": "https://github.com/owner/repo/issues/42",
+        "repository": mock_repo
+    })
     return issue
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_comment(mock_user, mock_datetime):
     """Create a mock GitHub issue comment."""
-    comment = Mock(spec=IssueComment)
-    comment.id = 22222
-    comment.body = "Test comment"
-    comment.user = mock_user
-    comment.created_at = mock_datetime
-    comment.updated_at = mock_datetime
-    comment.url = "https://api.github.com/repos/owner/repo/issues/comments/22222"
-    comment.html_url = "https://github.com/owner/repo/issues/42#issuecomment-22222"
+    comment = MockIssueComment(attributes={
+        "id": 22222,
+        "body": "Test comment",
+        "user": mock_user,
+        "created_at": mock_datetime,
+        "updated_at": mock_datetime,
+        "url": "https://api.github.com/repos/owner/repo/issues/comments/22222",
+        "html_url": "https://github.com/owner/repo/issues/42#issuecomment-22222"
+    })
     return comment
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def github_token():
-    """Set up and tear down GitHub token environment variable."""
-    original_token = os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN")
-    os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"] = "test-token"
-    yield "test-token"
-    if original_token:
-        os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"] = original_token
-    else:
-        del os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+    """Get the mock token value."""
+    return "test-token"

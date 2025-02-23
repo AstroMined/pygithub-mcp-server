@@ -132,6 +132,22 @@
    - Document parameter requirements in docstrings
    - Test with various parameter combinations
 
+7. Mocking Imported Modules:
+   ```python
+   # BAD - patching global name won't affect imported references
+   monkeypatch.setattr('github.Auth', mock_auth)  # Won't work
+   
+   # GOOD - patch the module where it's used
+   monkeypatch.setattr('pygithub_mcp_server.common.github.Auth', mock_auth)  # Works
+   ```
+
+   Key practices:
+   - Identify where the module is actually imported and used
+   - Patch at the point of use, not the global module
+   - Preserve real types when needed for isinstance() checks
+   - Use Mock(spec=...) to ensure proper interface
+   - Consider creating a dummy module if patching multiple attributes
+
 ## Troubleshooting
 - If MCP server fails to start, verify venv Python path in settings
 - For dependency errors, ensure all requirements are installed in venv

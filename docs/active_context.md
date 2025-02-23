@@ -149,6 +149,12 @@ Implementing and improving the test suite for the project. While initial test in
    - Coverage reporting helps identify gaps
    - Unit tests reveal design issues early
    - Mock data should match real API responses
+   - Patch imported modules at point of use, not globally
+   - Preserve type checking when mocking external libraries
+   - Consider module namespace binding when patching
+   - Use Mock(spec=...) to maintain type safety
+   - Create consistent mock instances for tracking calls
+   - Balance realistic behavior with test isolation
 
 1. Error Handling
    - Standardized error handling improves maintainability
