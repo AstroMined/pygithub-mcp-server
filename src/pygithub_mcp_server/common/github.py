@@ -29,15 +29,19 @@ class GitHubClient:
 
     _instance: Optional["GitHubClient"] = None
     _github: Optional[Github] = None
+    _created_via_get_instance: bool = False
 
     def __init__(self) -> None:
         """Initialize GitHub client.
 
         Note: Use get_instance() instead of constructor.
+        
+        Raises:
+            RuntimeError: If instantiated directly instead of through get_instance()
         """
-        if GitHubClient._instance is not None:
+        if not GitHubClient._created_via_get_instance:
             raise RuntimeError("Use GitHubClient.get_instance() instead")
-        self._init_client()
+        GitHubClient._created_via_get_instance = False  # Reset for next instantiation
 
     @classmethod
     def get_instance(cls) -> "GitHubClient":
@@ -47,7 +51,9 @@ class GitHubClient:
             GitHubClient instance
         """
         if cls._instance is None:
+            cls._created_via_get_instance = True
             cls._instance = cls()
+            cls._instance._init_client()
         return cls._instance
 
     def _init_client(self) -> None:
@@ -96,13 +102,14 @@ class GitHubClient:
             return repo
         except GithubException as e:
             logger.error(f"GitHub exception when getting repo {full_name}: {str(e)}")
-            raise self._handle_github_exception(e)
+            raise self._handle_github_exception(e, resource_hint="repository")
 
-    def _handle_github_exception(self, error: GithubException) -> GitHubError:
+    def _handle_github_exception(self, error: GithubException, resource_hint: Optional[str] = None) -> GitHubError:
         """Map PyGithub exceptions to our error types.
 
         Args:
             error: PyGithub exception
+            resource_hint: Optional hint about the resource type being accessed
 
         Returns:
             Appropriate GitHubError subclass instance
@@ -112,19 +119,20 @@ class GitHubClient:
 
         # Extract useful information from the error message
         error_msg = str(error)
-        resource_type = None
         
-        # Try to identify the resource type from the error message or data
-        if data and "resource" in data:
-            resource_type = data["resource"]
-        elif "issue" in error_msg.lower():
-            resource_type = "issue"
-        elif "repository" in error_msg.lower():
-            resource_type = "repository"
-        elif "comment" in error_msg.lower():
-            resource_type = "comment"
-        elif "label" in error_msg.lower():
-            resource_type = "label"
+        # Determine resource type, prioritizing the hint
+        resource_type = resource_hint
+        if not resource_type:
+            if data and "resource" in data:
+                resource_type = data["resource"]
+            elif "issue" in error_msg.lower():
+                resource_type = "issue"
+            elif "repository" in error_msg.lower():
+                resource_type = "repository"
+            elif "comment" in error_msg.lower():
+                resource_type = "comment"
+            elif "label" in error_msg.lower():
+                resource_type = "label"
 
         if error.status == 401:
             logger.error("Authentication error")
@@ -135,7 +143,8 @@ class GitHubClient:
         elif error.status == 403:
             if "rate limit" in error_msg.lower():
                 logger.error("Rate limit exceeded")
-                reset_time = error.headers.get("X-RateLimit-Reset") if hasattr(error, "headers") else None
+                headers = getattr(error, "headers", {}) or {}
+                reset_time = headers.get("X-RateLimit-Reset")
                 return GitHubRateLimitError(
                     "API rate limit exceeded. Please wait before making more requests.",
                     reset_time,

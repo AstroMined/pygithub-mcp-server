@@ -25,10 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added mocking patterns to .clinerules
 - Updated active_context.md with new testing insights
 - Enhanced mock implementations to preserve type checking
+- Fixed GitHubClient singleton implementation:
+  - Added _created_via_get_instance flag for better instantiation control
+  - Improved direct instantiation prevention
+  - Enhanced resource type detection for repository operations
+  - Fixed rate limit error handling for missing headers
+  - All tests in test_github_client.py now pass
 
 ### Known Issues
-- Many unit tests are currently failing
-- Test coverage needs improvement
+- Test coverage could be improved further
 - Some mock objects may need refinement
 
 ## [0.2.1] - 2025-02-22

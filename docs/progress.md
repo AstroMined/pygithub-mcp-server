@@ -41,6 +41,7 @@
 - Improved error message clarity and formatting
 - Enhanced validation error handling
 - Added resource type detection to errors
+- Fixed GitHubClient singleton implementation and tests
 
 ## What's Left to Build
 
@@ -64,7 +65,7 @@
   - [x] Operation module tests
   - [x] Error handling tests
   - [x] Validation tests
-  - [ ] Fix failing tests
+  - [x] Fixed GitHubClient test suite
   - [ ] Improve test coverage
 
 - [ ] Integration Tests
@@ -113,11 +114,11 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Test suite has been implemented with comprehensive unit tests, with ongoing improvements to test coverage and error handling. Recent fixes include proper handling of missing reset times in rate limit errors, demonstrating our commitment to robust error handling. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion. Focus now on continuing test improvements and preparing for PyPI publication.
+Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Test suite has been significantly improved with all GitHubClient tests now passing. Recent improvements include a robust singleton pattern implementation, better resource type detection, and proper handling of missing headers in rate limit errors. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion. Focus now on improving test coverage further and preparing for PyPI publication.
 
 ### Priorities
 1. Prepare for PyPI publication
-2. Implement comprehensive test suite
+2. Improve test coverage further
 3. Expand documentation with examples
 4. Add performance optimizations
 5. Integrate advanced features
@@ -125,7 +126,7 @@ Core implementation completed and operational with synchronous operations. Packa
 7. Add monitoring and logging
 
 ## Known Issues
-1. Test coverage needs significant improvement
+1. Test coverage could be improved further
 2. Some mock objects may not accurately reflect API responses
 3. Documentation could be more comprehensive
 4. Performance could be optimized
@@ -133,11 +134,11 @@ Core implementation completed and operational with synchronous operations. Packa
 6. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Fix failing unit tests
-2. Improve test coverage
-3. Refine mock objects
-4. Add performance optimizations
-5. Implement advanced features
+1. Improve test coverage
+2. Refine mock objects
+3. Add performance optimizations
+4. Implement advanced features
+5. Enhance documentation
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server

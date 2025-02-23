@@ -4,10 +4,12 @@
 Implementing and improving the test suite for the project. While initial test infrastructure is in place, many tests are failing and need attention. This focus on testing will help ensure reliability and catch potential issues early.
 
 ## Recent Changes
-- Fixed rate limit error handling to properly handle missing reset times:
-  - Made reset_at parameter optional in GitHubRateLimitError
-  - Updated error formatting to show "unknown" for missing reset times
-  - Added test coverage for None reset time case
+- Fixed failing tests in GitHubClient implementation:
+  - Improved singleton pattern to properly prevent direct instantiation
+  - Added _created_via_get_instance flag for robust instantiation control
+  - Enhanced resource type detection for repository operations
+  - Fixed rate limit error handling for missing headers
+  - All tests in test_github_client.py now pass
 
 - Implemented comprehensive test suite:
   - Set up pytest configuration with coverage reporting
@@ -141,7 +143,14 @@ Implementing and improving the test suite for the project. While initial test in
 
 ### Implementation Lessons
 
-1. Error Handling Patterns
+1. Singleton Pattern Testing
+   - Use dedicated flag for instantiation control
+   - Don't rely solely on instance state
+   - Reset all singleton state between tests
+   - Consider test fixture impact on patterns
+   - Document singleton testing approach
+
+2. Error Handling Patterns
    - Handle optional datetime fields defensively
    - Use clear placeholder text for missing values
    - Consider edge cases in error formatting

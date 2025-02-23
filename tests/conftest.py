@@ -33,6 +33,12 @@ class MockRepository(Repository):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        self._full_name = self._attributes.get('full_name')
+
+    @property
+    def full_name(self):
+        """Get repository full name."""
+        return self._full_name
 
 class MockNamedUser(NamedUser):
     """Mock class that inherits from NamedUser."""
@@ -106,9 +112,11 @@ def reset_github_client():
     """Reset GitHubClient singleton between tests."""
     GitHubClient._instance = None
     GitHubClient._github = None
+    GitHubClient._created_via_get_instance = False
     yield
     GitHubClient._instance = None
     GitHubClient._github = None
+    GitHubClient._created_via_get_instance = False
 
 
 @pytest.fixture(scope="function")
