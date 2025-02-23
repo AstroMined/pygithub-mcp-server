@@ -15,6 +15,7 @@ from github.IssueComment import IssueComment
 from github.Label import Label
 from github.Milestone import Milestone
 from github.NamedUser import NamedUser
+from github.PaginatedList import PaginatedList
 from github.Repository import Repository
 
 from pygithub_mcp_server.common.github import GitHubClient
@@ -55,6 +56,137 @@ class MockIssue(Issue):
         self._headers = {}
         self._attributes = kwargs.get('attributes', {})
         self._completed = True
+        
+        # Initialize all required attributes
+        self._id = self._attributes.get('id')
+        self._number = self._attributes.get('number')
+        self._title = self._attributes.get('title')
+        self._body = self._attributes.get('body')
+        self._state = self._attributes.get('state')
+        self._state_reason = self._attributes.get('state_reason')
+        self._labels = self._attributes.get('labels', [])
+        self._assignee = self._attributes.get('assignee')
+        self._assignees = self._attributes.get('assignees', [])
+        self._milestone = self._attributes.get('milestone')
+        self._comments = self._attributes.get('comments', 0)
+        self._created_at = self._attributes.get('created_at')
+        self._updated_at = self._attributes.get('updated_at')
+        self._closed_at = self._attributes.get('closed_at')
+        self._url = self._attributes.get('url')
+        self._html_url = self._attributes.get('html_url')
+        self._user = self._attributes.get('user')
+        self._locked = self._attributes.get('locked', False)
+        self._active_lock_reason = self._attributes.get('active_lock_reason')
+        self._author_association = self._attributes.get('author_association')
+
+    def _completeIfNotSet(self, value):
+        """Mock the _completeIfNotSet method to just return the value."""
+        return value
+
+    @property
+    def id(self):
+        """Get issue ID."""
+        return self._completeIfNotSet(self._id)
+
+    @property
+    def number(self):
+        """Get issue number."""
+        return self._completeIfNotSet(self._number)
+
+    @property
+    def title(self):
+        """Get issue title."""
+        return self._completeIfNotSet(self._title)
+
+    @property
+    def body(self):
+        """Get issue body."""
+        return self._completeIfNotSet(self._body)
+
+    @property
+    def state(self):
+        """Get issue state."""
+        return self._completeIfNotSet(self._state)
+
+    @property
+    def state_reason(self):
+        """Get issue state reason."""
+        return self._completeIfNotSet(self._state_reason)
+
+    @property
+    def labels(self):
+        """Get issue labels."""
+        return self._completeIfNotSet(self._labels)
+
+    @labels.setter
+    def labels(self, value):
+        """Set issue labels."""
+        self._labels = value
+
+    @property
+    def assignee(self):
+        """Get issue assignee."""
+        return self._completeIfNotSet(self._assignee)
+
+    @property
+    def assignees(self):
+        """Get issue assignees."""
+        return self._completeIfNotSet(self._assignees)
+
+    @property
+    def milestone(self):
+        """Get issue milestone."""
+        return self._completeIfNotSet(self._milestone)
+
+    @property
+    def comments(self):
+        """Get issue comments count."""
+        return self._completeIfNotSet(self._comments)
+
+    @property
+    def created_at(self):
+        """Get issue creation date."""
+        return self._completeIfNotSet(self._created_at)
+
+    @property
+    def updated_at(self):
+        """Get issue update date."""
+        return self._completeIfNotSet(self._updated_at)
+
+    @property
+    def closed_at(self):
+        """Get issue closure date."""
+        return self._completeIfNotSet(self._closed_at)
+
+    @property
+    def url(self):
+        """Get issue API URL."""
+        return self._completeIfNotSet(self._url)
+
+    @property
+    def html_url(self):
+        """Get issue HTML URL."""
+        return self._completeIfNotSet(self._html_url)
+
+    @property
+    def user(self):
+        """Get issue creator."""
+        return self._completeIfNotSet(self._user)
+
+    @property
+    def locked(self):
+        """Get issue locked state."""
+        return self._completeIfNotSet(self._locked)
+
+    @property
+    def active_lock_reason(self):
+        """Get issue lock reason."""
+        return self._completeIfNotSet(self._active_lock_reason)
+
+    @property
+    def author_association(self):
+        """Get author association."""
+        return self._completeIfNotSet(self._author_association)
 
 class MockLabel(Label):
     """Mock class that inherits from Label."""
@@ -83,8 +215,8 @@ class MockIssueComment(IssueComment):
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_environment(monkeypatch):
-    """Set up test environment with mock token."""
-    monkeypatch.setenv("GITHUB_PERSONAL_ACCESS_TOKEN", "test-token")
+    """Set up test environment."""
+    monkeypatch.setenv("TEST_ENVIRONMENT", "true")
     yield
 
 
@@ -113,20 +245,26 @@ def reset_github_client():
     GitHubClient._instance = None
     GitHubClient._github = None
     GitHubClient._created_via_get_instance = False
+    GitHubClient._initialized = False
     yield
     GitHubClient._instance = None
     GitHubClient._github = None
     GitHubClient._created_via_get_instance = False
+    GitHubClient._initialized = False
 
 
 @pytest.fixture(scope="function")
-def mock_github_class(monkeypatch):
+def mock_github_class(monkeypatch, mock_repo):
     """Mock Github class in the module under test."""
+    # Create base mock with proper spec
     mock = Mock(wraps=MockGithub)
     mock_instance = MockGithub()
     mock.return_value = mock_instance
-    mock_instance.get_repo = Mock(return_value=None)  # Can be overridden in tests
-
+    
+    # Configure instance with necessary methods
+    mock_instance.get_repo = Mock(return_value=mock_repo)
+    mock_instance.get_rate_limit = Mock()  # Prevents auth errors
+    
     # Patch Github in the module under test
     monkeypatch.setattr("pygithub_mcp_server.common.github.Github", mock)
     return mock
@@ -162,7 +300,7 @@ def mock_user():
 
 
 @pytest.fixture(scope="function")
-def mock_repo(mock_user):
+def mock_repo(mock_user, mock_issue, mock_milestone):
     """Create a mock GitHub repository."""
     repo = MockRepository(attributes={
         "full_name": "owner/repo",
@@ -172,6 +310,16 @@ def mock_repo(mock_user):
     # Mock the owner
     owner = MockNamedUser(attributes={"login": "owner"})
     type(repo).owner = PropertyMock(return_value=owner)
+    
+    # Configure methods with proper mocking while preserving inheritance
+    repo.create_issue = Mock(spec=repo.create_issue, return_value=mock_issue)
+    repo.get_issue = Mock(spec=repo.get_issue, return_value=mock_issue)
+    repo.get_milestone = Mock(spec=repo.get_milestone, return_value=mock_milestone)
+    
+    # Configure get_issues for pagination tests
+    mock_paginated = Mock(spec=PaginatedList)
+    mock_paginated.get_page = Mock(return_value=[])
+    repo.get_issues = Mock(return_value=mock_paginated)
     
     return repo
 
@@ -205,7 +353,7 @@ def mock_milestone(mock_datetime):
 
 
 @pytest.fixture(scope="function")
-def mock_issue(mock_user, mock_label, mock_milestone, mock_repo, mock_datetime):
+def mock_issue(mock_user, mock_label, mock_milestone, mock_datetime):
     """Create a mock GitHub issue."""
     issue = MockIssue(attributes={
         "id": 11111,
@@ -227,9 +375,17 @@ def mock_issue(mock_user, mock_label, mock_milestone, mock_repo, mock_datetime):
         "milestone": mock_milestone,
         "labels": [mock_label],
         "url": "https://api.github.com/repos/owner/repo/issues/42",
-        "html_url": "https://github.com/owner/repo/issues/42",
-        "repository": mock_repo
+        "html_url": "https://github.com/owner/repo/issues/42"
     })
+    
+    # Configure methods with proper mocking while preserving inheritance
+    issue.create_comment = Mock(spec=issue.create_comment)
+    issue.get_comments = Mock(spec=issue.get_comments)
+    issue.get_comment = Mock(spec=issue.get_comment)
+    issue.edit = Mock(spec=issue.edit)
+    issue.add_to_labels = Mock(spec=issue.add_to_labels)
+    issue.remove_from_labels = Mock(spec=issue.remove_from_labels)
+    
     return issue
 
 
@@ -245,6 +401,11 @@ def mock_comment(mock_user, mock_datetime):
         "url": "https://api.github.com/repos/owner/repo/issues/comments/22222",
         "html_url": "https://github.com/owner/repo/issues/42#issuecomment-22222"
     })
+    
+    # Configure methods with proper mocking while preserving inheritance
+    comment.edit = Mock(spec=comment.edit)
+    comment.delete = Mock(spec=comment.delete)
+    
     return comment
 
 

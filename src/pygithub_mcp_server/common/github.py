@@ -6,6 +6,7 @@ and handling GitHub API interactions through the PyGithub library.
 
 import logging
 import os
+import sys
 from typing import Optional, Dict, Any
 
 from github import Auth, Github, GithubException
@@ -30,6 +31,7 @@ class GitHubClient:
     _instance: Optional["GitHubClient"] = None
     _github: Optional[Github] = None
     _created_via_get_instance: bool = False
+    _initialized: bool = False
 
     def __init__(self) -> None:
         """Initialize GitHub client.
@@ -58,16 +60,49 @@ class GitHubClient:
 
     def _init_client(self) -> None:
         """Initialize PyGithub client with token authentication."""
+        if self._initialized:
+            return
+
+        # Initialize real client
         token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
         logger.debug("Initializing GitHub client")
+        
         if not token:
             logger.error("GITHUB_PERSONAL_ACCESS_TOKEN not set")
             raise GitHubError("GITHUB_PERSONAL_ACCESS_TOKEN environment variable not set")
 
+        # Check test environment
+        if self._is_test_environment():
+            logger.error("Attempting to use real token in test environment")
+            raise GitHubError(
+                "Attempting to use real GitHub token in test environment. "
+                "Set GITHUB_TEST_MODE=true or use appropriate test fixtures."
+            )
+
         logger.debug("Token found, creating GitHub client")
+        self._create_client(token)
+        logger.debug("GitHub client initialized successfully")
+        self._initialized = True
+
+    def _create_client(self, token: str) -> None:
+        """Create PyGithub client instance.
+        
+        Args:
+            token: GitHub personal access token
+        """
         auth = Auth.Token(token)
         self._github = Github(auth=auth)
-        logger.debug("GitHub client initialized successfully")
+
+    def _is_test_environment(self) -> bool:
+        """Check if running in a test environment.
+        
+        Returns:
+            bool: True if in test environment
+        """
+        return (
+            os.getenv("CI", "").lower() in ("true", "1", "yes") or
+            os.getenv("TEST_ENVIRONMENT", "").lower() in ("true", "1", "yes")
+        )
 
     @property
     def github(self) -> Github:
@@ -79,8 +114,12 @@ class GitHubClient:
         Raises:
             GitHubError: If client is not initialized
         """
+        if not self._initialized:
+            self._init_client()
+
         if self._github is None:
             raise GitHubError("GitHub client not initialized")
+
         return self._github
 
     def get_repo(self, full_name: str) -> Repository:
