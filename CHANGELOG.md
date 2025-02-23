@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Removed test mode functionality from GitHubClient
+- Simplified test environment by removing test-specific code paths
+- Optimized update_issue to avoid unnecessary API calls when no changes provided
+
 ### Added
 - Comprehensive test suite implementation:
   - Added pytest configuration with coverage reporting

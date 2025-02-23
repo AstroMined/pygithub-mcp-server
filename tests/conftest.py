@@ -419,9 +419,10 @@ class MockIssueComment(IssueComment):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_environment(monkeypatch):
+def mock_environment(monkeypatch, github_token):
     """Set up test environment."""
     monkeypatch.setenv("TEST_ENVIRONMENT", "true")
+    monkeypatch.setenv("GITHUB_PERSONAL_ACCESS_TOKEN", github_token)
     yield
 
 

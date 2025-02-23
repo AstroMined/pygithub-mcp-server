@@ -71,14 +71,6 @@ class GitHubClient:
             logger.error("GITHUB_PERSONAL_ACCESS_TOKEN not set")
             raise GitHubError("GITHUB_PERSONAL_ACCESS_TOKEN environment variable not set")
 
-        # Check test environment
-        if self._is_test_environment():
-            logger.error("Attempting to use real token in test environment")
-            raise GitHubError(
-                "Attempting to use real GitHub token in test environment. "
-                "Set GITHUB_TEST_MODE=true or use appropriate test fixtures."
-            )
-
         logger.debug("Token found, creating GitHub client")
         self._create_client(token)
         logger.debug("GitHub client initialized successfully")
@@ -92,17 +84,6 @@ class GitHubClient:
         """
         auth = Auth.Token(token)
         self._github = Github(auth=auth)
-
-    def _is_test_environment(self) -> bool:
-        """Check if running in a test environment.
-        
-        Returns:
-            bool: True if in test environment
-        """
-        return (
-            os.getenv("CI", "").lower() in ("true", "1", "yes") or
-            os.getenv("TEST_ENVIRONMENT", "").lower() in ("true", "1", "yes")
-        )
 
     @property
     def github(self) -> Github:

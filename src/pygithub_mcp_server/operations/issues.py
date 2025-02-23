@@ -154,10 +154,14 @@ def update_issue(
                 logger.error(f"Failed to get milestone {milestone}: {e}")
                 raise GitHubError(f"Invalid milestone number: {milestone}")
 
+        # If no changes provided, return current issue state
+        if not kwargs:
+            return convert_issue(issue)
+
         # Update issue using PyGithub with only provided values
         issue.edit(**kwargs)
 
-        # Get fresh issue data after update
+        # Get fresh issue data after update only if changes were made
         updated_issue = repository.get_issue(issue_number)
         return convert_issue(updated_issue)
 
