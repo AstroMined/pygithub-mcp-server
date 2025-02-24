@@ -4,6 +4,7 @@ This module provides shared pytest fixtures and configuration for testing
 the PyGithub MCP Server.
 """
 
+import json
 import os
 import pytest
 from datetime import datetime
@@ -521,17 +522,31 @@ def mock_repo(mock_user):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def configure_mock_repo(mock_repo, mock_issue, mock_milestone):
+def configure_mock_repo(mock_repo, mock_issue, mock_milestone, mock_comment):
     """Configure mock repository methods after issue is created."""
-    # Configure methods with proper mocking
+    # Configure issue creation and retrieval
     mock_repo.create_issue = Mock(spec=mock_repo.create_issue, return_value=mock_issue)
     mock_repo.get_issue = Mock(spec=mock_repo.get_issue, return_value=mock_issue)
     mock_repo.get_milestone = Mock(spec=mock_repo.get_milestone, return_value=mock_milestone)
     
-    # Configure get_issues for pagination tests
+    # Configure issue listing with pagination
     mock_paginated = Mock(spec=PaginatedList)
-    mock_paginated.get_page = Mock(return_value=[])
+    mock_paginated.get_page = Mock(return_value=[mock_issue])
+    mock_paginated.__iter__ = Mock(return_value=iter([mock_issue]))
+    mock_paginated.__getitem__ = Mock(return_value=[mock_issue])
     mock_repo.get_issues = Mock(return_value=mock_paginated)
+    
+    # Configure issue methods
+    mock_issue.create_comment = Mock(return_value=mock_comment)
+    mock_issue.get_comments = Mock(return_value=mock_paginated)
+    mock_issue.get_comment = Mock(return_value=mock_comment)
+    mock_issue.edit = Mock(return_value=mock_issue)
+    mock_issue.add_to_labels = Mock()
+    mock_issue.remove_from_labels = Mock()
+    
+    # Configure comment methods
+    mock_comment.edit = Mock(return_value=mock_comment)
+    mock_comment.delete = Mock()
 
 
 @pytest.fixture(scope="function")

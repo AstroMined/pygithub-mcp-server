@@ -352,6 +352,16 @@ A phased approach has been planned to improve coverage while maintaining existin
 - Schema migration for remaining modules
 - Operation refactoring planning
 
+### Recent Fixes
+- Fixed issue attribute name mismatch:
+  - Changed issue_number access from issue.issue_number to issue.number in converters.py
+  - Updated test_convert_issue to match our schema's issue_number field
+  - Resolved AttributeError in list_issues operation
+  - Aligned mock object attributes with PyGithub:
+    - Changed issue_number to number in mock objects
+    - Fixed mock object edit() method to properly update state
+    - Updated test assertions to use correct attribute names
+
 ### Upcoming
 - Refactor remaining operations to use PyGithub
 - Expand test suite with PyGithub mocks

@@ -29,7 +29,7 @@ from pygithub_mcp_server.operations.issues import (
 from pygithub_mcp_server.common.errors import GitHubError
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_github_instance(mock_repo):
     """Create a mock GitHubClient instance."""
     mock_instance = Mock()
@@ -37,7 +37,7 @@ def mock_github_instance(mock_repo):
     mock_instance._handle_github_exception = GitHubClient._handle_github_exception.__get__(mock_instance)
     return mock_instance
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_github_get_instance(monkeypatch, mock_github_instance):
     """Mock GitHubClient.get_instance to return our mock."""
     mock_get_instance = Mock(return_value=mock_github_instance)
@@ -47,14 +47,14 @@ def mock_github_get_instance(monkeypatch, mock_github_instance):
     )
     return mock_get_instance
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_repo():
     """Create a mock Repository."""
     mock = Mock()
     mock.full_name = "owner/repo"
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_comment():
     """Create a mock IssueComment."""
     mock = Mock()
@@ -89,7 +89,7 @@ def mock_comment():
     
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_label():
     """Create a mock Label."""
     mock = Mock()
@@ -110,7 +110,7 @@ def mock_label():
     
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_milestone():
     """Create a mock Milestone."""
     mock = Mock()
@@ -144,7 +144,7 @@ def mock_milestone():
     
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_rate_limit():
     """Create a mock Rate instance for rate limit testing."""
     mock_rate = Mock(spec=Rate)
@@ -161,7 +161,7 @@ def mock_rate_limit():
     exc.rate = mock_rate  # PyGithub sets this attribute
     return exc
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_paginated_empty():
     """Create a mock PaginatedList that returns empty results."""
     mock = Mock(spec=PaginatedList)
@@ -172,7 +172,7 @@ def mock_paginated_empty():
     mock.__getitem__ = lambda self, key: []
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_paginated_full():
     """Create a mock PaginatedList with 100+ items."""
     mock = Mock(spec=PaginatedList)
@@ -193,7 +193,7 @@ def mock_paginated_full():
     mock.__getitem__ = lambda self, key: mock_issues[key] if isinstance(key, int) else mock_issues[key.start:key.stop]
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_user():
     """Create a mock User."""
     def create(login):
@@ -203,11 +203,11 @@ def mock_user():
         return user
     return create
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_issue(mock_user):
     """Create a mock Issue with proper attribute initialization."""
     mock = Mock()
-    mock.number = 42
+    mock.number = 42  # Using PyGithub's attribute name
     mock.title = "Test Issue"
     mock.state = "open"
     mock.body = "Test body"
@@ -216,16 +216,58 @@ def mock_issue(mock_user):
     mock.milestone = None
     mock.id = 12345
     
+    # Initialize required attributes for conversion
+    mock.state_reason = None
+    mock.locked = False
+    mock.active_lock_reason = None
+    mock.comments = 0
+    mock.created_at = datetime(2025, 2, 23, 2, 0, 0)
+    mock.updated_at = datetime(2025, 2, 23, 2, 0, 0)
+    mock.closed_at = None
+    mock.author_association = "NONE"
+    
+    # Initialize user attributes
+    mock.user = Mock()
+    mock.user.login = "test-user"
+    mock.user.id = 123
+    mock.user.type = "User"
+    mock.user.site_admin = False
+    
+    # Initialize assignee attributes
+    mock.assignee = None
+    
+    # Initialize repository attributes
+    mock.repository = Mock()
+    mock.repository.full_name = "owner/repo"
+    mock.repository.name = "repo"
+    mock.repository.owner = Mock()
+    mock.repository.owner.login = "owner"
+    
+    # Initialize URL attributes
+    mock.url = "https://api.github.com/repos/owner/repo/issues/42"
+    mock.html_url = "https://github.com/owner/repo/issues/42"
+    
     # Ensure edit updates the state and returns self
     def edit(**kwargs):
+        print(f"\nBefore edit - Mock state: {mock.state}, title: {mock.title}")
         for key, value in kwargs.items():
             if key == "assignees":
                 mock.assignees = [mock_user(login) for login in value]
             elif key == "labels":
                 # Convert label strings to mock Label objects
                 mock.labels = [Mock(name=label) for label in value]
+            elif key == "title":
+                mock.title = value
+            elif key == "state":
+                mock.state = value
+            elif key == "body":
+                mock.body = value
             else:
                 setattr(mock, key, value)
+        # Update timestamps
+        mock.updated_at = datetime.now()
+        print(f"After edit - Mock state: {mock.state}, title: {mock.title}")
+        # Return self to match PyGithub behavior
         return mock
     mock.edit.side_effect = edit
     
@@ -233,19 +275,46 @@ def mock_issue(mock_user):
     def to_dict():
         return {
             "id": mock.id,
-            "number": mock.number,
+            "issue_number": mock.number,  # Convert PyGithub's 'number' to our schema's 'issue_number'
             "title": mock.title,
             "state": mock.state,
             "body": mock.body,
             "labels": [{"name": label.name} for label in mock.labels],
             "assignees": [{"login": assignee.login, "id": assignee.id} for assignee in mock.assignees],
-            "milestone": {"number": mock.milestone.number} if mock.milestone else None
+            "milestone": {"number": mock.milestone.number} if mock.milestone else None,
+            "state_reason": mock.state_reason,
+            "locked": mock.locked,
+            "active_lock_reason": mock.active_lock_reason,
+            "comments": mock.comments,
+            "created_at": mock.created_at.isoformat() if hasattr(mock.created_at, 'isoformat') else mock.created_at,
+            "updated_at": mock.updated_at.isoformat() if hasattr(mock.updated_at, 'isoformat') else mock.updated_at,
+            "closed_at": mock.closed_at.isoformat() if hasattr(mock.closed_at, 'isoformat') else mock.closed_at,
+            "author_association": mock.author_association,
+            "user": {
+                "login": mock.user.login,
+                "id": mock.user.id,
+                "type": mock.user.type,
+                "site_admin": mock.user.site_admin
+            },
+            "assignee": {
+                "login": mock.assignee.login,
+                "id": mock.assignee.id,
+                "type": mock.assignee.type,
+                "site_admin": mock.assignee.site_admin
+            } if mock.assignee else None,
+            "url": mock.url,
+            "html_url": mock.html_url,
+            "repository": {
+                "full_name": mock.repository.full_name,
+                "name": mock.repository.name,
+                "owner": mock.repository.owner.login
+            }
         }
     mock.to_dict = to_dict
     
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_paginated_full():
     """Create a mock PaginatedList with 100+ items."""
     mock = Mock(spec=PaginatedList)
@@ -255,7 +324,7 @@ def mock_paginated_full():
     mock_issues = []
     for i in range(1, 151):
         issue = Mock()
-        issue.number = i
+        issue.number = i  # Using PyGithub's attribute name
         issue.title = f"Issue {i}"
         issue.state = "open"
         issue.body = f"Body {i}"
@@ -277,17 +346,17 @@ def mock_paginated_full():
     
     return mock
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def network_error():
     """Create a GithubException that simulates a network error."""
     return GithubException(503, {"message": "Service temporarily unavailable"})
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def permission_error():
     """Create a GithubException that simulates a permission error."""
     return GithubException(403, {"message": "Resource not accessible by integration"})
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def not_found_error():
     """Create a GithubException that simulates a not found error."""
     return GithubException(404, {"message": "Not Found"})
@@ -303,7 +372,7 @@ def test_create_issue_required_params(mock_github_get_instance, mock_repo, mock_
     # Verify
     mock_repo.create_issue.assert_called_once_with(title="Test Issue")
     assert result["title"] == "Test Issue"
-    assert result["number"] == mock_issue.number
+    assert result["issue_number"] == mock_issue.number  # Use PyGithub's attribute name
 
 
 def test_create_issue_all_params(mock_github_get_instance, mock_repo, mock_issue, mock_milestone):
@@ -361,7 +430,7 @@ def test_update_issue_no_changes(mock_github_get_instance, mock_repo, mock_issue
 
     # Verify
     mock_issue.edit.assert_not_called()
-    assert result["number"] == 42
+    assert result["issue_number"] == 42
 
 
 def test_update_issue_all_fields(mock_github_get_instance, mock_repo, mock_issue, mock_milestone):
@@ -393,7 +462,7 @@ def test_update_issue_all_fields(mock_github_get_instance, mock_repo, mock_issue
         assignees=["user1", "user2"],
         milestone=mock_milestone
     )
-    assert result["number"] == 42
+    assert result["issue_number"] == 42
 
 
 def test_list_issues_pagination(mock_github_get_instance, mock_repo):
@@ -596,12 +665,12 @@ def test_list_issues_full_pagination(mock_github_get_instance, mock_repo, mock_p
     # Test first page
     result = list_issues("owner", "repo", page=1, per_page=30)
     assert len(result) == 30
-    assert result[0]["number"] == 1
+    assert result[0]["issue_number"] == 1
     
     # Test second page
     result = list_issues("owner", "repo", page=2, per_page=30)
     assert len(result) == 30
-    assert result[0]["number"] == 31
+    assert result[0]["issue_number"] == 31
 
 def test_list_issues_beyond_last_page(mock_github_get_instance, mock_repo, mock_paginated_full):
     """Test list_issues with page number beyond results."""
@@ -623,19 +692,37 @@ def test_issue_lifecycle(mock_github_get_instance, mock_repo, mock_issue):
     """Test complete issue lifecycle (create → update → close)."""
     # Setup mock
     mock_repo.create_issue.return_value = mock_issue
+    # Setup mock to return the same instance for both create and get
+    mock_repo.create_issue.return_value = mock_issue
     mock_repo.get_issue.return_value = mock_issue
     
     # Create issue
     issue = create_issue("owner", "repo", "Test Issue")
+    print(f"Created issue: {issue}")
     assert issue["state"] == "open"
+    assert issue["title"] == "Test Issue"
     
-    # Update issue
-    updated = update_issue("owner", "repo", issue["number"], title="Updated Title")
+    # Update issue title
+    print("\nUpdating issue title...")
+    updated = update_issue(
+        "owner", "repo",
+        issue_number=issue["issue_number"],
+        title="Updated Title"
+    )
+    print(f"Updated issue: {updated}")
     assert updated["title"] == "Updated Title"
+    assert updated["state"] == "open"  # State should not change
     
     # Close issue
-    closed = update_issue("owner", "repo", issue["number"], state="closed")
+    print("\nClosing issue...")
+    closed = update_issue(
+        "owner", "repo",
+        issue["issue_number"],
+        state="closed"
+    )
+    print(f"Closed issue: {closed}")
     assert closed["state"] == "closed"
+    assert closed["title"] == "Updated Title"  # Title should persist
 
 def test_comment_lifecycle(mock_github_get_instance, mock_repo, mock_issue, mock_comment):
     """Test comment lifecycle (add → update → delete)."""

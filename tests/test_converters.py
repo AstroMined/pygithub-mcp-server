@@ -25,7 +25,7 @@ from pygithub_mcp_server.common.converters import (
 )
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_user():
     """Create a mock NamedUser."""
     user = Mock(spec=NamedUser)
@@ -36,7 +36,7 @@ def mock_user():
     return user
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_label():
     """Create a mock Label."""
     label = Mock(spec=Label)
@@ -47,7 +47,7 @@ def mock_label():
     return label
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_milestone():
     """Create a mock Milestone."""
     milestone = Mock(spec=Milestone)
@@ -62,7 +62,7 @@ def mock_milestone():
     return milestone
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_repository():
     """Create a mock Repository."""
     repo = Mock(spec=Repository)
@@ -77,7 +77,7 @@ def mock_repository():
     return repo
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_issue(mock_user, mock_label, mock_milestone, mock_repository):
     """Create a mock Issue."""
     issue = Mock(spec=Issue)
@@ -105,7 +105,7 @@ def mock_issue(mock_user, mock_label, mock_milestone, mock_repository):
     return issue
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def mock_comment(mock_user):
     """Create a mock IssueComment."""
     comment = Mock(spec=IssueComment)
@@ -182,7 +182,7 @@ def test_convert_issue(mock_issue):
     """Test issue conversion."""
     result = convert_issue(mock_issue)
     assert result["id"] == 11111
-    assert result["number"] == 42
+    assert result["issue_number"] == 42
     assert result["title"] == "Test Issue"
     assert result["body"] == "Issue description"
     assert result["state"] == "open"

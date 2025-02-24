@@ -31,6 +31,10 @@
   - Consistent property decorator usage
   - Resolved fixture dependencies
   - Improved test maintainability
+  - Aligned attributes with PyGithub:
+    - Using 'number' instead of 'issue_number'
+    - Proper state updates in edit() methods
+    - Consistent attribute naming across mocks
 - Package renamed to pygithub-mcp-server
 - GitHub repository setup at github.com/AstroMined/pygithub-mcp-server
 - MIT license and .gitignore configuration

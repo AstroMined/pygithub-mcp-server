@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rate limit test fixtures now properly mock PyGithub's exception structure
 - Error handling in GitHubClient now properly formats rate limit messages
 - Mock objects now correctly handle rate limit attributes
+- Mock object attribute naming to match PyGithub:
+  - Changed issue_number to number in mock objects
+  - Updated mock object edit() method to properly update state
+  - Fixed attribute access in test assertions
+  - Improved test stability by aligning with PyGithub conventions
 
 ### Changed
 - Improved error handling in utils.py:

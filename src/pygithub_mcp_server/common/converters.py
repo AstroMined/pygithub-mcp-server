@@ -86,7 +86,7 @@ def convert_issue(issue: Issue) -> Dict[str, Any]:
     """
     return {
         "id": issue.id,
-        "number": issue.number,
+        "issue_number": issue.number,
         "title": issue.title,
         "body": issue.body,
         "state": issue.state,
