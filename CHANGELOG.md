@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Real GitHub API integration testing:
+  - Environment-based configuration
+  - Automatic test resource cleanup
+  - Rate limit protection
+  - Integration test documentation
+  - create_issue integration tests
+  - Dedicated test infrastructure in tests/server/
+
 ### Changed
 - Enhanced error handling and message formatting:
   - Added 'permission' word to permission error messages for better clarity

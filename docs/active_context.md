@@ -1,13 +1,20 @@
 # Active Context
 
 ## Current Focus
-Expanding test coverage systematically across the codebase. Current coverage analysis shows several areas needing attention:
-- utils.py (17% coverage)
-- server.py (23% coverage)
-- operations/issues.py (71% coverage)
-- __main__.py (0% coverage)
+Implementing real GitHub API testing while maintaining existing mock-based tests. This dual approach will:
+- Verify actual API behavior
+- Maintain quick feedback from mock tests
+- Improve test reliability
+- Serve as API documentation
 
-A phased approach has been planned to improve coverage while maintaining existing test stability and patterns.
+Current test status:
+- Mock-based tests: 24/25 failing
+- Integration tests: Initial implementation with create_issue
+- Coverage gaps remain in:
+  - utils.py (17% coverage)
+  - server.py (23% coverage)
+  - operations/issues.py (71% coverage)
+  - __main__.py (0% coverage)
 
 ## Recent Changes
 - Enhanced error handling and message formatting:
@@ -97,34 +104,44 @@ A phased approach has been planned to improve coverage while maintaining existin
 
 ## Next Steps
 
-1. Phase 1: Core Utilities (utils.py)
-   - Create test_utils.py with utility categories
-   - Implement parameter validation tests
-   - Add error handling test coverage
-   - Test type conversion utilities
-   - Cover resource management functions
-   - Target: Increase coverage from 17% to 90%+
+1. Phase 1: Integration Test Infrastructure
+   - Document test token requirements ✓
+   - Set up test repository configuration ✓
+   - Implement rate limit protection ✓
+   - Create resource cleanup mechanisms ✓
+   - Add integration test documentation ✓
 
-2. Phase 2: Issue Operations (issues.py)
-   - Extend test_issues.py with error scenarios
-   - Implement rate limit test fixtures
-   - Add resource lifecycle tests
-   - Cover label management functions
-   - Test comment validation
-   - Target: Increase coverage from 71% to 95%+
+2. Phase 2: Integration Test Implementation
+   - create_issue integration tests ✓
+   - list_issues integration tests
+   - get_issue integration tests
+   - update_issue integration tests
+   - comment operation tests
+   - label operation tests
 
-3. Phase 3: Server Core (server.py)
-   - Create test_server.py
-   - Test server lifecycle events
-   - Cover request/response handling
-   - Verify resource management
-   - Test tool registration
-   - Target: Increase coverage from 23% to 85%+
-
-4. Phase 4: Entry Point (__main__.py)
-   - Test initialization flow
-   - Cover argument handling
-   - Target: Increase coverage from 0% to 100%
+3. Phase 3: Coverage Improvements
+   - Core Utilities (utils.py)
+     * Parameter validation tests
+     * Error handling coverage
+     * Type conversion utilities
+     * Target: 90%+ coverage
+   
+   - Issue Operations (issues.py)
+     * Error scenarios
+     * Resource lifecycle
+     * Label management
+     * Target: 95%+ coverage
+   
+   - Server Core (server.py)
+     * Lifecycle events
+     * Request/response handling
+     * Tool registration
+     * Target: 85%+ coverage
+   
+   - Entry Point (__main__.py)
+     * Initialization flow
+     * Argument handling
+     * Target: 100% coverage
 
 2. Testing Strategy
    - Test each tool with MCP Inspector

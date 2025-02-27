@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pygithub-mcp-server"
-version = "0.1.0"
+version = "0.3.0"
 description = "GitHub MCP Server using PyGithub"
 requires-python = ">=3.10"
 dependencies = [
@@ -32,6 +32,9 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+markers = [
+    "integration: marks tests that use real GitHub API"
+]
 
 [tool.coverage.run]
 branch = true
