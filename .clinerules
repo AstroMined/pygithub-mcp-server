@@ -176,3 +176,36 @@
 - Both file and console logging enabled
 - Log file is created in the project root directory
 - Log format includes timestamps and module names for tracing
+
+## Git MCP Server Usage
+- NEVER use `"."` as a file parameter in git_add operations:
+  ```javascript
+  // DANGEROUS - can track .git directory and cause repository corruption
+  {
+    "repo_path": "/path/to/repo",
+    "files": ["."]
+  }
+  ```
+  
+- Always specify individual files or directories explicitly:
+  ```javascript
+  // SAFE - explicitly lists only the files/directories you want to track
+  {
+    "repo_path": "/path/to/repo",
+    "files": [
+      "src/",
+      "tests/",
+      "docs/",
+      "pyproject.toml",
+      "README.md"
+    ]
+  }
+  ```
+
+- If repository tracking becomes corrupted (showing .git files as modified):
+  1. Create a backup of important files
+  2. Reset the repository: `git fetch origin && git reset --hard origin/main`
+  3. Restore VS Code Git integration: `git config branch.main.vscode-merge-base origin/main`
+  4. Selectively add back your changes with specific paths
+
+- Periodically verify ignored paths with `git check-ignore -v <path>`
