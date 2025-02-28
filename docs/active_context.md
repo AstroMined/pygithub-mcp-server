@@ -1,7 +1,15 @@
 # Active Context
 
 ## Current Focus
-Transitioning to real GitHub API testing as our primary testing strategy, with minimal mocking only where absolutely necessary. This approach will:
+Enhancing schema validation to fix test failures and ensure robust type checking. We're addressing four specific test failures:
+1. TestCreateIssueParams::test_invalid_field_types - Ensuring proper validation of field types
+2. TestListIssuesParams::test_valid_data - Fixing datetime comparison issues
+3. TestGetIssueParams::test_invalid_issue_number_type - Ensuring proper validation of numeric types
+4. TestToolResponse::test_empty_content_list - Ensuring proper validation of empty lists
+
+These fixes are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
+
+We're also continuing our transition to real GitHub API testing as our primary testing strategy, with minimal mocking only where absolutely necessary. This approach will:
 - Verify actual API behavior with high confidence
 - Eliminate complex mock maintenance
 - Provide real error responses and rate limits
@@ -9,6 +17,7 @@ Transitioning to real GitHub API testing as our primary testing strategy, with m
 - Reduce time spent debugging mock behavior
 
 Current test status:
+- Schema validation tests: 4 failures being addressed
 - Mock-based tests: 24/25 failing due to brittle mock implementations
 - Integration tests: Initial implementation with create_issue
 - Coverage gaps remain in:
@@ -20,6 +29,13 @@ Current test status:
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Fixed schema validation issues:
+  - Added strict=True to field definitions in CreateIssueParams and GetIssueParams
+  - Fixed validation for empty content lists in ToolResponse
+  - Improved type checking for numeric and string fields
+  - Ensured consistent validation across all schema models
+  - Fixed test assertions for datetime comparisons
+
 - Enhanced schema validation (ADR 004):
   - Added field validators to prevent empty strings in critical fields
   - Implemented validation for owner, repo, path, title, body, and label fields
@@ -131,7 +147,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Improved error handling for PyGithub assertions
 
 ## Next Steps
-1. Schema Validation Expansion
+1. Complete Schema Validation Fixes
+   - Fix remaining test failures in schema validation
+   - Update test_issues.py to properly compare datetime objects
+   - Add strict=True to all fields that should reject type coercion
+   - Ensure all validators are working correctly
+   - Add additional tests for edge cases
+
+2. Schema Validation Expansion
    - Review all schema models for validation opportunities
    - Add field validators for critical string fields
    - Implement enum validation for state, sort, and direction fields
@@ -139,32 +162,31 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Ensure consistent validation patterns across all schemas
    - Update tests to cover all validation rules
 
-
-1. Phase 1: Infrastructure Refinement
+3. Phase 1: Infrastructure Refinement
    - Review and update environment configuration
    - Ensure test repository is properly configured
    - Implement robust token management
    - Develop rate limit handling with exponential backoff
 
-2. Phase 2: Core Implementation
+4. Phase 2: Core Implementation
    - Replace issue lifecycle tests with real API tests
    - Implement thorough cleanup mechanisms
    - Document patterns for real API testing
    - Develop helper functions for common test operations
 
-3. Phase 3: Comprehensive Transition
+5. Phase 3: Comprehensive Transition
    - Systematically replace mock-based tests with real API tests
    - Identify and document any edge cases that still require mocking
    - Update documentation to reflect new testing approach
    - Train team members on new testing patterns
 
-4. Phase 4: Optimization
+6. Phase 4: Optimization
    - Implement caching strategies where appropriate
    - Optimize test execution time
    - Refine CI/CD pipeline for efficient test execution
    - Regular maintenance of test infrastructure
 
-3. Phase 3: Coverage Improvements
+7. Phase 3: Coverage Improvements
    - Core Utilities (utils.py)
      * Parameter validation tests
      * Error handling coverage
@@ -188,73 +210,76 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
      * Argument handling
      * Target: 100% coverage
 
-2. Testing Strategy
+8. Testing Strategy
    - Test each tool with MCP Inspector
    - Verify with real GitHub repositories
    - Plan unit tests for operations
    - Plan integration tests with GitHub API
 
-3. PyPI Publication
+9. PyPI Publication
    - Verify package name availability
    - Prepare for PyPI release
    - Document installation process
    - Update badges in README.md
 
-2. Schema Alignment
+10. Schema Alignment
    - Update Pydantic models to match PyGithub objects
    - Document field mappings and relationships
    - Implement conversion utilities
    - Add validation for PyGithub-specific constraints
 
-2. Client Implementation
+11. Client Implementation
    - Create singleton GitHubClient class
    - Implement PyGithub instance management
    - Add object conversion utilities
    - Handle pagination and rate limiting
 
-3. Operation Refactoring
+12. Operation Refactoring
    - Convert list_issues as proof of concept
    - Document new patterns and approaches
    - Plan additional operation implementations
    - Maintain FastMCP interface stability
 
-4. Testing Implementation
+13. Testing Implementation
    - Set up pytest infrastructure
    - Create test fixtures and mocks
    - Implement unit tests for operations
    - Add integration tests for API calls
 
 ## Active Decisions
-1. Schema Organization
+1. Schema Validation Approach
+   - Use strict=True for fields that should reject type coercion
+   - Add field-level validators for empty strings and other constraints
+   - Ensure consistent validation patterns across all schemas
+   - Balance between strict validation and usability
+
+2. Schema Organization
    - Domain-specific schema files for better organization
    - Base schemas for common models (RepositoryRef, FileContent)
    - Backward compatibility through re-exports
    - Schema-first development approach for new features
    - Comprehensive validation with clear error messages
 
-
-### Technical Decisions
-1. Testing Strategy
+3. Testing Strategy
    - Prioritize real API testing over mock-based testing
    - Use mocks only for edge cases that cannot be reliably reproduced
    - Focus on testing behavior and outcomes rather than implementation details
    - Accept the trade-offs of real API testing for higher confidence
    - Implement thorough cleanup mechanisms to prevent test pollution
 
-
-1. PyGithub Integration
+4. PyGithub Integration
    - Using singleton pattern for client management
    - Maintaining FastMCP interface stability
    - Aligning schemas with PyGithub objects
    - Leveraging PyGithub's built-in features
 
-2. Schema Evolution
+5. Schema Evolution
    - Moving from REST API schema to object model
    - Adding PyGithub-specific fields
    - Implementing proper type validation
    - Maintaining backward compatibility
 
-3. Implementation Strategy
+6. Implementation Strategy
    - Starting with list_issues proof of concept
    - Phased approach to feature implementation
    - Focus on stability and reliability
@@ -267,37 +292,43 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Clear error messages for validation failures
    - Consistent validation patterns across schemas
    - Balance between validation and flexibility
+   - Strict type checking for fields that should reject coercion
 
-
-### Current Challenges
-1. Testing Transition
+2. Testing Transition
    - Systematically replacing mock-based tests with real API tests
    - Identifying edge cases that still require mocking
    - Implementing robust cleanup mechanisms
    - Managing rate limits in test environments
    - Handling network dependencies in CI/CD pipelines
 
-
-1. Schema Migration
+3. Schema Migration
    - Mapping between PyGithub objects and our schemas
    - Handling new PyGithub-specific fields
    - Maintaining type safety
    - Ensuring backward compatibility
 
-2. Testing Strategy
+4. Testing Strategy
    - Mocking PyGithub objects
    - Testing pagination
    - Error condition coverage
    - Integration test approach
 
-3. Feature Expansion
+5. Feature Expansion
    - Identifying useful PyGithub features
    - Planning feature implementation order
    - Maintaining consistent patterns
    - Documentation coverage
 
-### Implementation Lessons
-1. Schema Validation
+## Implementation Lessons
+1. Pydantic v2 Type Coercion
+   - Pydantic v2 has different type coercion behavior than v1
+   - It attempts to convert types automatically (e.g., int to str)
+   - Use strict=True to prevent automatic type coercion
+   - Field-level strictness is more precise than model-level
+   - Test both valid and invalid types to ensure proper validation
+   - Be explicit about expected behavior in tests
+
+2. Schema Validation
    - Empty strings can cause runtime errors in PyGithub
    - Pydantic's default validation doesn't check for empty strings
    - Field validators provide clear error messages
@@ -306,7 +337,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Whitespace stripping catches spaces-only inputs
    - Balance validation with backward compatibility
 
-1. Testing Strategy
+3. Testing Strategy
    - Real API testing provides higher confidence than mock-based testing
    - Mocks often fail to accurately represent API behavior
    - Time spent debugging mock behavior could be better spent on real tests
@@ -314,8 +345,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Implement thorough cleanup to prevent test pollution
    - Use test tagging to allow skipping integration tests when appropriate
 
-
-1. Error Message Formatting
+4. Error Message Formatting
    - Include descriptive words in error messages (e.g., 'permission' in permission errors)
    - Add technical details like status codes for debugging
    - Format messages consistently across error types
@@ -323,7 +353,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Test error message content explicitly
    - Ensure error messages are actionable
 
-2. Rate Limit Error Handling
+5. Rate Limit Error Handling
    - Properly mock PyGithub's RateLimitExceededException structure
    - Include rate details (remaining/limit) in error messages
    - Handle missing rate attributes defensively
@@ -331,8 +361,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Test both presence and absence of rate information
    - Consider user experience in error message formatting
 
-
-1. Test Coverage Strategy
+6. Test Coverage Strategy
    - Focus on core utilities first to establish patterns
    - Build test coverage incrementally and systematically
    - Maintain existing test stability while expanding coverage
@@ -340,19 +369,19 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Follow established mocking patterns from mocking_patterns.md
    - Balance between test coverage and maintainability
 
-2. Production Code Purity
+7. Production Code Purity
    - Avoid test-specific code paths in production code
    - Use proper mocking instead of test mode flags
    - Keep production code focused on real use cases
    - Maintain clear separation between test and production code
 
-2. Operation Optimization
+8. Operation Optimization
    - Check for no-op cases early
    - Avoid unnecessary API calls
    - Return early when no changes needed
    - Balance between fresh data and efficiency
 
-3. Mock Object Design
+9. Mock Object Design
   - Initialize all required attributes in __init__
   - Implement _completeIfNotSet for PyGithub compatibility
   - Use property decorators consistently
@@ -364,21 +393,21 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
   - Use autouse fixtures for configuration
   - Separate object creation from configuration
 
-1. Singleton Pattern Testing
+10. Singleton Pattern Testing
    - Use dedicated flag for instantiation control
    - Don't rely solely on instance state
    - Reset all singleton state between tests
    - Consider test fixture impact on patterns
    - Document singleton testing approach
 
-2. Error Handling Patterns
+11. Error Handling Patterns
    - Handle optional datetime fields defensively
    - Use clear placeholder text for missing values
    - Consider edge cases in error formatting
    - Test both presence and absence of optional data
    - Document expected behavior for missing fields
 
-2. Testing Strategy
+12. Testing Strategy
    - Comprehensive test suite is essential
    - Mocking GitHub objects requires careful attention
    - Test fixtures improve test maintainability
@@ -392,7 +421,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Create consistent mock instances for tracking calls
    - Balance realistic behavior with test isolation
 
-1. Error Handling
+13. Error Handling
    - Standardized error handling improves maintainability
    - Clear error messages help with debugging
    - Resource type detection provides better context
@@ -400,14 +429,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Consistent patterns across operations
    - Security implications must be considered
 
-2. Documentation
+14. Documentation
    - Comprehensive guides improve usability
    - Security considerations must be documented
    - Examples help clarify usage patterns
    - Tool reference must be detailed
    - Error handling deserves special attention
 
-3. Project Structure
+15. Project Structure
    - Singleton pattern benefits for client management
    - Clear separation of concerns in operations
    - Importance of schema documentation
@@ -416,7 +445,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Build isolation works fine without flags
    - Package naming important for PyPI publication
 
-2. PyGithub Integration
+16. PyGithub Integration
    - Follow library examples for parameter patterns
    - Handle assertions properly
    - Use simpler parameter passing when possible
@@ -426,20 +455,19 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Convert primitive types to PyGithub objects
    - Handle object conversion errors explicitly
 
-2. Environment Setup
+17. Environment Setup
    - PyGithub dependency management
    - Token-based authentication remains unchanged
    - Testing infrastructure needs
    - Documentation importance
 
-3. Server Operation
+18. Server Operation
    - FastMCP interface stability
    - Error handling improvements
    - Rate limiting benefits
    - Object model advantages
 
 ## Progress Tracking
-
 
 ### Completed
 - Renamed package to pygithub-mcp-server
@@ -455,6 +483,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Added PyGithub patterns to documentation
 
 ### In Progress
+- Schema validation fixes for test failures
 - Schema validation expansion
 - Testing strategy development
 - Documentation updates
@@ -462,6 +491,8 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Operation refactoring planning
 
 ### Recent Fixes
+- Added strict=True to field definitions in CreateIssueParams and GetIssueParams
+- Fixed validation for empty content lists in ToolResponse
 - Fixed issue attribute name mismatch:
   - Changed issue_number access from issue.issue_number to issue.number in converters.py
   - Updated test_convert_issue to match our schema's issue_number field
@@ -472,6 +503,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
     - Updated test assertions to use correct attribute names
 
 ### Upcoming
+- Fix remaining test failures in schema validation
 - Expand schema validation to all models
 - Refactor remaining operations to use PyGithub
 - Expand test suite with PyGithub mocks

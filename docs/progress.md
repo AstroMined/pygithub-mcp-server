@@ -1,6 +1,14 @@
 # Project Progress
 
 ## What Works
+- Schema validation improvements:
+  - Added strict=True to field definitions in CreateIssueParams and GetIssueParams
+  - Fixed validation for empty content lists in ToolResponse
+  - Improved type checking for numeric and string fields
+  - Ensured consistent validation across all schema models
+  - Fixed test assertions for datetime comparisons
+  - Addressed specific test failures in schema validation
+
 - Schema reorganization and validation:
   - Created dedicated schemas directory with domain-specific files
   - Separated schemas by domain: base, repositories, issues, pull_requests, search, responses
@@ -91,6 +99,8 @@
 ## What's Left to Build
 ### Schema Validation Expansion
 - [ ] Schema Validation Enhancements
+  - [x] Fix test failures in schema validation
+  - [x] Add strict=True to fields that should reject type coercion
   - [ ] Review all schema models for validation opportunities
   - [ ] Add field validators for remaining critical string fields
   - [ ] Implement enum validation for state, sort, and direction fields
@@ -186,6 +196,8 @@ Core implementation completed and operational with synchronous operations. Packa
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
+We've addressed specific test failures in schema validation by adding strict=True to field definitions in CreateIssueParams and GetIssueParams, and fixing validation for empty content lists in ToolResponse. These changes ensure proper type checking and prevent automatic type coercion, which was causing test failures.
+
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including 24/25 failing tests, complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
 
 Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
@@ -193,15 +205,16 @@ Test suite continues to improve with enhanced rate limit error handling and mock
 Focus now on implementing the real API testing strategy and preparing for PyPI publication.
 
 ### Priorities
-1. Expand schema validation to all models
-2. Implement real API testing strategy
-3. Prepare for PyPI publication
-4. Improve remaining module coverage
-5. Expand documentation with examples
-6. Add performance optimizations
-7. Integrate advanced features
-8. Improve error handling
-9. Add monitoring and logging
+1. Complete schema validation fixes
+2. Expand schema validation to all models
+3. Implement real API testing strategy
+4. Prepare for PyPI publication
+5. Improve remaining module coverage
+6. Expand documentation with examples
+7. Add performance optimizations
+8. Integrate advanced features
+9. Improve error handling
+10. Add monitoring and logging
 
 ## Known Issues
 1. Mock-based tests are brittle and difficult to maintain
@@ -211,14 +224,15 @@ Focus now on implementing the real API testing strategy and preparing for PyPI p
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Expand schema validation to all models
-2. Implement real API testing strategy
-3. Replace issue lifecycle tests with real API tests
-4. Implement thorough cleanup mechanisms
-5. Document patterns for real API testing
-6. Continue test coverage improvements
-7. Add performance optimizations
-8. Enhance documentation
+1. Complete schema validation fixes
+2. Expand schema validation to all models
+3. Implement real API testing strategy
+4. Replace issue lifecycle tests with real API tests
+5. Implement thorough cleanup mechanisms
+6. Document patterns for real API testing
+7. Continue test coverage improvements
+8. Add performance optimizations
+9. Enhance documentation
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server
@@ -230,6 +244,9 @@ Focus now on implementing the real API testing strategy and preparing for PyPI p
 - UV package manager
 
 ## Notes
+- Pydantic v2 has different type coercion behavior than v1
+- Use strict=True to prevent automatic type coercion
+- Field-level strictness is more precise than model-level
 - Package renamed for PyPI compatibility
 - Build isolation works fine without flags
 - Following test-driven development approach

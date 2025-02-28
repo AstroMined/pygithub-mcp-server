@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-02-28
+
+### Fixed
+- Schema validation issues:
+  - Added strict=True to field definitions in CreateIssueParams and GetIssueParams to prevent automatic type coercion
+  - Fixed validation for empty content lists in ToolResponse
+  - Improved type checking for numeric and string fields
+  - Fixed test assertions for datetime comparisons
+  - Addressed specific test failures in schema validation tests
+  - Ensured consistent validation across all schema models
+
+### Added
+- New implementation lessons in documentation:
+  - Documented Pydantic v2 type coercion behavior differences
+  - Added guidance on using strict=True for field-level validation
+  - Updated schema validation best practices
+
 ## [0.3.0] - 2025-02-27
 
 ### Added

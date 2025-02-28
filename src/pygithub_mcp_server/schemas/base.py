@@ -4,12 +4,14 @@ This module defines common Pydantic models that are used by multiple
 domain-specific schema modules.
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class RepositoryRef(BaseModel):
     """Reference to a GitHub repository."""
 
+    model_config = ConfigDict(strict=True)
+    
     owner: str = Field(..., description="Repository owner (username or organization)")
     repo: str = Field(..., description="Repository name")
 
@@ -33,6 +35,8 @@ class RepositoryRef(BaseModel):
 class FileContent(BaseModel):
     """Content of a file to create or update."""
 
+    model_config = ConfigDict(strict=True)
+    
     path: str = Field(..., description="Path where to create/update the file")
     content: str = Field(..., description="Content of the file")
 
