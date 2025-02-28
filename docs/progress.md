@@ -1,6 +1,17 @@
 # Project Progress
 
 ## What Works
+- Schema reorganization and validation:
+  - Created dedicated schemas directory with domain-specific files
+  - Separated schemas by domain: base, repositories, issues, pull_requests, search, responses
+  - Added field validators to prevent empty strings in critical fields
+  - Implemented validation for owner, repo, path, title, body, and label fields
+  - Created comprehensive test suite for schema validation
+  - Added ADRs for schema reorganization (003) and validation (004)
+  - Improved maintainability and discoverability of schema models
+  - Enhanced error messages for validation failures
+  - Aligned schema validation with PyGithub expectations
+
 - Error handling improvements:
   - Enhanced error message formatting:
     - Added 'permission' word to permission error messages
@@ -78,6 +89,15 @@
 - Fixed GitHubClient singleton implementation and tests
 
 ## What's Left to Build
+### Schema Validation Expansion
+- [ ] Schema Validation Enhancements
+  - [ ] Review all schema models for validation opportunities
+  - [ ] Add field validators for remaining critical string fields
+  - [ ] Implement enum validation for state, sort, and direction fields
+  - [ ] Add range validation for numeric fields
+  - [ ] Ensure consistent validation patterns across all schemas
+  - [ ] Update tests to cover all validation rules
+
 
 ### Testing Strategy Transition
 - [ ] Real API Testing Implementation
@@ -164,6 +184,8 @@
 ## Current Status
 Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests.
 
+Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
+
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including 24/25 failing tests, complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
 
 Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
@@ -171,14 +193,15 @@ Test suite continues to improve with enhanced rate limit error handling and mock
 Focus now on implementing the real API testing strategy and preparing for PyPI publication.
 
 ### Priorities
-1. Implement real API testing strategy
-2. Prepare for PyPI publication
-3. Improve remaining module coverage
-4. Expand documentation with examples
-5. Add performance optimizations
-6. Integrate advanced features
-7. Improve error handling
-8. Add monitoring and logging
+1. Expand schema validation to all models
+2. Implement real API testing strategy
+3. Prepare for PyPI publication
+4. Improve remaining module coverage
+5. Expand documentation with examples
+6. Add performance optimizations
+7. Integrate advanced features
+8. Improve error handling
+9. Add monitoring and logging
 
 ## Known Issues
 1. Mock-based tests are brittle and difficult to maintain
@@ -188,13 +211,14 @@ Focus now on implementing the real API testing strategy and preparing for PyPI p
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Implement real API testing strategy
-2. Replace issue lifecycle tests with real API tests
-3. Implement thorough cleanup mechanisms
-4. Document patterns for real API testing
-5. Continue test coverage improvements
-6. Add performance optimizations
-7. Enhance documentation
+1. Expand schema validation to all models
+2. Implement real API testing strategy
+3. Replace issue lifecycle tests with real API tests
+4. Implement thorough cleanup mechanisms
+5. Document patterns for real API testing
+6. Continue test coverage improvements
+7. Add performance optimizations
+8. Enhance documentation
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server

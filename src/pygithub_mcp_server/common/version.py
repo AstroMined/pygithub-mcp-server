@@ -8,7 +8,7 @@ from typing import Final, Tuple
 
 # Version components
 VERSION_MAJOR: Final[int] = 0
-VERSION_MINOR: Final[int] = 2
+VERSION_MINOR: Final[int] = 3
 VERSION_PATCH: Final[int] = 0
 
 # Full version string

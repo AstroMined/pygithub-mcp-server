@@ -36,8 +36,37 @@
 
 ## Testing
 
+### Testing Strategy
+- Prioritize real API testing over mock-based testing
+- Use mocks only for edge cases that cannot be reliably reproduced with the real API
+- Focus on testing behavior and outcomes rather than implementation details
+- Implement thorough cleanup mechanisms to prevent test pollution
+- Use test tagging to allow skipping integration tests when appropriate
+- Implement robust retry mechanisms for network issues
+- Consider caching strategies for frequently accessed data
+
+### Real API Testing
+- Set up test environment variables in .env file:
+  ```
+  GITHUB_TEST_TOKEN=your-test-token
+  GITHUB_TEST_OWNER=test-owner
+  GITHUB_TEST_REPO=test-repo
+  ```
+- Run integration tests with pytest:
+  ```bash
+  pytest tests/integration/ -v
+  ```
+- Skip integration tests when needed:
+  ```bash
+  pytest -k "not integration"
+  ```
+- Always implement cleanup to prevent test pollution
+- Use descriptive test names that reflect the behavior being tested
+- Test both success and error scenarios
+- Implement exponential backoff for rate limit handling
+
 ### MCP Tool Testing
-- Test MCP tools using MCP Inspector during development:
+- Human-driven user acceptance testing to test MCP tools using MCP Inspector during development:
   ```bash
   source .venv/bin/activate  # Must activate venv first
   npx @modelcontextprotocol/inspector -e GITHUB_PERSONAL_ACCESS_TOKEN=your-token-here uv run pygithub-mcp-server
@@ -148,7 +177,7 @@
    - Document parameter requirements in docstrings
    - Test with various parameter combinations
 
-7. Mocking Imported Modules:
+7. Mocking Guidelines:
    ```python
    # BAD - patching global name won't affect imported references
    monkeypatch.setattr('github.Auth', mock_auth)  # Won't work
@@ -158,11 +187,15 @@
    ```
 
    Key practices:
+   - Only mock when absolutely necessary (e.g., rate limit errors, rare error conditions)
+   - Keep mocks as simple as possible
+   - Document why mocking is necessary for each case
    - Identify where the module is actually imported and used
    - Patch at the point of use, not the global module
    - Preserve real types when needed for isinstance() checks
    - Use Mock(spec=...) to ensure proper interface
    - Consider creating a dummy module if patching multiple attributes
+   - Regularly review mocked tests to see if they can be replaced with real API tests
 
 ## Troubleshooting
 - If MCP server fails to start, verify venv Python path in settings

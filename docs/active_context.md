@@ -20,6 +20,23 @@ Current test status:
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Enhanced schema validation (ADR 004):
+  - Added field validators to prevent empty strings in critical fields
+  - Implemented validation for owner, repo, path, title, body, and label fields
+  - Improved error messages for validation failures
+  - Aligned schema validation with PyGithub expectations
+  - Added comprehensive tests for validation rules
+  - Created ADR 004 to document validation approach
+
+- Reorganized schema models (ADR 003):
+  - Created dedicated schemas directory with domain-specific files
+  - Separated schemas by domain: base, repositories, issues, pull_requests, search, responses
+  - Implemented backward compatibility through re-exports
+  - Added deprecation warnings to original types.py module
+  - Created comprehensive test suite for schema validation
+  - Improved maintainability and discoverability of schema models
+  - Established foundation for schema-first development approach
+
 - Updated ADR 002 (Real API Testing):
   - Shifted focus to prioritize real API testing over mock-based testing
   - Documented challenges with maintaining complex mocks
@@ -114,6 +131,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Improved error handling for PyGithub assertions
 
 ## Next Steps
+1. Schema Validation Expansion
+   - Review all schema models for validation opportunities
+   - Add field validators for critical string fields
+   - Implement enum validation for state, sort, and direction fields
+   - Add range validation for numeric fields
+   - Ensure consistent validation patterns across all schemas
+   - Update tests to cover all validation rules
+
 
 1. Phase 1: Infrastructure Refinement
    - Review and update environment configuration
@@ -200,6 +225,13 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Add integration tests for API calls
 
 ## Active Decisions
+1. Schema Organization
+   - Domain-specific schema files for better organization
+   - Base schemas for common models (RepositoryRef, FileContent)
+   - Backward compatibility through re-exports
+   - Schema-first development approach for new features
+   - Comprehensive validation with clear error messages
+
 
 ### Technical Decisions
 1. Testing Strategy
@@ -229,6 +261,13 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Comprehensive documentation updates
 
 ## Current Considerations
+1. Schema Validation Strategy
+   - Field validators for critical string fields
+   - Whitespace stripping for string validation
+   - Clear error messages for validation failures
+   - Consistent validation patterns across schemas
+   - Balance between validation and flexibility
+
 
 ### Current Challenges
 1. Testing Transition
@@ -258,6 +297,15 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Documentation coverage
 
 ### Implementation Lessons
+1. Schema Validation
+   - Empty strings can cause runtime errors in PyGithub
+   - Pydantic's default validation doesn't check for empty strings
+   - Field validators provide clear error messages
+   - Validation at schema level prevents issues at runtime
+   - Consistent validation patterns improve maintainability
+   - Whitespace stripping catches spaces-only inputs
+   - Balance validation with backward compatibility
+
 1. Testing Strategy
    - Real API testing provides higher confidence than mock-based testing
    - Mocks often fail to accurately represent API behavior
@@ -392,6 +440,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 
 ## Progress Tracking
 
+
 ### Completed
 - Renamed package to pygithub-mcp-server
 - Created and configured GitHub repository
@@ -406,6 +455,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Added PyGithub patterns to documentation
 
 ### In Progress
+- Schema validation expansion
 - Testing strategy development
 - Documentation updates
 - Schema migration for remaining modules
@@ -422,6 +472,7 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
     - Updated test assertions to use correct attribute names
 
 ### Upcoming
+- Expand schema validation to all models
 - Refactor remaining operations to use PyGithub
 - Expand test suite with PyGithub mocks
 - Add integration tests

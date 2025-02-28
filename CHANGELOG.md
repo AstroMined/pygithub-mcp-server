@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-02-27
+
+### Added
+- Schema reorganization (ADR 003):
+  - Created dedicated schemas directory with domain-specific files
+  - Separated schemas by domain: base, repositories, issues, pull_requests, search, responses
+  - Implemented backward compatibility through re-exports
+  - Added deprecation warnings to original types.py module
+  - Established foundation for schema-first development approach
+
+- Enhanced schema validation (ADR 004):
+  - Added field validators to prevent empty strings in critical fields
+  - Implemented validation for owner, repo, path, title, body, and label fields
+  - Improved error messages for validation failures
+  - Aligned schema validation with PyGithub expectations
+
+- Comprehensive schema test suite:
+  - Created tests for base schemas (RepositoryRef, FileContent)
+  - Added tests for issue-related schemas
+  - Implemented tests for response schemas
+  - Ensured tests cover both valid and invalid inputs
+
 ## [Unreleased]
 ### Added
 - Updated ADR 002 (Real API Testing):

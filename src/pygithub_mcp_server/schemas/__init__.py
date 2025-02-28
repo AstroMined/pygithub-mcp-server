@@ -1,28 +1,12 @@
-"""Type definitions and schema models for GitHub MCP Server.
-
-DEPRECATED: This module is deprecated. Import schemas from pygithub_mcp_server.schemas instead.
+"""Schema models for GitHub MCP Server.
 
 This module re-exports all schema models from their domain-specific modules
 for backward compatibility.
 """
 
-import warnings
-
-# Show deprecation warning
-warnings.warn(
-    "The pygithub_mcp_server.common.types module is deprecated. "
-    "Import schemas from pygithub_mcp_server.schemas instead.",
-    DeprecationWarning,
-    stacklevel=2
-)
-
-# Re-export all schemas from the new location
-from pygithub_mcp_server.schemas import (
-    # Base
-    RepositoryRef,
-    FileContent,
-    
-    # Repositories
+# Re-export all schemas for backward compatibility
+from .base import RepositoryRef, FileContent
+from .repositories import (
     CreateOrUpdateFileParams,
     PushFilesParams,
     SearchRepositoriesParams,
@@ -30,9 +14,8 @@ from pygithub_mcp_server.schemas import (
     GetFileContentsParams,
     ForkRepositoryParams,
     CreateBranchParams,
-    ListCommitsParams,
-    
-    # Issues
+)
+from .issues import (
     CreateIssueParams,
     UpdateIssueParams,
     GetIssueParams,
@@ -43,22 +26,25 @@ from pygithub_mcp_server.schemas import (
     DeleteIssueCommentParams,
     AddIssueLabelsParams,
     RemoveIssueLabelParams,
-    
-    # Pull Requests
+)
+from .pull_requests import (
     CreatePullRequestParams,
-    
-    # Search
+)
+from .search import (
     SearchParams,
     SearchCodeParams,
     SearchIssuesParams,
     SearchUsersParams,
-    
-    # Responses
+)
+from .responses import (
     ToolResponse,
     TextContent,
     ErrorContent,
     ResponseContent,
 )
+
+# For backward compatibility, also import ListCommitsParams
+from .repositories import ListCommitsParams
 
 __all__ = [
     # Base

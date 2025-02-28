@@ -10,7 +10,7 @@ import sys
 import traceback
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
-from pygithub_mcp_server.common.types import (
+from pygithub_mcp_server.schemas.issues import (
     ListIssuesParams,
     CreateIssueParams,
     GetIssueParams,
