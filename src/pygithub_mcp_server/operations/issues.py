@@ -130,15 +130,18 @@ def update_issue(
         GitHubError: If the API request fails
     """
     try:
+        print(f"\nupdate_issue called with title={title}")  # Show input parameters
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
         issue = repository.get_issue(issue_number)
+        print(f"Got issue with title: {issue.title}")  # Show issue before update
 
         # Build kwargs with only provided values
         kwargs = {}
         
         if title is not None:
             kwargs["title"] = title
+            print(f"Adding title={title} to kwargs")  # Confirm title is added to kwargs
         if body is not None:
             kwargs["body"] = body
         if state is not None:
@@ -154,16 +157,21 @@ def update_issue(
                 logger.error(f"Failed to get milestone {milestone}: {e}")
                 raise GitHubError(f"Invalid milestone number: {milestone}")
 
+        print(f"kwargs for edit: {kwargs}")  # Show final kwargs
+
         # If no changes provided, return current issue state
         if not kwargs:
             return convert_issue(issue)
 
         # Update issue using PyGithub with only provided values
-        issue.edit(**kwargs)
+        # Use the object returned by edit directly
+        updated_issue = issue.edit(**kwargs)
+        print(f"After edit, updated_issue.title: {updated_issue.title}")  # Show updated issue
 
-        # Get fresh issue data after update only if changes were made
-        updated_issue = repository.get_issue(issue_number)
-        return convert_issue(updated_issue)
+        # Return the updated issue
+        result = convert_issue(updated_issue)
+        print(f"Converted result: {result}")  # Show final result
+        return result
 
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)

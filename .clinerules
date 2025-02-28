@@ -11,10 +11,11 @@
 - Build with `uv build` (build isolation works fine)
 - Always specify requires-python in pyproject.toml
 - Keep dependencies in virtual environment for isolation
-- Always activate virtual environment before running tools:
+- Activate virtual environment before running tools if not already activated:
   ```bash
   source .venv/bin/activate
   ```
+- No need to source the venv repeatedly if you're already in it - only source it once per session
 
 ## MCP Configuration
 - Use direct venv Python interpreter in MCP settings:

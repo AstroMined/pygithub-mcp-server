@@ -79,6 +79,18 @@
 
 ## What's Left to Build
 
+### Testing Strategy Transition
+- [ ] Real API Testing Implementation
+  - [ ] Infrastructure refinement
+  - [ ] Replace issue lifecycle tests with real API tests
+  - [ ] Implement thorough cleanup mechanisms
+  - [ ] Document patterns for real API testing
+  - [ ] Develop helper functions for common test operations
+  - [ ] Systematically replace mock-based tests
+  - [ ] Identify edge cases that still require mocking
+  - [ ] Implement caching strategies where appropriate
+  - [ ] Optimize test execution time
+
 ### PyPI Publication
 - [ ] Package Publication
   - [ ] Verify package name availability
@@ -104,9 +116,10 @@
   - [ ] Improve remaining module coverage
 
 - [ ] Integration Tests
-  - [ ] API interaction tests
-  - [ ] Rate limit handling
-  - [ ] Error recovery
+  - [ ] Replace issue lifecycle tests with real API tests
+  - [ ] Implement thorough cleanup mechanisms
+  - [ ] Rate limit handling with exponential backoff
+  - [ ] Error recovery strategies
   - [ ] End-to-end workflows
 
 ### Documentation
@@ -149,31 +162,39 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion. Focus now on improving coverage for remaining modules and preparing for PyPI publication.
+Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests.
 
-Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests. Test suite has been significantly improved with utils.py coverage increased to 95% and all GitHubClient tests now passing. Recent improvements include enhanced error handling, rate limit detection, and comprehensive parameter validation tests. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion. Focus now on improving coverage for remaining modules and preparing for PyPI publication.
+We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including 24/25 failing tests, complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
+
+Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
+
+Focus now on implementing the real API testing strategy and preparing for PyPI publication.
 
 ### Priorities
-1. Prepare for PyPI publication
-2. Improve remaining module coverage
-3. Expand documentation with examples
-4. Add performance optimizations
-5. Integrate advanced features
-6. Improve error handling
-7. Add monitoring and logging
+1. Implement real API testing strategy
+2. Prepare for PyPI publication
+3. Improve remaining module coverage
+4. Expand documentation with examples
+5. Add performance optimizations
+6. Integrate advanced features
+7. Improve error handling
+8. Add monitoring and logging
 
 ## Known Issues
-1. Documentation could be more comprehensive
-2. Performance could be optimized
-3. Need to document synchronous operation benefits
-4. Need to update API examples for synchronous usage
+1. Mock-based tests are brittle and difficult to maintain
+2. Documentation could be more comprehensive
+3. Performance could be optimized
+4. Need to document synchronous operation benefits
+5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Continue test coverage improvements
-2. Refine mock objects
-3. Add performance optimizations
-4. Implement advanced features
-5. Enhance documentation
+1. Implement real API testing strategy
+2. Replace issue lifecycle tests with real API tests
+3. Implement thorough cleanup mechanisms
+4. Document patterns for real API testing
+5. Continue test coverage improvements
+6. Add performance optimizations
+7. Enhance documentation
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server

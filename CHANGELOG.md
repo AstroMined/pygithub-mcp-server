@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Updated ADR 002 (Real API Testing):
+  - Shifted focus to prioritize real API testing over mock-based testing
+  - Documented challenges with maintaining complex mocks
+  - Added detailed implementation plan for transitioning to real API tests
+  - Added guidance for future development
+  - Expanded consequences and mitigation strategies
+  - Added references to testing best practices
+
 - Real GitHub API integration testing:
   - Environment-based configuration
   - Automatic test resource cleanup

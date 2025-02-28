@@ -1,14 +1,15 @@
 # Active Context
 
 ## Current Focus
-Implementing real GitHub API testing while maintaining existing mock-based tests. This dual approach will:
-- Verify actual API behavior
-- Maintain quick feedback from mock tests
-- Improve test reliability
+Transitioning to real GitHub API testing as our primary testing strategy, with minimal mocking only where absolutely necessary. This approach will:
+- Verify actual API behavior with high confidence
+- Eliminate complex mock maintenance
+- Provide real error responses and rate limits
 - Serve as API documentation
+- Reduce time spent debugging mock behavior
 
 Current test status:
-- Mock-based tests: 24/25 failing
+- Mock-based tests: 24/25 failing due to brittle mock implementations
 - Integration tests: Initial implementation with create_issue
 - Coverage gaps remain in:
   - utils.py (17% coverage)
@@ -16,7 +17,17 @@ Current test status:
   - operations/issues.py (71% coverage)
   - __main__.py (0% coverage)
 
+We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
+
 ## Recent Changes
+- Updated ADR 002 (Real API Testing):
+  - Shifted focus to prioritize real API testing over mock-based testing
+  - Documented challenges with maintaining complex mocks
+  - Added detailed implementation plan for transitioning to real API tests
+  - Added guidance for future development
+  - Expanded consequences and mitigation strategies
+  - Added references to testing best practices
+
 - Enhanced error handling and message formatting:
   - Added 'permission' word to permission error messages for clarity
   - Included status code in unknown error messages
@@ -104,20 +115,29 @@ Current test status:
 
 ## Next Steps
 
-1. Phase 1: Integration Test Infrastructure
-   - Document test token requirements ✓
-   - Set up test repository configuration ✓
-   - Implement rate limit protection ✓
-   - Create resource cleanup mechanisms ✓
-   - Add integration test documentation ✓
+1. Phase 1: Infrastructure Refinement
+   - Review and update environment configuration
+   - Ensure test repository is properly configured
+   - Implement robust token management
+   - Develop rate limit handling with exponential backoff
 
-2. Phase 2: Integration Test Implementation
-   - create_issue integration tests ✓
-   - list_issues integration tests
-   - get_issue integration tests
-   - update_issue integration tests
-   - comment operation tests
-   - label operation tests
+2. Phase 2: Core Implementation
+   - Replace issue lifecycle tests with real API tests
+   - Implement thorough cleanup mechanisms
+   - Document patterns for real API testing
+   - Develop helper functions for common test operations
+
+3. Phase 3: Comprehensive Transition
+   - Systematically replace mock-based tests with real API tests
+   - Identify and document any edge cases that still require mocking
+   - Update documentation to reflect new testing approach
+   - Train team members on new testing patterns
+
+4. Phase 4: Optimization
+   - Implement caching strategies where appropriate
+   - Optimize test execution time
+   - Refine CI/CD pipeline for efficient test execution
+   - Regular maintenance of test infrastructure
 
 3. Phase 3: Coverage Improvements
    - Core Utilities (utils.py)
@@ -182,6 +202,13 @@ Current test status:
 ## Active Decisions
 
 ### Technical Decisions
+1. Testing Strategy
+   - Prioritize real API testing over mock-based testing
+   - Use mocks only for edge cases that cannot be reliably reproduced
+   - Focus on testing behavior and outcomes rather than implementation details
+   - Accept the trade-offs of real API testing for higher confidence
+   - Implement thorough cleanup mechanisms to prevent test pollution
+
 
 1. PyGithub Integration
    - Using singleton pattern for client management
@@ -204,6 +231,13 @@ Current test status:
 ## Current Considerations
 
 ### Current Challenges
+1. Testing Transition
+   - Systematically replacing mock-based tests with real API tests
+   - Identifying edge cases that still require mocking
+   - Implementing robust cleanup mechanisms
+   - Managing rate limits in test environments
+   - Handling network dependencies in CI/CD pipelines
+
 
 1. Schema Migration
    - Mapping between PyGithub objects and our schemas
@@ -224,6 +258,14 @@ Current test status:
    - Documentation coverage
 
 ### Implementation Lessons
+1. Testing Strategy
+   - Real API testing provides higher confidence than mock-based testing
+   - Mocks often fail to accurately represent API behavior
+   - Time spent debugging mock behavior could be better spent on real tests
+   - Focus on behavior and outcomes rather than implementation details
+   - Implement thorough cleanup to prevent test pollution
+   - Use test tagging to allow skipping integration tests when appropriate
+
 
 1. Error Message Formatting
    - Include descriptive words in error messages (e.g., 'permission' in permission errors)

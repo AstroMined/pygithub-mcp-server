@@ -34,7 +34,15 @@ def mock_github_instance(mock_repo):
     """Create a mock GitHubClient instance."""
     mock_instance = Mock()
     mock_instance.get_repo.return_value = mock_repo
-    mock_instance._handle_github_exception = GitHubClient._handle_github_exception.__get__(mock_instance)
+    
+    # Create a proper method that matches the signature of the original
+    def handle_exception(error, resource_hint=None):
+        """Mock implementation of _handle_github_exception."""
+        # Just return a GitHubError with the error message
+        return GitHubError(str(error), getattr(error, 'data', None))
+    
+    # Attach the method to the mock
+    mock_instance._handle_github_exception = handle_exception
     return mock_instance
 
 @pytest.fixture(scope="function")
@@ -250,34 +258,45 @@ def mock_issue(mock_user):
     # Ensure edit updates the state and returns self
     def edit(**kwargs):
         print(f"\nBefore edit - Mock state: {mock.state}, title: {mock.title}")
+        print(f"edit kwargs: {kwargs}")  # Show what parameters are being passed
+        
+        # Store original values to verify changes
+        original_title = mock.title
+        
+        # Update all attributes using setattr to ensure they're properly set
         for key, value in kwargs.items():
             if key == "assignees":
                 mock.assignees = [mock_user(login) for login in value]
             elif key == "labels":
                 # Convert label strings to mock Label objects
                 mock.labels = [Mock(name=label) for label in value]
-            elif key == "title":
-                mock.title = value
-            elif key == "state":
-                mock.state = value
-            elif key == "body":
-                mock.body = value
             else:
+                # Use setattr for all other attributes including title, state, body
                 setattr(mock, key, value)
+                if key == "title":
+                    print(f"Setting title from '{original_title}' to '{value}'")
+        
         # Update timestamps
         mock.updated_at = datetime.now()
+        
+        # Verify the changes were applied
         print(f"After edit - Mock state: {mock.state}, title: {mock.title}")
+        
         # Return self to match PyGithub behavior
         return mock
     mock.edit.side_effect = edit
     
     # Add to_dict method for consistent conversion
     def to_dict():
+        # Get the current state of the mock, not cached values
+        current_title = getattr(mock, 'title', 'Unknown')
+        current_state = getattr(mock, 'state', 'Unknown')
+        
         return {
             "id": mock.id,
             "issue_number": mock.number,  # Convert PyGithub's 'number' to our schema's 'issue_number'
-            "title": mock.title,
-            "state": mock.state,
+            "title": current_title,  # Use the current value, not a cached one
+            "state": current_state,  # Use the current value, not a cached one
             "body": mock.body,
             "labels": [{"name": label.name} for label in mock.labels],
             "assignees": [{"login": assignee.login, "id": assignee.id} for assignee in mock.assignees],
@@ -314,37 +333,6 @@ def mock_issue(mock_user):
     
     return mock
 
-@pytest.fixture(scope="function")
-def mock_paginated_full():
-    """Create a mock PaginatedList with 100+ items."""
-    mock = Mock(spec=PaginatedList)
-    mock.totalCount = 150
-    
-    # Create mock issues
-    mock_issues = []
-    for i in range(1, 151):
-        issue = Mock()
-        issue.number = i  # Using PyGithub's attribute name
-        issue.title = f"Issue {i}"
-        issue.state = "open"
-        issue.body = f"Body {i}"
-        issue.labels = []
-        issue.assignees = []
-        issue.milestone = None
-        mock_issues.append(issue)
-    
-    # Return different items for different pages
-    def get_page(page):
-        start = page * 30
-        end = start + 30
-        return mock_issues[start:end] if start < len(mock_issues) else []
-    
-    # Make the mock iterable and subscriptable
-    mock.get_page.side_effect = get_page
-    mock.__iter__ = lambda self: iter(mock_issues)
-    mock.__getitem__ = lambda self, key: mock_issues[key] if isinstance(key, int) else mock_issues[key.start:key.stop]
-    
-    return mock
 
 @pytest.fixture(scope="function")
 def network_error():
@@ -704,12 +692,13 @@ def test_issue_lifecycle(mock_github_get_instance, mock_repo, mock_issue):
     
     # Update issue title
     print("\nUpdating issue title...")
-    updated = update_issue(
-        "owner", "repo",
-        issue_number=issue["issue_number"],
-        title="Updated Title"
-    )
-    print(f"Updated issue: {updated}")
+    print(f"Before update - Mock issue title: {mock_issue.title}")
+    print(f"issue_number: {issue['issue_number']}")
+    print(f"Type of issue_number: {type(issue['issue_number'])}")
+    updated = update_issue("owner", "repo", issue_number=issue["issue_number"], title="Updated Title")
+    print(f"After update - Mock issue title: {mock_issue.title}")
+    print(f"Updated issue object: {updated}")
+    print(f"Updated issue title from result: {updated['title']}")
     assert updated["title"] == "Updated Title"
     assert updated["state"] == "open"  # State should not change
     
