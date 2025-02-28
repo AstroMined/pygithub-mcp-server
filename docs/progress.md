@@ -1,6 +1,16 @@
 # Project Progress
 
 ## What Works
+- Schema test coverage improvements:
+  - Improved test coverage for issues.py from 90% to 99-100%
+  - Added comprehensive tests for datetime validation with various timezone formats
+  - Added dedicated test methods for timezone format validation
+  - Expanded test coverage for all schema classes in issues.py
+  - Addressed specific branch coverage gap in the validate_since method
+  - Added tests for edge cases in all validation methods
+  - Tested various timezone formats (Z, +00:00, -05:00, -0500)
+  - Added tests for invalid timezone formats
+
 - Schema validation improvements:
   - Added strict=True to field definitions in CreateIssueParams and GetIssueParams
   - Fixed validation for empty content lists in ToolResponse
@@ -106,6 +116,9 @@
 - [ ] Schema Validation Enhancements
   - [x] Fix test failures in schema validation
   - [x] Add strict=True to fields that should reject type coercion
+  - [x] Improve test coverage for issues.py to 99-100%
+  - [ ] Improve test coverage for base.py (currently 73%)
+  - [ ] Improve test coverage for responses.py (currently 78%)
   - [ ] Review all schema models for validation opportunities
   - [ ] Add field validators for remaining critical string fields
   - [ ] Implement enum validation for state, sort, and direction fields
@@ -201,6 +214,8 @@ Core implementation completed and operational with synchronous operations. Packa
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
+We've significantly improved test coverage for schema validation, particularly for the issues.py file, which now has 99-100% coverage. We've added comprehensive tests for datetime validation with various timezone formats, including negative timezone offsets (-05:00, -0500) which were previously untested. This has addressed a specific branch coverage gap in the validate_since method that was handling timezone formats.
+
 We've addressed specific test failures in schema validation by adding strict=True to field definitions in CreateIssueParams and GetIssueParams, and fixing validation for empty content lists in ToolResponse. These changes ensure proper type checking and prevent automatic type coercion, which was causing test failures.
 
 We've fixed issues in the test suite by correcting indentation problems in tests/schemas/test_issues.py and removing a redundant test file (tests/schemas/test_issues_complete.py) that was causing confusion and test failures. The redundant file was incomplete and had a truncated test method that was causing a NameError during test execution.
@@ -209,10 +224,10 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 
 Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
 
-Focus now on implementing the real API testing strategy and preparing for PyPI publication.
+Focus now on improving test coverage for remaining schema files (base.py at 73%, responses.py at 78%) and implementing the real API testing strategy.
 
 ### Priorities
-1. Complete schema validation fixes
+1. Improve test coverage for remaining schema files (base.py, responses.py)
 2. Expand schema validation to all models
 3. Implement real API testing strategy
 4. Prepare for PyPI publication
@@ -231,15 +246,16 @@ Focus now on implementing the real API testing strategy and preparing for PyPI p
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Complete schema validation fixes
-2. Expand schema validation to all models
-3. Implement real API testing strategy
-4. Replace issue lifecycle tests with real API tests
-5. Implement thorough cleanup mechanisms
-6. Document patterns for real API testing
-7. Continue test coverage improvements
-8. Add performance optimizations
-9. Enhance documentation
+1. Improve test coverage for base.py (currently 73%)
+2. Improve test coverage for responses.py (currently 78%)
+3. Expand schema validation to all models
+4. Implement real API testing strategy
+5. Replace issue lifecycle tests with real API tests
+6. Implement thorough cleanup mechanisms
+7. Document patterns for real API testing
+8. Continue test coverage improvements
+9. Add performance optimizations
+10. Enhance documentation
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server
@@ -254,6 +270,11 @@ Focus now on implementing the real API testing strategy and preparing for PyPI p
 - Pydantic v2 has different type coercion behavior than v1
 - Use strict=True to prevent automatic type coercion
 - Field-level strictness is more precise than model-level
+- ISO 8601 datetime validation requires careful testing
+- Timezone handling is particularly complex and error-prone
+- Test various timezone formats (Z, +00:00, -05:00, -0500)
+- Test edge cases like missing timezone, invalid timezone format
+- Ensure validation logic handles all branches in conditional statements
 - Package renamed for PyPI compatibility
 - Build isolation works fine without flags
 - Following test-driven development approach

@@ -241,3 +241,177 @@ class SchemaModel(BaseModel):
     Maps to PyGithub ObjectType.
     See: [link to PyGithub docs]
     """
+```
+
+## Validation Patterns
+
+### 1. Field Validation
+```python
+class SchemaModel(BaseModel):
+    model_config = ConfigDict(strict=True)
+    
+    title: str = Field(..., description="Title field", strict=True)
+    
+    @field_validator('title')
+    @classmethod
+    def validate_title(cls, v):
+        """Validate that title is not empty."""
+        if not v.strip():
+            raise ValueError("title cannot be empty")
+        return v
+```
+
+### 2. Datetime Validation
+```python
+class DateTimeModel(BaseModel):
+    since: Optional[datetime] = Field(
+        None, 
+        description="Filter by date (ISO 8601 format with timezone: YYYY-MM-DDThh:mm:ssZ)"
+    )
+    
+    @field_validator('since', mode='before')
+    @classmethod
+    def validate_since(cls, v):
+        """Convert string dates to datetime objects.
+        
+        Accepts:
+        - ISO 8601 format strings with timezone (e.g., "2020-01-01T00:00:00Z")
+        - datetime objects
+        
+        Returns:
+        - datetime object
+        
+        Raises:
+        - ValueError: If the string is not a valid ISO 8601 datetime with timezone
+        """
+        if isinstance(v, str):
+            # Check for ISO format with time component and timezone
+            if not ('T' in v and ('+' in v or 'Z' in v or '-' in v.split('T')[1])):
+                raise ValueError(
+                    f"Invalid ISO format datetime: {v}. "
+                    f"Must be in format YYYY-MM-DDThh:mm:ss+00:00 or YYYY-MM-DDThh:mm:ssZ"
+                )
+            
+            try:
+                # Handle 'Z' timezone indicator by replacing with +00:00
+                v = v.replace('Z', '+00:00')
+                return datetime.fromisoformat(v)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid ISO format datetime: {v}. "
+                    f"Contains invalid date/time components."
+                )
+        return v
+```
+
+### 3. Enum Validation
+```python
+class StateModel(BaseModel):
+    state: Optional[str] = Field(
+        None, 
+        description=f"Issue state: {', '.join(VALID_STATES)}"
+    )
+    
+    @field_validator('state')
+    @classmethod
+    def validate_state(cls, v):
+        """Validate that state is one of the allowed values."""
+        if v is not None and v not in VALID_STATES:
+            raise ValueError(f"Invalid state: {v}. Must be one of: {', '.join(VALID_STATES)}")
+        return v
+```
+
+### 4. Numeric Validation
+```python
+class PaginationModel(BaseModel):
+    page: Optional[int] = Field(
+        None, 
+        description="Page number for pagination (1-based)"
+    )
+    per_page: Optional[int] = Field(
+        None, 
+        description="Results per page (max 100)"
+    )
+    
+    @field_validator('page')
+    @classmethod
+    def validate_page(cls, v):
+        """Validate that page is a positive integer."""
+        if v is not None and v < 1:
+            raise ValueError("Page number must be a positive integer")
+        return v
+    
+    @field_validator('per_page')
+    @classmethod
+    def validate_per_page(cls, v):
+        """Validate that per_page is a positive integer <= 100."""
+        if v is not None:
+            if v < 1:
+                raise ValueError("Results per page must be a positive integer")
+            if v > 100:
+                raise ValueError("Results per page cannot exceed 100")
+        return v
+```
+
+## Testing Patterns
+
+### 1. Schema Validation Testing
+```python
+def test_valid_data(valid_data):
+    """Test that valid data passes validation."""
+    params = SchemaModel(**valid_data)
+    assert params.field == valid_data["field"]
+
+def test_invalid_field_types(valid_base_data):
+    """Test that invalid field types raise validation errors."""
+    with pytest.raises(ValidationError) as exc_info:
+        SchemaModel(
+            **valid_base_data,
+            field=123  # Should be a string
+        )
+    assert "field" in str(exc_info.value).lower()
+
+def test_empty_string_validation(valid_base_data):
+    """Test that empty strings raise validation errors."""
+    with pytest.raises(ValidationError) as exc_info:
+        SchemaModel(
+            **valid_base_data,
+            field=""
+        )
+    assert "field cannot be empty" in str(exc_info.value).lower()
+```
+
+### 2. Datetime Testing
+```python
+def test_datetime_parsing(valid_base_data):
+    """Test that datetime strings are correctly parsed."""
+    # Test with various formats
+    params = DateTimeModel(
+        **valid_base_data,
+        since="2020-01-01T00:00:00Z"
+    )
+    assert isinstance(params.since, datetime)
+    
+    # Test with negative timezone offset
+    params = DateTimeModel(
+        **valid_base_data,
+        since="2020-01-01T12:30:45-05:00"
+    )
+    assert isinstance(params.since, datetime)
+    
+    # Test with compact negative timezone offset
+    params = DateTimeModel(
+        **valid_base_data,
+        since="2020-01-01T12:30:45-0500"
+    )
+    assert isinstance(params.since, datetime)
+
+def test_invalid_datetime_format(valid_base_data):
+    """Test behavior with invalid datetime format."""
+    with pytest.raises(ValidationError) as exc_info:
+        DateTimeModel(
+            **valid_base_data,
+            since="2020-01-01"  # Missing time component
+        )
+    assert "Invalid ISO format datetime" in str(exc_info.value)
+```

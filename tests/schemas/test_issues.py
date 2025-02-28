@@ -315,7 +315,7 @@ class TestListIssuesParams:
         assert params.since.minute == 0
         assert params.since.second == 0
         
-        # Test with different ISO format
+        # Test with different ISO format (positive timezone offset)
         params = ListIssuesParams(
             **valid_repository_ref_data,
             since="2020-01-01T12:30:45+00:00"
@@ -336,6 +336,60 @@ class TestListIssuesParams:
         )
         assert params.since == dt
     
+    def test_timezone_formats(self, valid_repository_ref_data):
+        """Test various timezone formats in datetime strings."""
+        # Test with standard negative timezone offset
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45-05:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with negative timezone offset without colon
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45-0500"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with single-digit negative timezone offset
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45-01:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with extreme negative timezone offset
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45-12:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+
     def test_invalid_datetime_format(self, valid_repository_ref_data):
         """Test behavior with invalid datetime format."""
         # Missing time component
@@ -378,6 +432,14 @@ class TestListIssuesParams:
             )
         assert "Invalid ISO format datetime" in str(exc_info.value)
         assert "Contains invalid date/time components" in str(exc_info.value)
+        
+        # Test with invalid timezone format (missing minutes in offset)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssuesParams(
+                **valid_repository_ref_data,
+                since="2020-01-01T12:30:45-5"  # Invalid timezone format
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value) or "Contains invalid date/time components" in str(exc_info.value)
 
 
 class TestGetIssueParams:
@@ -540,6 +602,166 @@ class TestUpdateIssueParams:
         assert params.labels is None
         assert params.assignees is None
         assert params.milestone is None
+        
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number="1"  # Should be an integer
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid title type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                title=123  # Should be a string
+            )
+        assert "title" in str(exc_info.value).lower()
+        
+        # Invalid body type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                body=123  # Should be a string
+            )
+        assert "body" in str(exc_info.value).lower()
+        
+        # Invalid state type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                state=123  # Should be a string
+            )
+        assert "state" in str(exc_info.value).lower()
+        
+        # Invalid labels type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                labels="bug"  # Should be a list
+            )
+        assert "labels" in str(exc_info.value).lower()
+        
+        # Invalid assignees type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                assignees="octocat"  # Should be a list
+            )
+        assert "assignees" in str(exc_info.value).lower()
+        
+        # Invalid milestone type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                milestone="1"  # Should be an integer
+            )
+        assert "milestone" in str(exc_info.value).lower()
+
+
+class TestUpdateIssueCommentParams:
+    """Tests for the UpdateIssueCommentParams schema."""
+
+    def test_valid_data(self, valid_update_issue_comment_data):
+        """Test that valid data passes validation."""
+        params = UpdateIssueCommentParams(**valid_update_issue_comment_data)
+        assert params.owner == valid_update_issue_comment_data["owner"]
+        assert params.repo == valid_update_issue_comment_data["repo"]
+        assert params.issue_number == valid_update_issue_comment_data["issue_number"]
+        assert params.comment_id == valid_update_issue_comment_data["comment_id"]
+        assert params.body == valid_update_issue_comment_data["body"]
+
+    def test_missing_required_fields(self, valid_repository_ref_data):
+        """Test that missing required fields raise validation errors."""
+        # Missing issue_number
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                comment_id=123456,
+                body="Updated comment text."
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Missing comment_id
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                body="Updated comment text."
+            )
+        assert "comment_id" in str(exc_info.value).lower()
+        
+        # Missing body
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id=123456
+            )
+        assert "body" in str(exc_info.value).lower()
+
+    def test_empty_body(self, valid_repository_ref_data):
+        """Test that empty body raises validation error."""
+        # Empty body
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id=123456,
+                body=""
+            )
+        assert "body cannot be empty" in str(exc_info.value).lower()
+        
+        # Whitespace-only body
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id=123456,
+                body="   "
+            )
+        assert "body cannot be empty" in str(exc_info.value).lower()
+
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                comment_id=123456,
+                body="Updated comment text."
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid comment_id type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id="123456",  # Should be an integer
+                body="Updated comment text."
+            )
+        assert "comment_id" in str(exc_info.value).lower()
+        
+        # Invalid body type
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id=123456,
+                body=123  # Should be a string
+            )
+        assert "body" in str(exc_info.value).lower()
 
 
 class TestDeleteIssueCommentParams:
@@ -580,6 +802,26 @@ class TestDeleteIssueCommentParams:
             comment_id=123456
         )
         assert params.issue_number == -1
+        
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            DeleteIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                comment_id=123456
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid comment_id type
+        with pytest.raises(ValidationError) as exc_info:
+            DeleteIssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                comment_id="123456"  # Should be an integer
+            )
+        assert "comment_id" in str(exc_info.value).lower()
 
 
 class TestAddIssueLabelsParams:
@@ -613,14 +855,14 @@ class TestAddIssueLabelsParams:
 
     def test_empty_labels_list(self, valid_repository_ref_data):
         """Test behavior with empty labels list."""
-        # Empty labels list - should be valid but not practical
+        # Empty labels list - should raise validation error
         with pytest.raises(ValidationError) as exc_info:
             AddIssueLabelsParams(
                 **valid_repository_ref_data,
                 issue_number=1,
                 labels=[]
             )
-        assert "labels" in str(exc_info.value).lower()
+        assert "labels list cannot be empty" in str(exc_info.value).lower()
 
     def test_negative_issue_number(self, valid_repository_ref_data):
         """Test behavior with negative issue number."""
@@ -631,6 +873,105 @@ class TestAddIssueLabelsParams:
             labels=["bug", "help wanted"]
         )
         assert params.issue_number == -1
+        
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            AddIssueLabelsParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                labels=["bug", "help wanted"]
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid labels type
+        with pytest.raises(ValidationError) as exc_info:
+            AddIssueLabelsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                labels="bug"  # Should be a list
+            )
+        assert "labels" in str(exc_info.value).lower()
+        
+        # Invalid label item type
+        with pytest.raises(ValidationError) as exc_info:
+            AddIssueLabelsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                labels=["bug", 123]  # All items should be strings
+            )
+        assert "labels" in str(exc_info.value).lower()
+
+
+class TestRemoveIssueLabelParams:
+    """Tests for the RemoveIssueLabelParams schema."""
+
+    def test_valid_data(self, valid_remove_issue_label_data):
+        """Test that valid data passes validation."""
+        params = RemoveIssueLabelParams(**valid_remove_issue_label_data)
+        assert params.owner == valid_remove_issue_label_data["owner"]
+        assert params.repo == valid_remove_issue_label_data["repo"]
+        assert params.issue_number == valid_remove_issue_label_data["issue_number"]
+        assert params.label == valid_remove_issue_label_data["label"]
+
+    def test_missing_required_fields(self, valid_repository_ref_data):
+        """Test that missing required fields raise validation errors."""
+        # Missing issue_number
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                label="help wanted"
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Missing label
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                issue_number=1
+            )
+        assert "label" in str(exc_info.value).lower()
+
+    def test_empty_label(self, valid_repository_ref_data):
+        """Test behavior with empty label."""
+        # Empty label - should raise error
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                label=""
+            )
+        assert "label cannot be empty" in str(exc_info.value).lower()
+        
+        # Whitespace-only label - should raise error
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                label="   "
+            )
+        assert "label cannot be empty" in str(exc_info.value).lower()
+
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                label="help wanted"
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid label type
+        with pytest.raises(ValidationError) as exc_info:
+            RemoveIssueLabelParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                label=123  # Should be a string
+            )
+        assert "label" in str(exc_info.value).lower()
 
 
 class TestIssueCommentParams:
@@ -681,6 +1022,26 @@ class TestIssueCommentParams:
                 body="   "
             )
         assert "body cannot be empty" in str(exc_info.value).lower()
+        
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            IssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                body="This is a comment."
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid body type
+        with pytest.raises(ValidationError) as exc_info:
+            IssueCommentParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                body=123  # Should be a string
+            )
+        assert "body" in str(exc_info.value).lower()
 
 
 class TestListIssueCommentsParams:
@@ -733,7 +1094,7 @@ class TestListIssueCommentsParams:
         assert params.since.minute == 0
         assert params.since.second == 0
         
-        # Test with different ISO format
+        # Test with different ISO format (positive timezone offset)
         params = ListIssueCommentsParams(
             **valid_repository_ref_data,
             issue_number=1,
@@ -755,3 +1116,205 @@ class TestListIssueCommentsParams:
             since=dt
         )
         assert params.since == dt
+        
+    def test_timezone_formats(self, valid_repository_ref_data):
+        """Test various timezone formats in datetime strings."""
+        # Test with standard negative timezone offset
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45-05:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with negative timezone offset without colon
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45-0500"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with single-digit negative timezone offset
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45-01:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with extreme negative timezone offset
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45-12:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+
+    def test_invalid_datetime_format(self, valid_repository_ref_data):
+        """Test behavior with invalid datetime format."""
+        # Missing time component
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="2020-01-01"  # Missing time component
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value)
+        
+        # Missing timezone
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="2020-01-01T00:00:00"  # No timezone
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value)
+        
+        # Space instead of 'T'
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="2020-01-01 00:00:00Z"  # Space instead of 'T'
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value)
+        
+        # Completely invalid format
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="not-a-date"
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value)
+        
+        # Malformed but plausible ISO format (passes regex check but fails parsing)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="2020-13-32T25:61:61Z"  # Invalid month, day, hour, minute, second
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value)
+        assert "Contains invalid date/time components" in str(exc_info.value)
+        
+        # Test with invalid timezone format (missing minutes in offset)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since="2020-01-01T12:30:45-5"  # Invalid timezone format
+            )
+        assert "Invalid ISO format datetime" in str(exc_info.value) or "Contains invalid date/time components" in str(exc_info.value)
+        
+    def test_invalid_field_types(self, valid_repository_ref_data):
+        """Test that invalid field types raise validation errors."""
+        # Invalid issue_number type
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number="1",  # Should be an integer
+                since="2020-01-01T00:00:00Z"
+            )
+        assert "issue_number" in str(exc_info.value).lower()
+        
+        # Invalid since type (not a string or datetime)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                since=123  # Should be a string or datetime
+            )
+        assert "since" in str(exc_info.value).lower()
+        
+        # Invalid page type
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                page="1"  # Should be an integer
+            )
+        assert "page" in str(exc_info.value).lower()
+        
+        # Invalid per_page type
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                per_page="30"  # Should be an integer
+            )
+        assert "per_page" in str(exc_info.value).lower()
+        
+    def test_invalid_page_values(self, valid_repository_ref_data):
+        """Test that invalid page values raise validation errors."""
+        # Page 0 (invalid)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                page=0
+            )
+        assert "Page number must be a positive integer" in str(exc_info.value)
+        
+        # Negative page (invalid)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                page=-1
+            )
+        assert "Page number must be a positive integer" in str(exc_info.value)
+        
+    def test_invalid_per_page_values(self, valid_repository_ref_data):
+        """Test that invalid per_page values raise validation errors."""
+        # per_page 0 (invalid)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                per_page=0
+            )
+        assert "Results per page must be a positive integer" in str(exc_info.value)
+        
+        # Negative per_page (invalid)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                per_page=-1
+            )
+        assert "Results per page must be a positive integer" in str(exc_info.value)
+        
+        # per_page > 100 (invalid)
+        with pytest.raises(ValidationError) as exc_info:
+            ListIssueCommentsParams(
+                **valid_repository_ref_data,
+                issue_number=1,
+                per_page=101
+            )
+        assert "Results per page cannot exceed 100" in str(exc_info.value)

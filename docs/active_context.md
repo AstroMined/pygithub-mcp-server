@@ -1,13 +1,15 @@
 # Active Context
 
 ## Current Focus
-Enhancing schema validation to fix test failures and ensure robust type checking. We're addressing four specific test failures:
-1. TestCreateIssueParams::test_invalid_field_types - Ensuring proper validation of field types
-2. TestListIssuesParams::test_valid_data - Fixing datetime comparison issues
-3. TestGetIssueParams::test_invalid_issue_number_type - Ensuring proper validation of numeric types
-4. TestToolResponse::test_empty_content_list - Ensuring proper validation of empty lists
+Improving test coverage for schema validation, with a focus on achieving 100% branch coverage for all schema files. We've successfully improved the coverage for issues.py from 90% to 99-100%, addressing specific branch coverage gaps in datetime validation logic.
 
-These fixes are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
+Our current focus is on:
+1. Comprehensive testing of datetime validation with various timezone formats
+2. Testing edge cases in schema validation methods
+3. Ensuring all branches in complex conditional logic are covered
+4. Expanding test coverage to other schema files (base.py, responses.py)
+
+These improvements are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
 
 We're also continuing our transition to real GitHub API testing as our primary testing strategy, with minimal mocking only where absolutely necessary. This approach will:
 - Verify actual API behavior with high confidence
@@ -17,10 +19,12 @@ We're also continuing our transition to real GitHub API testing as our primary t
 - Reduce time spent debugging mock behavior
 
 Current test status:
-- Schema validation tests: 4 failures being addressed
+- Schema validation tests: Significantly improved, with issues.py at 99-100% coverage
 - Mock-based tests: 24/25 failing due to brittle mock implementations
 - Integration tests: Initial implementation with create_issue
 - Coverage gaps remain in:
+  - base.py (73% coverage)
+  - responses.py (78% coverage)
   - utils.py (17% coverage)
   - server.py (23% coverage)
   - operations/issues.py (71% coverage)
@@ -29,6 +33,14 @@ Current test status:
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Improved schema test coverage:
+  - Added comprehensive tests for datetime validation with various timezone formats
+  - Added dedicated test methods for timezone format validation
+  - Expanded test coverage for all schema classes in issues.py
+  - Addressed specific branch coverage gap in the validate_since method
+  - Improved test coverage from 90% to 99-100% for issues.py
+  - Added tests for edge cases in all validation methods
+
 - Fixed schema validation issues:
   - Added strict=True to field definitions in CreateIssueParams and GetIssueParams
   - Fixed validation for empty content lists in ToolResponse
@@ -343,6 +355,15 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Consistent validation patterns improve maintainability
    - Whitespace stripping catches spaces-only inputs
    - Balance validation with backward compatibility
+
+3. Datetime Validation
+   - ISO 8601 datetime validation requires careful testing
+   - Timezone handling is particularly complex and error-prone
+   - Test various timezone formats (Z, +00:00, -05:00, -0500)
+   - Test edge cases like missing timezone, invalid timezone format
+   - Ensure validation logic handles all branches in conditional statements
+   - Negative timezone offsets need specific test cases
+   - Python's datetime.fromisoformat() has specific format requirements
 
 3. Testing Strategy
    - Real API testing provides higher confidence than mock-based testing
