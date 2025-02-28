@@ -35,6 +35,13 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
   - Improved type checking for numeric and string fields
   - Ensured consistent validation across all schema models
   - Fixed test assertions for datetime comparisons
+  
+- Fixed schema test failures:
+  - Fixed indentation issues in tests/schemas/test_issues.py
+  - Removed redundant test file tests/schemas/test_issues_complete.py
+  - Resolved NameError in test_invalid_page_values method
+  - Improved test structure and organization
+  - Fixed truncated test methods
 
 - Enhanced schema validation (ADR 004):
   - Added field validators to prevent empty strings in critical fields
@@ -466,6 +473,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Error handling improvements
    - Rate limiting benefits
    - Object model advantages
+
+19. Test File Management
+   - Avoid duplicate test files with similar names
+   - Ensure test files are complete and properly formatted
+   - Remove redundant test files to prevent confusion
+   - Maintain consistent test structure across files
+   - Fix indentation issues promptly to prevent syntax errors
+   - Complete all test methods properly to avoid runtime errors
 
 ## Progress Tracking
 

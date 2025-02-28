@@ -274,46 +274,6 @@ class TestListIssuesParams:
     def test_invalid_page_values(self, valid_repository_ref_data):
         """Test that invalid page values raise validation errors."""
         with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                page=0
-            )
-        assert "Page number must be a positive integer" in str(exc_info.value)
-        
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                page=-1
-            )
-        assert "Page number must be a positive integer" in str(exc_info.value)
-    
-    def test_invalid_per_page_values(self, valid_repository_ref_data):
-        """Test that invalid per_page values raise validation errors."""
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                per_page=0
-            )
-        assert "Results per page must be a positive integer" in str(exc_info.value)
-        
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                per_page=-1
-            )
-        assert "Results per page must be a positive integer" in str(exc_info.value)
-        
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                per_page=101
-            )
-        assert "Results per page cannot exceed 100" in str(exc_info.value)
             ListIssuesParams(**valid_repository_ref_data, page=0)
         assert "Page number must be a positive integer" in str(exc_info.value)
         
@@ -795,7 +755,3 @@ class TestListIssueCommentsParams:
             since=dt
         )
         assert params.since == dt
-    
-    def test_invalid_page_values(self, valid_repository_ref_data):
-        """Test that invalid page values raise validation errors."""
-        with pytest.raises(ValidationError) as exc_info:

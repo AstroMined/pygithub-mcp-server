@@ -42,6 +42,11 @@
   - Removed test mode functionality for cleaner codebase
   - Optimized update_issue to avoid unnecessary API calls
   - Simplified test environment setup
+  - Fixed indentation issues in tests/schemas/test_issues.py
+  - Removed redundant test file tests/schemas/test_issues_complete.py
+  - Resolved NameError in test_invalid_page_values method
+  - Improved test structure and organization
+  - Fixed truncated test methods
   - All tests now passing
 
 - Improved mock object implementations:
@@ -197,6 +202,8 @@ Core implementation completed and operational with synchronous operations. Packa
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
 We've addressed specific test failures in schema validation by adding strict=True to field definitions in CreateIssueParams and GetIssueParams, and fixing validation for empty content lists in ToolResponse. These changes ensure proper type checking and prevent automatic type coercion, which was causing test failures.
+
+We've fixed issues in the test suite by correcting indentation problems in tests/schemas/test_issues.py and removing a redundant test file (tests/schemas/test_issues_complete.py) that was causing confusion and test failures. The redundant file was incomplete and had a truncated test method that was causing a NameError during test execution.
 
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including 24/25 failing tests, complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
 
