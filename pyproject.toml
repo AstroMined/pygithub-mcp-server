@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pygithub-mcp-server"
 # IMPORTANT: Keep version in sync with src/pygithub_mcp_server/version.py
 # TODO: Once project stabilizes, we'll use importlib.metadata to read version from here
-version = "0.4.2"
+version = "0.5.0"
 description = "GitHub MCP Server using PyGithub"
 requires-python = ">=3.10"
 dependencies = [
@@ -29,6 +29,7 @@ addopts = """
     --cov-report=html
     --cov-branch
     -v
+    --tb=short
 """
 testpaths = ["tests"]
 python_files = "test_*.py"
@@ -37,6 +38,12 @@ python_functions = "test_*"
 markers = [
     "integration: marks tests that use real GitHub API"
 ]
+
+# Log settings
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.coverage.run]
 branch = true

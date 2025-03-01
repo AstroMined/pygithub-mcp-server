@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-03-01
+
+### Added
+- Implemented ADR-002 (Real API Testing):
+  - Created integration test directory structure with domain-specific organization
+  - Implemented test fixtures with retry mechanism for rate limits
+  - Added comprehensive test suite for GitHub issue operations
+  - Set up environment configuration for real API testing
+  - Added test documentation with patterns and best practices
+  - Successfully ran first real API test (test_list_issues_basic)
+  - Established foundation for future integration tests
+
+### Changed
+- Updated pytest configuration for integration tests:
+  - Added integration test marker
+  - Configured test output formatting
+  - Added logging settings for better debugging
+- Enhanced test organization with separate integration test directory
+- Improved test fixtures for real API testing
+- Updated documentation to reflect new testing approach
+
+### Fixed
+- Security: Ensured .env.test is properly ignored by git
+- Added explicit .env.test to .gitignore for better security
+
 ## [0.4.2] - 2025-03-01
 
 ### Added
