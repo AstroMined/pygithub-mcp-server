@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2025-03-01
+
+### Added
+- Implemented `convert_issue_list` function in issues converter
+- Added comprehensive unit tests for converters using realistic data structures
+- Created integration tests for client module and error handlers following ADR-002
+
+### Changed
+- Removed mock-based tests in favor of real API testing approach (ADR-002)
+- Improved test coverage for converter modules
+
+### Fixed
+- Fixed handling of `None` values in `create_tool_response` function
+
 ## [0.5.0] - 2025-03-01
 
 ### Added

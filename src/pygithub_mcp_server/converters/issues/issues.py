@@ -91,3 +91,15 @@ def convert_issue(issue: Issue) -> Dict[str, Any]:
             "owner": issue.repository.owner.login,
         },
     }
+
+
+def convert_issue_list(issues: List[Issue]) -> List[Dict[str, Any]]:
+    """Convert a list of PyGithub Issues to our schema.
+
+    Args:
+        issues: List of PyGithub Issue objects
+
+    Returns:
+        List of issue data in our schema format
+    """
+    return [convert_issue(issue) for issue in issues]

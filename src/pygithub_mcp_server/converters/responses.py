@@ -31,6 +31,9 @@ def create_tool_response(
     elif isinstance(data, dict) or isinstance(data, list):
         # Convert dict/list to JSON string
         content = TextContent(type="text", text=json.dumps(data, indent=2))
+    elif data is None:
+        # Convert None to JSON null
+        content = TextContent(type="text", text=json.dumps(None))
     else:
         content = TextContent(type="text", text=str(data))
 

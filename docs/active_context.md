@@ -1,42 +1,52 @@
 # Active Context
 
 ## Current Focus
-Improving test coverage for schema validation, with a focus on achieving 100% branch coverage for all schema files. We've successfully improved the coverage for issues.py from 90% to 100%, addressing specific branch coverage gaps in datetime validation logic.
+Improving overall test coverage, with a particular focus on implementing real API testing as outlined in ADR-002. We've successfully fixed failing tests and significantly improved test quality by replacing mocks with realistic data structures.
 
 Our current focus is on:
-1. Comprehensive testing of datetime validation with various timezone formats
-2. Testing edge cases in schema validation methods
-3. Ensuring all branches in complex conditional logic are covered
-4. Expanding test coverage to other schema files (base.py, responses.py)
+1. Implementing real API testing through integration tests
+2. Creating realistic test fixtures that don't rely on mocks
+3. Improving converters test coverage with realistic data structures
+4. Addressing low-coverage modules (client, rate_limit, errors)
+5. Ensuring all new tests follow the ADR-002 approach of avoiding mocks
 
-We've enhanced the datetime conversion functionality to support more flexible timezone formats, particularly adding support for single-digit timezone offsets like "-5". This makes our datetime parsing more robust and user-friendly while maintaining strict validation where needed.
+We've made several improvements to test coverage and fixed failing tests. Key enhancements include:
 
-We've fixed the test failures in `test_issues.py` by adding comprehensive tests for timezone formats and enhancing the converter function. Specifically, we addressed:
-- The `validate_since` method for both `ListIssuesParams` and `ListIssueCommentsParams`, ensuring all timezone format variations are properly tested
-- The `validate_title` method in `UpdateIssueParams` with `None` value
-- The `convert_iso_string_to_datetime` function to handle single-digit timezone offsets
+1. Fixed the handling of `None` values in the `create_tool_response` function by properly using `json.dumps(None)` to produce "null" rather than the string "None".
+
+2. Implemented the `convert_issue_list` function in the issues converter, enhancing our ability to handle collections of issues.
+
+3. Created comprehensive tests for converters using realistic data structures instead of mocks:
+   - Implemented realistic classes in tests that match PyGithub's API
+   - Created test fixtures with proper data structures for Issue, User, Label, etc.
+   - Tested all edge cases without relying on mocks
+
+4. Created integration tests following the ADR-002 approach:
+   - Added client module tests using real GitHub API
+   - Implemented rate limit handling tests
+   - Added error handlers tests with real error conditions
 
 These improvements are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
 
-We're now committed to completely eliminating mock-based testing in favor of real GitHub API testing. This approach will:
-- Verify actual API behavior with high confidence
-- Completely eliminate complex mock maintenance
-- Provide real error responses and rate limits
-- Serve as documentation of actual API behavior
-- Eliminate time spent debugging mock behavior
-- Make tests more reliable and representative of real usage
+These improvements implement our commitment to completely eliminating mock-based testing in favor of real GitHub API testing or realistic data structures. This approach:
+- Verifies actual API behavior with high confidence
+- Eliminates complex mock maintenance
+- Provides real error responses and rate limits
+- Serves as documentation of actual API behavior
+- Eliminates time spent debugging mock behavior
+- Makes tests more reliable and representative of real usage
 
 Current test status:
-- Schema validation tests: Significantly improved, with issues.py at 100% coverage
-- Mock-based tests: 24/25 failing due to brittle mock implementations
-- Integration tests: Initial implementation with create_issue
+- Fixed failing test in test_responses.py
+- Removed legacy mock-based tests
+- Created new tests with realistic data structures
+- Added integration tests for client module and error handlers
 - Coverage gaps remain in:
-  - base.py (73% coverage)
-  - responses.py (78% coverage)
-  - utils.py (17% coverage)
-  - server.py (23% coverage)
-  - operations/issues.py (71% coverage)
-  - __main__.py (0% coverage)
+  - client/client.py (34% coverage)
+  - client/rate_limit.py (18% coverage)
+  - errors/formatters.py (11% coverage)
+  - errors/handlers.py (6% coverage)
+  - operations/issues.py (8% coverage)
 
 We've updated our testing strategy (ADR 002) to completely eliminate mock-based testing in favor of real API testing, focusing on behavior and outcomes rather than implementation details.
 

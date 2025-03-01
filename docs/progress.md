@@ -1,6 +1,15 @@
 # Project Progress
 
 ## What Works
+- Test coverage improvements and ADR-002 implementation:
+  - Fixed failing test in `test_responses.py` by properly handling `None` values
+  - Added `convert_issue_list` function to issue converters
+  - Created comprehensive tests for converters using realistic data structures
+  - Implemented integration tests for client module and error handlers
+  - Removed legacy mock-based tests in favor of real API testing approach
+  - Created realistic test fixtures that match PyGithub's API structure
+  - Improved test quality by following ADR-002 approach
+
 - Integration test infrastructure (ADR-002):
   - Created integration test directory structure with domain-specific organization
   - Implemented test fixtures with retry mechanism for rate limits
@@ -140,6 +149,18 @@
 - Fixed GitHubClient singleton implementation and tests
 
 ## What's Left to Build
+### Test Coverage Improvements
+- [ ] Test Coverage Enhancements
+  - [x] Fix failing test in `test_responses.py`
+  - [x] Improve converter test coverage using realistic data structures
+  - [x] Add integration tests for client module
+  - [x] Add integration tests for error handlers
+  - [ ] Improve coverage for client/client.py (currently 34%)
+  - [ ] Improve coverage for client/rate_limit.py (currently 18%)
+  - [ ] Improve coverage for errors/formatters.py (currently 11%)
+  - [ ] Improve coverage for errors/handlers.py (currently 6%)
+  - [ ] Improve coverage for operations/issues.py (currently 8%)
+
 ### Schema Validation Expansion
 - [ ] Schema Validation Enhancements
   - [x] Fix test failures in schema validation
@@ -238,7 +259,14 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation completed and operational with synchronous operations. Package renamed and published to GitHub repository. Server successfully connects and processes MCP tool requests.
+Core implementation is operational with synchronous operations. We've made significant improvements to test coverage and quality by implementing the ADR-002 approach of using real API testing instead of mocks.
+
+Recent improvements include:
+1. Fixed the failing test in `test_responses.py` by properly handling `None` values with `json.dumps(None)` to produce "null" instead of "None".
+2. Added the missing `convert_issue_list` function to the issues converter module.
+3. Created comprehensive tests for converters using realistic data structures that match PyGithub's API.
+4. Implemented integration tests for the client module and error handlers using the real GitHub API.
+5. Removed legacy mock-based tests in favor of the ADR-002 approach.
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
@@ -246,44 +274,41 @@ We've significantly improved test coverage for schema validation, particularly f
 
 We've addressed specific test failures in schema validation by adding strict=True to field definitions in CreateIssueParams and GetIssueParams, and fixing validation for empty content lists in ToolResponse. These changes ensure proper type checking and prevent automatic type coercion, which was causing test failures.
 
-We've fixed issues in the test suite by correcting indentation problems in tests/schemas/test_issues.py and removing a redundant test file (tests/schemas/test_issues_complete.py) that was causing confusion and test failures. The redundant file was incomplete and had a truncated test method that was causing a NameError during test execution.
+We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
 
-We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing. This decision was made after experiencing significant challenges with mock-based testing, including 24/25 failing tests, complex mock implementations, brittle test fixtures, and difficulty maintaining mock parity with API changes. The updated ADR provides a detailed implementation plan for transitioning to real API tests and guidance for future development.
+Test suite continues to improve with enhanced rate limit error handling and real API testing approach. Recent improvements include proper handling for edge cases, implementation of retry mechanisms, and comprehensive test coverage with real API interactions. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
 
-Test suite continues to improve with enhanced rate limit error handling and mock fixtures. Recent improvements include proper RateLimitExceededException handling, improved error message formatting, and comprehensive rate limit test coverage. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging. Each tool follows established patterns for kwargs handling and object conversion.
-
-Focus now on improving test coverage for remaining schema files (base.py at 73%, responses.py at 78%) and implementing the real API testing strategy.
+Focus now on improving test coverage for low-coverage modules (client, rate_limit, errors, operations) and continuing implementation of the real API testing strategy.
 
 ### Priorities
-1. Improve test coverage for remaining schema files (base.py, responses.py)
-2. Expand schema validation to all models
-3. Implement real API testing strategy
+1. Continue improving test coverage for low-coverage modules (client, rate_limit, errors, operations)
+2. Implement more integration tests following ADR-002
+3. Expand schema validation to all models
 4. Prepare for PyPI publication
-5. Improve remaining module coverage
-6. Expand documentation with examples
-7. Add performance optimizations
-8. Integrate advanced features
-9. Improve error handling
-10. Add monitoring and logging
+5. Expand documentation with examples
+6. Add performance optimizations
+7. Integrate advanced features
+8. Improve error handling
+9. Add monitoring and logging
 
 ## Known Issues
-1. Mock-based tests are brittle and difficult to maintain
+1. Several modules still have low test coverage
 2. Documentation could be more comprehensive
 3. Performance could be optimized
 4. Need to document synchronous operation benefits
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Improve test coverage for base.py (currently 73%)
-2. Improve test coverage for responses.py (currently 78%)
-3. Expand schema validation to all models
-4. Implement real API testing strategy
-5. Replace issue lifecycle tests with real API tests
-6. Implement thorough cleanup mechanisms
-7. Document patterns for real API testing
-8. Continue test coverage improvements
-9. Add performance optimizations
-10. Enhance documentation
+1. Improve coverage for client/client.py (currently 34%)
+2. Improve coverage for client/rate_limit.py (currently 18%)
+3. Improve coverage for errors/formatters.py (currently 11%)
+4. Improve coverage for errors/handlers.py (currently 6%)
+5. Improve coverage for operations/issues.py (currently 8%)
+6. Expand schema validation to all models
+7. Implement more integration tests with real API testing
+8. Add performance optimizations
+9. Enhance documentation
+10. Prepare for PyPI publication
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server
@@ -295,19 +320,14 @@ Focus now on improving test coverage for remaining schema files (base.py at 73%,
 - UV package manager
 
 ## Notes
-- Pydantic v2 has different type coercion behavior than v1
-- Use strict=True to prevent automatic type coercion
-- Field-level strictness is more precise than model-level
-- ISO 8601 datetime validation requires careful testing
-- Timezone handling is particularly complex and error-prone
-- Test various timezone formats (Z, +00:00, -05:00, -0500)
-- Test edge cases like missing timezone, invalid timezone format
-- Ensure validation logic handles all branches in conditional statements
-- Package renamed for PyPI compatibility
-- Build isolation works fine without flags
-- Following test-driven development approach
-- Implementing features incrementally
-- Maintaining documentation alongside code
-- Focusing on code quality and maintainability
-- Local development setup proven successful
-- MCP tools functioning as expected
+- Real API testing provides higher confidence than mock-based testing
+- Mocks often fail to accurately represent API behavior
+- Time spent debugging mock behavior could be better spent on real tests
+- Focus on behavior and outcomes rather than implementation details
+- Implement thorough cleanup to prevent test pollution
+- Use test tagging to allow skipping integration tests when appropriate
+- Maintain a dedicated test repository for integration tests
+- Tag all test-created resources for easy identification and cleanup
+- Use unique identifiers for test resources to prevent conflicts
+- Separate unit tests and integration tests into distinct directories
+- Build a robust unit test suite first before implementing integration tests
