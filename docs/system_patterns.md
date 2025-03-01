@@ -276,6 +276,7 @@ class DateTimeModel(BaseModel):
         
         Accepts:
         - ISO 8601 format strings with timezone (e.g., "2020-01-01T00:00:00Z")
+        - ISO 8601 format strings with timezone without colon (e.g., "2020-01-01T12:30:45-0500")
         - datetime objects
         
         Returns:
@@ -295,6 +296,19 @@ class DateTimeModel(BaseModel):
             try:
                 # Handle 'Z' timezone indicator by replacing with +00:00
                 v = v.replace('Z', '+00:00')
+                
+                # Handle timezone formats without colons (e.g., -0500 -> -05:00)
+                # Check if there's a timezone part (+ or - followed by 4 digits)
+                if ('+' in v or '-' in v.split('T')[1]):
+                    # Find the position of the timezone sign
+                    sign_pos = max(v.rfind('+'), v.rfind('-'))
+                    if sign_pos > 0:
+                        timezone_part = v[sign_pos:]
+                        # If timezone doesn't have a colon and has 5 chars (e.g., -0500)
+                        if ':' not in timezone_part and len(timezone_part) == 5:
+                            # Insert colon between hours and minutes
+                            v = v[:sign_pos+3] + ':' + v[sign_pos+3:]
+                
                 return datetime.fromisoformat(v)
             except ValueError:
                 raise ValueError(
@@ -403,6 +417,20 @@ def test_datetime_parsing(valid_base_data):
     params = DateTimeModel(
         **valid_base_data,
         since="2020-01-01T12:30:45-0500"
+    )
+    assert isinstance(params.since, datetime)
+    
+    # Test with timezone format that has a colon (no normalization needed)
+    params = DateTimeModel(
+        **valid_base_data,
+        since="2020-01-01T12:30:45+05:00"
+    )
+    assert isinstance(params.since, datetime)
+    
+    # Test with timezone format that doesn't have 5 chars (e.g., +05)
+    params = DateTimeModel(
+        **valid_base_data,
+        since="2020-01-01T12:30:45+05"
     )
     assert isinstance(params.since, datetime)
 

@@ -2,7 +2,7 @@
 
 ## What Works
 - Schema test coverage improvements:
-  - Improved test coverage for issues.py from 90% to 99-100%
+  - Improved test coverage for issues.py from 90% to 100%
   - Added comprehensive tests for datetime validation with various timezone formats
   - Added dedicated test methods for timezone format validation
   - Expanded test coverage for all schema classes in issues.py
@@ -116,7 +116,7 @@
 - [ ] Schema Validation Enhancements
   - [x] Fix test failures in schema validation
   - [x] Add strict=True to fields that should reject type coercion
-  - [x] Improve test coverage for issues.py to 99-100%
+  - [x] Improve test coverage for issues.py to 100%
   - [ ] Improve test coverage for base.py (currently 73%)
   - [ ] Improve test coverage for responses.py (currently 78%)
   - [ ] Review all schema models for validation opportunities
@@ -214,7 +214,7 @@ Core implementation completed and operational with synchronous operations. Packa
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
-We've significantly improved test coverage for schema validation, particularly for the issues.py file, which now has 99-100% coverage. We've added comprehensive tests for datetime validation with various timezone formats, including negative timezone offsets (-05:00, -0500) which were previously untested. This has addressed a specific branch coverage gap in the validate_since method that was handling timezone formats.
+We've significantly improved test coverage for schema validation, particularly for the issues.py file, which now has 100% coverage. We've added comprehensive tests for datetime validation with various timezone formats, including negative timezone offsets (-05:00, -0500) which were previously untested. This has addressed specific branch coverage gaps in the validate_since method for both ListIssuesParams and ListIssueCommentsParams, as well as the validate_title method in UpdateIssueParams with None value.
 
 We've addressed specific test failures in schema validation by adding strict=True to field definitions in CreateIssueParams and GetIssueParams, and fixing validation for empty content lists in ToolResponse. These changes ensure proper type checking and prevent automatic type coercion, which was causing test failures.
 

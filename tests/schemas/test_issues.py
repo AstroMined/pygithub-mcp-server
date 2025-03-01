@@ -351,10 +351,49 @@ class TestListIssuesParams:
         assert params.since.minute == 30
         assert params.since.second == 45
         
+        # Test with timezone format that has a colon (no normalization needed)
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45+05:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with timezone format that doesn't have 5 chars (e.g., +05)
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45+05"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
         # Test with negative timezone offset without colon
         params = ListIssuesParams(
             **valid_repository_ref_data,
             since="2020-01-01T12:30:45-0500"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with timezone format that has no sign (Z)
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45Z"
         )
         assert isinstance(params.since, datetime)
         assert params.since.year == 2020
@@ -381,6 +420,32 @@ class TestListIssuesParams:
         params = ListIssuesParams(
             **valid_repository_ref_data,
             since="2020-01-01T12:30:45-12:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with positive timezone offset without colon
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45+0500"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with timezone format that doesn't need normalization
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45+05:30"
         )
         assert isinstance(params.since, datetime)
         assert params.since.year == 2020
@@ -602,6 +667,16 @@ class TestUpdateIssueParams:
         assert params.labels is None
         assert params.assignees is None
         assert params.milestone is None
+        
+    def test_title_validation_edge_cases(self, valid_repository_ref_data):
+        """Test edge cases for title validation."""
+        # Test with None title (should be valid)
+        params = UpdateIssueParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            title=None
+        )
+        assert params.title is None
         
     def test_invalid_field_types(self, valid_repository_ref_data):
         """Test that invalid field types raise validation errors."""
@@ -1147,6 +1222,20 @@ class TestListIssueCommentsParams:
         assert params.since.minute == 30
         assert params.since.second == 45
         
+        # Test with timezone format that has no sign (Z)
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45Z"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
         # Test with single-digit negative timezone offset
         params = ListIssueCommentsParams(
             **valid_repository_ref_data,
@@ -1166,6 +1255,34 @@ class TestListIssueCommentsParams:
             **valid_repository_ref_data,
             issue_number=1,
             since="2020-01-01T12:30:45-12:00"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with positive timezone offset without colon
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45+0500"
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
+        
+        # Test with timezone format that doesn't need normalization
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45+05:30"
         )
         assert isinstance(params.since, datetime)
         assert params.since.year == 2020
