@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Common module reorganization (ADR 005):
   - Created domain-specific directories for converters (issues, repositories, users)
   - Established dedicated modules for error handling, client management, and utilities
-  - Implemented backward compatibility through re-exports and deprecation warnings
   - Improved code organization and maintainability
   - Standardized on PyGithub for API interactions
   - Consolidated data transformation functions into logical groups
@@ -22,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transferred GitHub client functionality to client directory
 - Consolidated datetime conversion in common/datetime.py
 - Enhanced separation of concerns across all modules
+- Removed deprecated common module files entirely
+- Updated test imports to use the new module structure
+- Eliminated technical debt by removing deprecated code instead of just marking it as deprecated
 
 ## [0.3.1] - 2025-02-28
 

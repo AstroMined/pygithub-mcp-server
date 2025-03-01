@@ -6,7 +6,7 @@ configuration settings.
 
 import os
 
-from pygithub_mcp_server.common.errors import GitHubError
+from pygithub_mcp_server.errors import GitHubError
 
 
 def get_github_token() -> str:

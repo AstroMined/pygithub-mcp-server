@@ -19,7 +19,7 @@ from github.NamedUser import NamedUser
 from github.PaginatedList import PaginatedList
 from github.Repository import Repository
 
-from pygithub_mcp_server.common.github import GitHubClient
+from pygithub_mcp_server.client import GitHubClient
 
 
 # Mock classes that inherit from GitHub classes
@@ -441,7 +441,7 @@ def mock_auth(monkeypatch):
     mock_auth_module.Token = token_factory_mock
     
     # Patch the Auth in the module under test
-    monkeypatch.setattr("pygithub_mcp_server.common.github.Auth", mock_auth_module)
+    monkeypatch.setattr("pygithub_mcp_server.client.Auth", mock_auth_module)
     
     return mock_auth_module
 
@@ -473,7 +473,7 @@ def mock_github_class(monkeypatch, mock_repo):
     mock_instance.get_rate_limit = Mock()  # Prevents auth errors
     
     # Patch Github in the module under test
-    monkeypatch.setattr("pygithub_mcp_server.common.github.Github", mock)
+    monkeypatch.setattr("pygithub_mcp_server.client.Github", mock)
     return mock
 
 

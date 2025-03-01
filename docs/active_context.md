@@ -37,14 +37,15 @@ Current test status:
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
-- Reorganized common module (ADR 005):
+- Completed common module reorganization (ADR 005):
   - Created domain-specific directories for converters (issues, repositories, users)
   - Established dedicated modules for error handling, client management, and utilities
-  - Implemented backward compatibility through re-exports and deprecation warnings
   - Improved code organization and maintainability
   - Standardized on PyGithub for API interactions
   - Consolidated data transformation functions into logical groups
   - Enhanced separation of concerns across all modules
+  - Removed deprecated common module files entirely
+  - Started updating test imports to use the new module structure
 
 - Improved schema test coverage:
   - Added comprehensive tests for datetime validation with various timezone formats
@@ -526,6 +527,15 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Granular modules are easier to test and maintain
    - Consistent naming conventions improve navigation
 
+21. Technical Debt Management
+   - Completely removing deprecated code is better than just marking it as deprecated
+   - Maintaining backward compatibility through re-exports creates technical debt
+   - Deprecated modules can lead to confusion and maintenance overhead
+   - Test imports need to be updated when reorganizing modules
+   - Refactoring should be complete rather than partial to avoid lingering technical debt
+   - Removing deprecated code forces consumers to update to the new API
+   - Complete removal is cleaner than maintaining parallel implementations
+
 ## Progress Tracking
 
 ### Completed
@@ -540,6 +550,8 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Created object conversion utilities
 - Refactored issues module to use PyGithub
 - Added PyGithub patterns to documentation
+- Completed common module reorganization (ADR 005)
+- Removed deprecated common module files entirely
 
 ### In Progress
 - Schema validation fixes for test failures

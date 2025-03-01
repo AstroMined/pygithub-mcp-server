@@ -22,8 +22,8 @@ from pygithub_mcp_server.schemas.issues import (
     AddIssueLabelsParams,
     RemoveIssueLabelParams,
 )
-from pygithub_mcp_server.common.version import VERSION
-from pygithub_mcp_server.common.errors import GitHubError, format_github_error
+from pygithub_mcp_server.version import VERSION
+from pygithub_mcp_server.errors import GitHubError, format_github_error
 from pygithub_mcp_server.operations import issues
 
 # Set up logging
