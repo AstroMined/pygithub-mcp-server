@@ -15,12 +15,13 @@ We've fixed the test failures in `test_issues.py` by adding comprehensive tests 
 
 These improvements are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
 
-We're also continuing our transition to real GitHub API testing as our primary testing strategy, with minimal mocking only where absolutely necessary. This approach will:
+We're now committed to completely eliminating mock-based testing in favor of real GitHub API testing. This approach will:
 - Verify actual API behavior with high confidence
-- Eliminate complex mock maintenance
+- Completely eliminate complex mock maintenance
 - Provide real error responses and rate limits
-- Serve as API documentation
-- Reduce time spent debugging mock behavior
+- Serve as documentation of actual API behavior
+- Eliminate time spent debugging mock behavior
+- Make tests more reliable and representative of real usage
 
 Current test status:
 - Schema validation tests: Significantly improved, with issues.py at 100% coverage
@@ -34,7 +35,7 @@ Current test status:
   - operations/issues.py (71% coverage)
   - __main__.py (0% coverage)
 
-We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
+We've updated our testing strategy (ADR 002) to completely eliminate mock-based testing in favor of real API testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
 - Completed common module reorganization (ADR 005):
@@ -87,12 +88,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
   - Established foundation for schema-first development approach
 
 - Updated ADR 002 (Real API Testing):
-  - Shifted focus to prioritize real API testing over mock-based testing
-  - Documented challenges with maintaining complex mocks
-  - Added detailed implementation plan for transitioning to real API tests
-  - Added guidance for future development
+  - Committed to completely eliminating mock-based testing in favor of real API testing
+  - Documented approach for creating realistic fixtures using real schemas, converters, and operations
+  - Reorganized implementation plan with unit tests first, then integration tests
+  - Added detailed directory structure for test organization
+  - Enhanced guidance for test repository management
+  - Added comprehensive strategies for handling rate limits and test isolation
   - Expanded consequences and mitigation strategies
-  - Added references to testing best practices
+  - Added references to testing best practices and testing without mocks
 
 - Enhanced error handling and message formatting:
   - Added 'permission' word to permission error messages for clarity
@@ -208,8 +211,12 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Develop helper functions for common test operations
 
 5. Phase 3: Comprehensive Transition
-   - Systematically replace mock-based tests with real API tests
-   - Identify and document any edge cases that still require mocking
+   - Systematically replace all mock-based tests with real API tests
+   - Create realistic fixtures using real schemas, converters, and operations
+   - Organize tests by domain (issues, repositories, users)
+   - Implement proper setup and teardown for each test
+   - Tag all test-created resources for easy identification
+   - Use unique identifiers for test resources to prevent conflicts
    - Update documentation to reflect new testing approach
    - Train team members on new testing patterns
 
@@ -274,10 +281,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Maintain FastMCP interface stability
 
 13. Testing Implementation
-   - Set up pytest infrastructure
-   - Create test fixtures and mocks
-   - Implement unit tests for operations
-   - Add integration tests for API calls
+   - Set up pytest infrastructure with unit/integration separation
+   - Create test fixtures using real schemas and converters
+   - Implement unit tests for internal components
+   - Implement integration tests with real API interactions
+   - Set up dedicated test repository and token
+   - Implement thorough cleanup mechanisms
+   - Create helper functions for common test operations
+   - Organize tests by domain (issues, repositories, users)
 
 ## Active Decisions
 1. Schema Validation Approach
@@ -294,11 +305,15 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Comprehensive validation with clear error messages
 
 3. Testing Strategy
-   - Prioritize real API testing over mock-based testing
-   - Use mocks only for edge cases that cannot be reliably reproduced
-   - Focus on testing behavior and outcomes rather than implementation details
+   - Completely eliminate mock-based testing in favor of real API testing
+   - Create realistic fixtures using real schemas, converters, and operations
+   - Separate unit tests and integration tests into distinct directories
+   - Build a robust unit test suite first before implementing integration tests
+   - Maintain a dedicated test repository rather than creating/deleting for each test run
+   - Implement thorough cleanup mechanisms that run after each test
+   - Tag all test-created resources for easy identification
+   - Use unique identifiers for all test resources
    - Accept the trade-offs of real API testing for higher confidence
-   - Implement thorough cleanup mechanisms to prevent test pollution
 
 4. PyGithub Integration
    - Using singleton pattern for client management
@@ -328,10 +343,13 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Strict type checking for fields that should reject coercion
 
 2. Testing Transition
-   - Systematically replacing mock-based tests with real API tests
-   - Identifying edge cases that still require mocking
-   - Implementing robust cleanup mechanisms
-   - Managing rate limits in test environments
+   - Building a robust unit test suite first to ensure internal components work correctly
+   - Implementing integration tests that test full resource lifecycles
+   - Creating helper functions for common test operations
+   - Implementing thorough cleanup mechanisms
+   - Managing rate limits with exponential backoff
+   - Using conditional requests with ETags to reduce rate limit impact
+   - Implementing request batching where possible
    - Handling network dependencies in CI/CD pipelines
 
 3. Schema Migration
@@ -340,11 +358,14 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Maintaining type safety
    - Ensuring backward compatibility
 
-4. Testing Strategy
-   - Mocking PyGithub objects
-   - Testing pagination
-   - Error condition coverage
-   - Integration test approach
+4. Testing Organization
+   - Separating unit tests and integration tests
+   - Organizing tests by domain (issues, repositories, users)
+   - Using descriptive test names that reflect the behavior being tested
+   - Implementing proper setup and teardown for each test
+   - Testing pagination with real API responses
+   - Comprehensive error condition coverage
+   - Full resource lifecycle testing
 
 5. Feature Expansion
    - Identifying useful PyGithub features
@@ -386,6 +407,11 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Focus on behavior and outcomes rather than implementation details
    - Implement thorough cleanup to prevent test pollution
    - Use test tagging to allow skipping integration tests when appropriate
+   - Maintain a dedicated test repository for integration tests
+   - Tag all test-created resources for easy identification and cleanup
+   - Use unique identifiers for test resources to prevent conflicts
+   - Separate unit tests and integration tests into distinct directories
+   - Build a robust unit test suite first before implementing integration tests
 
 4. Error Message Formatting
    - Include descriptive words in error messages (e.g., 'permission' in permission errors)
@@ -449,19 +475,20 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Test both presence and absence of optional data
    - Document expected behavior for missing fields
 
-12. Testing Strategy
+12. Real API Testing
    - Comprehensive test suite is essential
-   - Mocking GitHub objects requires careful attention
    - Test fixtures improve test maintainability
    - Coverage reporting helps identify gaps
    - Unit tests reveal design issues early
-   - Mock data should match real API responses
-   - Patch imported modules at point of use, not globally
-   - Preserve type checking when mocking external libraries
-   - Consider module namespace binding when patching
-   - Use Mock(spec=...) to maintain type safety
-   - Create consistent mock instances for tracking calls
-   - Balance realistic behavior with test isolation
+   - Separate unit tests and integration tests
+   - Organize tests by domain (issues, repositories, users)
+   - Use descriptive test names that reflect behavior
+   - Implement proper setup and teardown for each test
+   - Tag all test-created resources for easy identification
+   - Use unique identifiers for test resources
+   - Implement thorough cleanup mechanisms
+   - Build unit test suite first before integration tests
+   - Test full resource lifecycles in integration tests
 
 13. Error Handling
    - Standardized error handling improves maintainability
@@ -577,6 +604,9 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
 - Fix remaining test failures in schema validation
 - Expand schema validation to all models
 - Refactor remaining operations to use PyGithub
-- Expand test suite with PyGithub mocks
-- Add integration tests
+- Create test directory structure with unit/integration separation
+- Build robust unit test suite for internal components
+- Implement integration tests with real API interactions
+- Set up dedicated test repository and token
+- Implement thorough cleanup mechanisms for test resources
 - Implement advanced PyGithub features

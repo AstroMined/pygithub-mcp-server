@@ -15,7 +15,7 @@ from github.Milestone import Milestone
 from github.NamedUser import NamedUser
 from github.Repository import Repository
 
-from pygithub_mcp_server.common.converters import (
+from pygithub_mcp_server.converters import (
     convert_user,
     convert_label,
     convert_milestone,
