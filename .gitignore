@@ -40,7 +40,7 @@ logs/
 *.log
 
 # PyGithub Documentation
-# docs/PyGithub/
+docs/PyGithub-Archive/
 
 # Local development
 .DS_Store
