@@ -37,6 +37,15 @@ Current test status:
 We've updated our testing strategy (ADR 002) to prioritize real API testing over mock-based testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Reorganized common module (ADR 005):
+  - Created domain-specific directories for converters (issues, repositories, users)
+  - Established dedicated modules for error handling, client management, and utilities
+  - Implemented backward compatibility through re-exports and deprecation warnings
+  - Improved code organization and maintainability
+  - Standardized on PyGithub for API interactions
+  - Consolidated data transformation functions into logical groups
+  - Enhanced separation of concerns across all modules
+
 - Improved schema test coverage:
   - Added comprehensive tests for datetime validation with various timezone formats
   - Added dedicated test methods for timezone format validation
@@ -506,6 +515,16 @@ We've updated our testing strategy (ADR 002) to prioritize real API testing over
    - Maintain consistent test structure across files
    - Fix indentation issues promptly to prevent syntax errors
    - Complete all test methods properly to avoid runtime errors
+
+20. Module Organization Patterns
+   - Domain-based decomposition improves maintainability
+   - Re-exports with deprecation warnings ensure backward compatibility
+   - Clear separation of concerns reduces code complexity
+   - Consistent directory structures improve discoverability
+   - Logical grouping of related functionality enhances readability
+   - Deprecation warnings help guide users to new APIs
+   - Granular modules are easier to test and maintain
+   - Consistent naming conventions improve navigation
 
 ## Progress Tracking
 

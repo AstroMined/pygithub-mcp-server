@@ -1,111 +1,46 @@
 """GitHub API error handling.
 
-This module defines custom exceptions for GitHub API operations, providing
-clear error messages and proper error context.
+DEPRECATED: This module is deprecated. Import from pygithub_mcp_server.errors instead.
+
+This module re-exports all error classes and functions from the new location
+for backward compatibility.
 """
 
-from datetime import datetime
-from typing import Any, Dict, Optional
+import warnings
 
+# Show deprecation warning
+warnings.warn(
+    "The pygithub_mcp_server.common.errors module is deprecated. "
+    "Import from pygithub_mcp_server.errors instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
-class GitHubError(Exception):
-    """Base exception for GitHub API errors."""
+# Re-export all error classes and functions from the new location
+from pygithub_mcp_server.errors import (
+    GitHubError,
+    GitHubValidationError,
+    GitHubResourceNotFoundError,
+    GitHubAuthenticationError,
+    GitHubPermissionError,
+    GitHubRateLimitError,
+    GitHubConflictError,
+    format_github_error,
+    is_github_error,
+    handle_github_exception,
+    format_validation_error,
+)
 
-    def __init__(self, message: str, response: Optional[Dict[str, Any]] = None) -> None:
-        """Initialize GitHub error.
-
-        Args:
-            message: Error message
-            response: Optional raw API response data
-        """
-        super().__init__(message)
-        self.response = response
-
-
-class GitHubValidationError(GitHubError):
-    """Raised when request validation fails."""
-
-    pass
-
-
-class GitHubResourceNotFoundError(GitHubError):
-    """Raised when a requested resource is not found."""
-
-    pass
-
-
-class GitHubAuthenticationError(GitHubError):
-    """Raised when authentication fails."""
-
-    pass
-
-
-class GitHubPermissionError(GitHubError):
-    """Raised when the authenticated user lacks required permissions."""
-
-    pass
-
-
-class GitHubRateLimitError(GitHubError):
-    """Raised when GitHub API rate limit is exceeded."""
-
-    def __init__(
-        self, message: str, reset_at: Optional[datetime] = None, response: Optional[Dict[str, Any]] = None
-    ) -> None:
-        """Initialize rate limit error.
-
-        Args:
-            message: Error message
-            reset_at: When the rate limit will reset, or None if unknown
-            response: Optional raw API response data
-        """
-        super().__init__(message, response)
-        self.reset_at = reset_at
-
-
-class GitHubConflictError(GitHubError):
-    """Raised when there is a conflict with the current state."""
-
-    pass
-
-
-def format_github_error(error: GitHubError) -> str:
-    """Format a GitHub error for display.
-
-    Args:
-        error: The GitHub error to format
-
-    Returns:
-        Formatted error message with context
-    """
-    message = f"GitHub API Error: {str(error)}"
-
-    if isinstance(error, GitHubValidationError):
-        message = f"Validation Error: {str(error)}"
-        if error.response:
-            message += f"\nDetails: {error.response}"
-    elif isinstance(error, GitHubResourceNotFoundError):
-        message = f"Not Found: {str(error)}"
-    elif isinstance(error, GitHubAuthenticationError):
-        message = f"Authentication Failed: {str(error)}"
-    elif isinstance(error, GitHubPermissionError):
-        message = f"Permission Denied: {str(error)}"
-    elif isinstance(error, GitHubRateLimitError):
-        reset_info = f"Resets at: {error.reset_at.isoformat() if error.reset_at else 'unknown'}"
-        message = f"Rate Limit Exceeded: {str(error)}\n{reset_info}"
-    elif isinstance(error, GitHubConflictError):
-        message = f"Conflict: {str(error)}"
-
-    return message
-
-
-def is_github_error(error: Any) -> bool:
-    """Check if an error is a GitHub error.
-
-    Args:
-        error: Error to check
-
-    Returns:
-        True if error is a GitHub error, False otherwise
-    """
-    return isinstance(error, GitHubError)
+__all__ = [
+    "GitHubError",
+    "GitHubValidationError",
+    "GitHubResourceNotFoundError",
+    "GitHubAuthenticationError",
+    "GitHubPermissionError",
+    "GitHubRateLimitError",
+    "GitHubConflictError",
+    "format_github_error",
+    "is_github_error",
+    "handle_github_exception",
+    "format_validation_error",
+]

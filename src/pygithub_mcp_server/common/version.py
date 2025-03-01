@@ -30,8 +30,8 @@ from typing import Final, Tuple
 # Version components - IMPORTANT: Keep in sync with pyproject.toml
 # TODO: Once project stabilizes, replace with importlib.metadata approach to read version from package metadata
 VERSION_MAJOR: Final[int] = 0
-VERSION_MINOR: Final[int] = 3
-VERSION_PATCH: Final[int] = 1
+VERSION_MINOR: Final[int] = 4
+VERSION_PATCH: Final[int] = 0
 
 # Full version string
 VERSION: Final[str] = f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}"

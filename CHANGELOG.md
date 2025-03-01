@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-02-28
+
+### Added
+- Common module reorganization (ADR 005):
+  - Created domain-specific directories for converters (issues, repositories, users)
+  - Established dedicated modules for error handling, client management, and utilities
+  - Implemented backward compatibility through re-exports and deprecation warnings
+  - Improved code organization and maintainability
+  - Standardized on PyGithub for API interactions
+  - Consolidated data transformation functions into logical groups
+
+### Changed
+- Moved converter functions to domain-specific files
+- Relocated error handling to dedicated modules
+- Transferred GitHub client functionality to client directory
+- Consolidated datetime conversion in common/datetime.py
+- Enhanced separation of concerns across all modules
+
 ## [0.3.1] - 2025-02-28
 
 ### Fixed

@@ -1,6 +1,15 @@
 # Project Progress
 
 ## What Works
+- Common module reorganization (ADR 005):
+  - Created domain-specific directories for converters (issues, repositories, users)
+  - Established dedicated modules for error handling, client management, and utilities
+  - Implemented backward compatibility through re-exports and deprecation warnings
+  - Improved code organization and maintainability
+  - Standardized on PyGithub for API interactions
+  - Consolidated data transformation functions into logical groups
+  - Enhanced separation of concerns across all modules
+
 - Schema test coverage improvements:
   - Improved test coverage for issues.py from 90% to 100%
   - Added comprehensive tests for datetime validation with various timezone formats

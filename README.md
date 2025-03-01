@@ -216,17 +216,55 @@ src/
     ├── __init__.py
     ├── __main__.py
     ├── server.py
-    ├── common/
+    ├── client/                # GitHub client functionality
     │   ├── __init__.py
+    │   ├── client.py          # Core GitHub client
+    │   └── rate_limit.py      # Rate limit handling
+    ├── common/                # Legacy module (deprecated)
+    │   ├── __init__.py
+    │   ├── converters.py
     │   ├── errors.py
-    │   ├── github.py      # GitHub client singleton
-    │   ├── converters.py  # Object conversion utilities
+    │   ├── github.py
     │   ├── types.py
     │   ├── utils.py
     │   └── version.py
-    └── operations/
+    ├── converters/            # Data transformation
+    │   ├── __init__.py
+    │   ├── parameters.py      # Parameter formatting
+    │   ├── responses.py       # Response formatting
+    │   ├── common/            # Common converters
+    │   │   ├── __init__.py
+    │   │   └── datetime.py    # Date/time conversions
+    │   ├── issues/            # Issue-related converters
+    │   │   ├── __init__.py
+    │   │   ├── issues.py      # Issue converters
+    │   │   └── comments.py    # Issue comment converters
+    │   ├── repositories/      # Repository converters
+    │   │   ├── __init__.py
+    │   │   ├── repositories.py # Repository converters
+    │   │   └── contents.py    # Repository content converters
+    │   └── users/             # User-related converters
+    │       ├── __init__.py
+    │       └── users.py       # User converters
+    ├── errors/                # Error handling
+    │   ├── __init__.py
+    │   ├── exceptions.py      # Custom exceptions
+    │   ├── formatters.py      # Error formatting
+    │   └── handlers.py        # Error handling
+    ├── operations/            # GitHub operations
+    │   ├── __init__.py
+    │   └── issues.py
+    ├── schemas/               # Data models
+    │   ├── __init__.py
+    │   ├── base.py
+    │   ├── issues.py
+    │   ├── pull_requests.py
+    │   ├── repositories.py
+    │   ├── responses.py
+    │   └── search.py
+    └── utils/                 # General utilities
         ├── __init__.py
-        └── issues.py
+        └── environment.py     # Environment utilities
 ```
 
 ### Troubleshooting

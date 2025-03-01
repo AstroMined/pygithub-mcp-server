@@ -1,254 +1,33 @@
 """GitHub client singleton.
 
-This module provides a singleton class for managing the PyGithub instance
-and handling GitHub API interactions through the PyGithub library.
+DEPRECATED: This module is deprecated. Import from pygithub_mcp_server.client instead.
+
+This module re-exports the GitHub client from the new location for backward compatibility.
 """
 
-import logging
-import os
-import sys
-from typing import Optional, Dict, Any
+import warnings
 
-from github import Auth, Github, GithubException, RateLimitExceededException
-from github.Repository import Repository
-
-# Get logger
-logger = logging.getLogger(__name__)
-
-from .errors import (
-    GitHubAuthenticationError,
-    GitHubError,
-    GitHubPermissionError,
-    GitHubRateLimitError,
-    GitHubResourceNotFoundError,
-    GitHubValidationError,
+# Show deprecation warning
+warnings.warn(
+    "The pygithub_mcp_server.common.github module is deprecated. "
+    "Import from pygithub_mcp_server.client instead.",
+    DeprecationWarning,
+    stacklevel=2
 )
 
+# Re-export GitHub client from the new location
+from pygithub_mcp_server.client import (
+    GitHubClient,
+    check_rate_limit,
+    wait_for_rate_limit_reset,
+    exponential_backoff,
+    handle_rate_limit_with_backoff,
+)
 
-class GitHubClient:
-    """Singleton class for managing PyGithub instance."""
-
-    _instance: Optional["GitHubClient"] = None
-    _github: Optional[Github] = None
-    _created_via_get_instance: bool = False
-    _initialized: bool = False
-
-    def __init__(self) -> None:
-        """Initialize GitHub client.
-
-        Note: Use get_instance() instead of constructor.
-        
-        Raises:
-            RuntimeError: If instantiated directly instead of through get_instance()
-        """
-        if not GitHubClient._created_via_get_instance:
-            raise RuntimeError("Use GitHubClient.get_instance() instead")
-        GitHubClient._created_via_get_instance = False  # Reset for next instantiation
-
-    @classmethod
-    def get_instance(cls) -> "GitHubClient":
-        """Get singleton instance.
-
-        Returns:
-            GitHubClient instance
-        """
-        if cls._instance is None:
-            cls._created_via_get_instance = True
-            cls._instance = cls()
-            cls._instance._init_client()
-        return cls._instance
-
-    def _init_client(self) -> None:
-        """Initialize PyGithub client with token authentication."""
-        if self._initialized:
-            return
-
-        # Initialize real client
-        token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
-        logger.debug("Initializing GitHub client")
-        
-        if not token:
-            logger.error("GITHUB_PERSONAL_ACCESS_TOKEN not set")
-            raise GitHubError("GITHUB_PERSONAL_ACCESS_TOKEN environment variable not set")
-
-        logger.debug("Token found, creating GitHub client")
-        self._create_client(token)
-        logger.debug("GitHub client initialized successfully")
-        self._initialized = True
-
-    def _create_client(self, token: str) -> None:
-        """Create PyGithub client instance.
-        
-        Args:
-            token: GitHub personal access token
-        """
-        auth = Auth.Token(token)
-        self._github = Github(auth=auth)
-
-    @property
-    def github(self) -> Github:
-        """Get PyGithub instance.
-
-        Returns:
-            PyGithub instance
-
-        Raises:
-            GitHubError: If client is not initialized
-        """
-        if not self._initialized:
-            self._init_client()
-
-        if self._github is None:
-            raise GitHubError("GitHub client not initialized")
-
-        return self._github
-
-    def get_repo(self, full_name: str) -> Repository:
-        """Get a repository by full name.
-
-        Args:
-            full_name: Repository full name (owner/repo)
-
-        Returns:
-            PyGithub Repository object
-
-        Raises:
-            GitHubError: If repository access fails
-        """
-        logger.debug(f"Getting repository: {full_name}")
-        try:
-            repo = self.github.get_repo(full_name)
-            logger.debug(f"Successfully got repository: {full_name}")
-            return repo
-        except GithubException as e:
-            logger.error(f"GitHub exception when getting repo {full_name}: {str(e)}")
-            raise self._handle_github_exception(e, resource_hint="repository")
-
-    def _handle_github_exception(self, error: GithubException, resource_hint: Optional[str] = None) -> GitHubError:
-        """Map PyGithub exceptions to our error types.
-
-        Args:
-            error: PyGithub exception
-            resource_hint: Optional hint about the resource type being accessed
-
-        Returns:
-            Appropriate GitHubError subclass instance
-        """
-        try:
-            # Handle RateLimitExceededException specifically
-            if isinstance(error, RateLimitExceededException):
-                logger.error("Rate limit exceeded")
-                rate = getattr(error, 'rate', None)
-                reset_time = None
-                remaining = 0
-                limit = None
-                
-                if rate:
-                    reset_time = getattr(rate, 'reset', None)
-                    remaining = getattr(rate, 'remaining', 0)
-                    limit = getattr(rate, 'limit', None)
-                
-                msg = f"API rate limit exceeded ({remaining}/{limit} calls remaining)"
-                if reset_time:
-                    try:
-                        msg += f". Reset at {reset_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
-                    except (AttributeError, TypeError):
-                        # Handle case where reset_time doesn't have strftime or isn't a datetime
-                        msg += f". Reset at {reset_time}"
-                return GitHubRateLimitError(msg, reset_time, None)
-
-            data = error.data if hasattr(error, "data") else {}
-            if isinstance(data, str):
-                try:
-                    import json
-                    data = json.loads(data)
-                except:
-                    data = {"message": data}
-            
-            logger.error(f"Handling GitHub exception: status={error.status}, data={data}")
-
-            # Extract error message
-            error_msg = data.get("message", str(error)) if data else str(error)
-            
-            # Determine resource type, prioritizing the hint
-            resource_type = resource_hint
-            if not resource_type:
-                if data and "resource" in data:
-                    resource_type = data["resource"]
-                elif "issue" in error_msg.lower():
-                    resource_type = "issue"
-                elif "repository" in error_msg.lower():
-                    resource_type = "repository"
-                elif "comment" in error_msg.lower():
-                    resource_type = "comment"
-                elif "label" in error_msg.lower():
-                    resource_type = "label"
-
-            if error.status == 401:
-                logger.error("Authentication error")
-                return GitHubAuthenticationError(
-                    "Authentication failed. Please verify your GitHub token.",
-                    data
-                )
-            elif error.status == 403:
-                if "rate limit" in error_msg.lower():
-                    logger.error("Rate limit exceeded")
-                    headers = getattr(error, "headers", {}) or {}
-                    reset_time = headers.get("X-RateLimit-Reset")
-                    msg = "API rate limit exceeded"
-                    if reset_time:
-                        from datetime import datetime
-                        reset_dt = datetime.fromtimestamp(int(reset_time))
-                        msg += f". Reset at {reset_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
-                    return GitHubRateLimitError(msg, reset_time, data)
-                logger.error("Permission denied")
-                return GitHubPermissionError(
-                    f"Permission denied: Resource not accessible by integration",
-                    data
-                )
-            elif error.status == 404:
-                logger.error("Resource not found")
-                msg = "Not Found"
-                if resource_type:
-                    msg = f"{resource_type.title()} not found"
-                return GitHubResourceNotFoundError(msg, data)
-            elif error.status == 422:
-                logger.error("Validation error")
-                return GitHubValidationError(error_msg, data)
-            else:
-                logger.error(f"Unknown GitHub error: {error.status}")
-                return GitHubError(f"GitHub API Error ({error.status}): {error_msg}", data)
-        except Exception as e:
-            logger.error(f"Error handling GitHub exception: {e}")
-            return GitHubError(str(error), None)
-
-    def _format_validation_error(self, error_msg: str, data: Optional[Dict[str, Any]]) -> str:
-        """Format validation error message to be more user-friendly.
-
-        Args:
-            error_msg: Original error message
-            data: Error response data
-
-        Returns:
-            Formatted error message
-        """
-        if not data:
-            return error_msg
-
-        # Extract validation errors from response data
-        errors = data.get("errors", [])
-        if not errors:
-            return error_msg
-
-        # Format each validation error
-        formatted_errors = []
-        for error in errors:
-            if "field" in error:
-                field = error["field"]
-                code = error.get("code", "invalid")
-                message = error.get("message", "is invalid")
-                formatted_errors.append(f"- {field}: {message} ({code})")
-
-        if formatted_errors:
-            return "Validation failed:\n" + "\n".join(formatted_errors)
-        return error_msg
+__all__ = [
+    "GitHubClient",
+    "check_rate_limit",
+    "wait_for_rate_limit_reset",
+    "exponential_backoff",
+    "handle_rate_limit_with_backoff",
+]
