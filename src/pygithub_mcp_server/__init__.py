@@ -6,7 +6,7 @@ issues, repositories, and pull requests.
 """
 
 from .server import mcp
-from .common.version import VERSION
+from .version import VERSION
 
 __version__ = VERSION
 __all__ = ["mcp", "__version__"]

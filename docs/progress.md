@@ -1,6 +1,15 @@
 # Project Progress
 
 ## What Works
+- Environment setup for testing:
+  - Added .env.test file for test credentials
+  - Implemented dotenv loading functionality in utils/environment.py
+  - Added environment type support (test, dev, prod)
+  - Fixed environment utility tests to expect GitHubError
+  - Added unit test conftest.py with test environment loading
+  - Improved test organization with unit test structure
+  - Established foundation for real API testing
+
 - Common module reorganization (ADR 005):
   - Created domain-specific directories for converters (issues, repositories, users)
   - Established dedicated modules for error handling, client management, and utilities

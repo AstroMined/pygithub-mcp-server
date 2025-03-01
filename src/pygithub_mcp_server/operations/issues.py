@@ -11,9 +11,10 @@ from typing import Any, Dict, List, Optional, Union
 from github import GithubException
 from github.PaginatedList import PaginatedList
 
-from ..common.converters import convert_issue, convert_issue_comment, convert_label
-from ..common.errors import GitHubError
-from ..common.github import GitHubClient
+from ..converters.issues.issues import convert_issue, convert_label
+from ..converters.issues.comments import convert_issue_comment
+from ..errors import GitHubError
+from ..client import GitHubClient
 
 # Get logger
 logger = logging.getLogger(__name__)

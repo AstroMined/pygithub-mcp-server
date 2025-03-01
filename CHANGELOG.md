@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-03-01
+
+### Added
+- Environment configuration with .env file support:
+  - Added .env.test file for test credentials
+  - Implemented dotenv loading functionality in utils/environment.py
+  - Added environment type support (test, dev, prod)
+  - Improved test organization with unit test structure
+
+### Changed
+- Updated import paths to reflect module reorganization
+- Fixed environment utility tests to expect GitHubError
+- Added unit test conftest.py with test environment loading
+- Established foundation for real API testing
+
+### Fixed
+- Fixed import issues after common module reorganization
+- Updated GitHubError import in environment tests
+- Fixed version import path in __init__.py
+
 ## [0.4.0] - 2025-02-28
 
 ### Added

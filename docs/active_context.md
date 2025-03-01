@@ -38,6 +38,15 @@ Current test status:
 We've updated our testing strategy (ADR 002) to completely eliminate mock-based testing in favor of real API testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Implemented ADR-002 (Real API Testing):
+  - Added environment configuration with .env file support
+  - Created .env.test file for test credentials
+  - Implemented dotenv loading functionality in utils/environment.py
+  - Fixed environment utility tests to expect GitHubError
+  - Added unit test conftest.py with test environment loading
+  - Improved test organization with unit test structure
+  - Established foundation for real API testing
+
 - Completed common module reorganization (ADR 005):
   - Created domain-specific directories for converters (issues, repositories, users)
   - Established dedicated modules for error handling, client management, and utilities
