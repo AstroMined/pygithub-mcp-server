@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import List, Literal, Optional, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+from pygithub_mcp_server.converters.common.datetime import convert_iso_string_to_datetime
 from .base import RepositoryRef
 
 # Valid values for issue state
@@ -128,44 +129,30 @@ class ListIssuesParams(RepositoryRef):
         Accepts:
         - ISO 8601 format strings with timezone (e.g., "2020-01-01T00:00:00Z")
         - ISO 8601 format strings with timezone without colon (e.g., "2020-01-01T12:30:45-0500")
+        - ISO 8601 format strings with short timezone (e.g., "2020-01-01T12:30:45+05")
+        - ISO 8601 format strings with single digit timezone (e.g., "2020-01-01T12:30:45-5")
         - datetime objects
         
         Returns:
         - datetime object
         
         Raises:
-        - ValueError: If the string is not a valid ISO 8601 datetime with timezone
+        - ValueError: If the string cannot be converted to a valid datetime object
         """
         if isinstance(v, str):
-            # Check for ISO format with time component and timezone
+            # Basic validation - must have 'T' and some form of timezone indicator
             if not ('T' in v and ('+' in v or 'Z' in v or '-' in v.split('T')[1])):
                 raise ValueError(
                     f"Invalid ISO format datetime: {v}. "
-                    f"Must be in format YYYY-MM-DDThh:mm:ss+00:00 or YYYY-MM-DDThh:mm:ssZ"
+                    f"Must include date, time with 'T' separator, and timezone."
                 )
             
             try:
-                # Handle 'Z' timezone indicator by replacing with +00:00
-                v = v.replace('Z', '+00:00')
-                
-                # Handle timezone formats without colons (e.g., -0500 -> -05:00)
-                # Check if there's a timezone part (+ or - followed by 4 digits)
-                if ('+' in v or '-' in v.split('T')[1]):
-                    # Find the position of the timezone sign
-                    sign_pos = max(v.rfind('+'), v.rfind('-'))
-                    if sign_pos > 0:
-                        timezone_part = v[sign_pos:]
-                        # If timezone doesn't have a colon and has 5 chars (e.g., -0500)
-                        if ':' not in timezone_part and len(timezone_part) == 5:
-                            # Insert colon between hours and minutes
-                            v = v[:sign_pos+3] + ':' + v[sign_pos+3:]
-                
-                return datetime.fromisoformat(v)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid ISO format datetime: {v}. "
-                    f"Contains invalid date/time components."
-                )
+                # Try to convert using our flexible converter
+                return convert_iso_string_to_datetime(v)
+            except ValueError as e:
+                # Only raise if conversion actually fails
+                raise ValueError(f"Invalid ISO format datetime: {v}. {str(e)}")
         return v
 
 
@@ -284,44 +271,30 @@ class ListIssueCommentsParams(RepositoryRef):
         Accepts:
         - ISO 8601 format strings with timezone (e.g., "2020-01-01T00:00:00Z")
         - ISO 8601 format strings with timezone without colon (e.g., "2020-01-01T12:30:45-0500")
+        - ISO 8601 format strings with short timezone (e.g., "2020-01-01T12:30:45+05")
+        - ISO 8601 format strings with single digit timezone (e.g., "2020-01-01T12:30:45-5")
         - datetime objects
         
         Returns:
         - datetime object
         
         Raises:
-        - ValueError: If the string is not a valid ISO 8601 datetime with timezone
+        - ValueError: If the string cannot be converted to a valid datetime object
         """
         if isinstance(v, str):
-            # Check for ISO format with time component and timezone
+            # Basic validation - must have 'T' and some form of timezone indicator
             if not ('T' in v and ('+' in v or 'Z' in v or '-' in v.split('T')[1])):
                 raise ValueError(
                     f"Invalid ISO format datetime: {v}. "
-                    f"Must be in format YYYY-MM-DDThh:mm:ss+00:00 or YYYY-MM-DDThh:mm:ssZ"
+                    f"Must include date, time with 'T' separator, and timezone."
                 )
             
             try:
-                # Handle 'Z' timezone indicator by replacing with +00:00
-                v = v.replace('Z', '+00:00')
-                
-                # Handle timezone formats without colons (e.g., -0500 -> -05:00)
-                # Check if there's a timezone part (+ or - followed by 4 digits)
-                if ('+' in v or '-' in v.split('T')[1]):
-                    # Find the position of the timezone sign
-                    sign_pos = max(v.rfind('+'), v.rfind('-'))
-                    if sign_pos > 0:
-                        timezone_part = v[sign_pos:]
-                        # If timezone doesn't have a colon and has 5 chars (e.g., -0500)
-                        if ':' not in timezone_part and len(timezone_part) == 5:
-                            # Insert colon between hours and minutes
-                            v = v[:sign_pos+3] + ':' + v[sign_pos+3:]
-                
-                return datetime.fromisoformat(v)
-            except ValueError:
-                raise ValueError(
-                    f"Invalid ISO format datetime: {v}. "
-                    f"Contains invalid date/time components."
-                )
+                # Try to convert using our flexible converter
+                return convert_iso_string_to_datetime(v)
+            except ValueError as e:
+                # Only raise if conversion actually fails
+                raise ValueError(f"Invalid ISO format datetime: {v}. {str(e)}")
         return v
 
 

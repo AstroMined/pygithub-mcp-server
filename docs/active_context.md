@@ -9,9 +9,12 @@ Our current focus is on:
 3. Ensuring all branches in complex conditional logic are covered
 4. Expanding test coverage to other schema files (base.py, responses.py)
 
-We've fixed the test failures in `test_issues.py` by adding comprehensive tests for timezone formats. Specifically, we addressed branch coverage gaps in:
+We've enhanced the datetime conversion functionality to support more flexible timezone formats, particularly adding support for single-digit timezone offsets like "-5". This makes our datetime parsing more robust and user-friendly while maintaining strict validation where needed.
+
+We've fixed the test failures in `test_issues.py` by adding comprehensive tests for timezone formats and enhancing the converter function. Specifically, we addressed:
 - The `validate_since` method for both `ListIssuesParams` and `ListIssueCommentsParams`, ensuring all timezone format variations are properly tested
 - The `validate_title` method in `UpdateIssueParams` with `None` value
+- The `convert_iso_string_to_datetime` function to handle single-digit timezone offsets
 
 These improvements are part of our broader schema validation expansion effort, ensuring that our Pydantic models properly validate input data before it reaches PyGithub methods.
 

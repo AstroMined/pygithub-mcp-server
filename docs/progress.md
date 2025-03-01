@@ -26,8 +26,9 @@
   - Expanded test coverage for all schema classes in issues.py
   - Addressed specific branch coverage gap in the validate_since method
   - Added tests for edge cases in all validation methods
-  - Tested various timezone formats (Z, +00:00, -05:00, -0500)
+  - Tested various timezone formats (Z, +00:00, -05:00, -0500, -5)
   - Added tests for invalid timezone formats
+  - Enhanced datetime conversion to support single-digit timezone offsets
 
 - Schema validation improvements:
   - Added strict=True to field definitions in CreateIssueParams and GetIssueParams

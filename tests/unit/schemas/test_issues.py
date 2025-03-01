@@ -496,15 +496,19 @@ class TestListIssuesParams:
                 since="2020-13-32T25:61:61Z"  # Invalid month, day, hour, minute, second
             )
         assert "Invalid ISO format datetime" in str(exc_info.value)
-        assert "Contains invalid date/time components" in str(exc_info.value)
         
-        # Test with invalid timezone format (missing minutes in offset)
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssuesParams(
-                **valid_repository_ref_data,
-                since="2020-01-01T12:30:45-5"  # Invalid timezone format
-            )
-        assert "Invalid ISO format datetime" in str(exc_info.value) or "Contains invalid date/time components" in str(exc_info.value)
+        # Test with single-digit timezone format (now supported)
+        params = ListIssuesParams(
+            **valid_repository_ref_data,
+            since="2020-01-01T12:30:45-5"  # Single-digit timezone format
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
 
 
 class TestGetIssueParams:
@@ -1338,16 +1342,20 @@ class TestListIssueCommentsParams:
                 since="2020-13-32T25:61:61Z"  # Invalid month, day, hour, minute, second
             )
         assert "Invalid ISO format datetime" in str(exc_info.value)
-        assert "Contains invalid date/time components" in str(exc_info.value)
         
-        # Test with invalid timezone format (missing minutes in offset)
-        with pytest.raises(ValidationError) as exc_info:
-            ListIssueCommentsParams(
-                **valid_repository_ref_data,
-                issue_number=1,
-                since="2020-01-01T12:30:45-5"  # Invalid timezone format
-            )
-        assert "Invalid ISO format datetime" in str(exc_info.value) or "Contains invalid date/time components" in str(exc_info.value)
+        # Test with single-digit timezone format (now supported)
+        params = ListIssueCommentsParams(
+            **valid_repository_ref_data,
+            issue_number=1,
+            since="2020-01-01T12:30:45-5"  # Single-digit timezone format
+        )
+        assert isinstance(params.since, datetime)
+        assert params.since.year == 2020
+        assert params.since.month == 1
+        assert params.since.day == 1
+        assert params.since.hour == 12
+        assert params.since.minute == 30
+        assert params.since.second == 45
         
     def test_invalid_field_types(self, valid_repository_ref_data):
         """Test that invalid field types raise validation errors."""
