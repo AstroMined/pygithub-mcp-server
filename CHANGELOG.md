@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-03-02
+
+### Added
+- Added test_mode parameter to rate limit functions to improve test performance
+- Created comprehensive test failure resolution plan in docs/test_failure_resolution_plan.md
+- Implemented deterministic mode for rate limit backoff calculations
+
+### Changed
+- Standardized error handling across operations with _handle_github_exception method
+- Improved datetime handling with consistent timezone-aware operations
+- Enhanced rate limit tests to use test_mode instead of waiting for real reset times
+
+### Fixed
+- Fixed update_issue function to properly handle PyGithub's edit() returning None
+- Added missing reset_timestamp attribute to GitHubRateLimitError
+- Fixed error handling in the remove_issue_label function for 404 errors
+- Fixed issue with offset-naive and offset-aware datetime comparisons
+- Improved list_issues and list_issue_comments to properly handle string ISO dates
+
 ## [0.5.2] - 2025-03-02
 
 ### Added

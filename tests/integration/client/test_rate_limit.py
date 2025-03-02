@@ -34,7 +34,11 @@ def test_check_rate_limit(github_client, with_retry):
     assert remaining <= limit
     assert reset_time is None or isinstance(reset_time, datetime)
     if reset_time:
-        assert reset_time > datetime.now() - timedelta(hours=1)  # Should be recent or in the future
+        # Use timezone-aware comparison for datetime
+        now = datetime.now().astimezone()
+        if reset_time.tzinfo is None:
+            reset_time = reset_time.astimezone()
+        assert reset_time > now - timedelta(hours=1)  # Should be recent or in the future
 
 
 @pytest.mark.integration
@@ -58,17 +62,19 @@ def test_wait_for_rate_limit_reset():
 @pytest.mark.integration
 def test_exponential_backoff():
     """Test exponential_backoff function."""
-    # Test with different attempt numbers
-    delay0 = exponential_backoff(0)
-    delay1 = exponential_backoff(1)
-    delay2 = exponential_backoff(2)
+    # Test with deterministic mode for predictable results
+    delay0 = exponential_backoff(0, deterministic=True)
+    delay1 = exponential_backoff(1, deterministic=True)
+    delay2 = exponential_backoff(2, deterministic=True)
     
-    # Verify exponential growth
-    assert delay0 > 0
-    assert delay1 > delay0
-    assert delay2 > delay1
-    assert delay1 >= delay0 * 2  # Should at least double
-    assert delay2 >= delay1 * 2  # Should at least double
+    # Verify exact exponential growth in deterministic mode
+    assert delay0 == 2.0  # Base delay
+    assert delay1 == 4.0  # 2.0 * 2^1
+    assert delay2 == 8.0  # 2.0 * 2^2
+    
+    # Also test with jitter to ensure it's different
+    delay0_with_jitter = exponential_backoff(0)
+    assert delay0_with_jitter != delay0  # Should include jitter
     
     # Test max attempts
     with pytest.raises(ValueError) as exc:
@@ -87,14 +93,35 @@ def test_handle_rate_limit_with_backoff(github_client):
     # Test with attempt exceeding max_attempts
     with pytest.raises(RateLimitExceededException) as exc:
         handle_rate_limit_with_backoff(
-            github_client.github, exception, attempt=2, max_attempts=2
+            github_client.github, exception, attempt=2, max_attempts=2,
+            test_mode=True  # Use test mode to avoid long waits
         )
     assert "rate limit" in str(exc.value).lower()
     
-    # Test with valid attempt (should not raise, just wait)
+    # Test with valid attempt in deterministic mode and test mode
     start_time = time.time()
     handle_rate_limit_with_backoff(
-        github_client.github, exception, attempt=0, max_attempts=3
+        github_client.github, exception, attempt=0, max_attempts=3, 
+        deterministic=True, test_mode=True
     )
     elapsed = time.time() - start_time
-    assert elapsed > 0  # Should have waited some time
+    # Should be very quick in test mode with base_delay=0.1
+    assert elapsed < 0.2  # Should be around 0.1 seconds in test mode
+    
+    # Test backoff behavior (should have increasing delays)
+    start_time = time.time()
+    handle_rate_limit_with_backoff(
+        github_client.github, exception, attempt=1, max_attempts=3, 
+        deterministic=True, test_mode=True
+    )
+    elapsed1 = time.time() - start_time
+    
+    start_time = time.time()
+    handle_rate_limit_with_backoff(
+        github_client.github, exception, attempt=2, max_attempts=3, 
+        deterministic=True, test_mode=True
+    )
+    elapsed2 = time.time() - start_time
+    
+    # Verify exponential backoff (second attempt should take longer than first)
+    assert elapsed2 > elapsed1

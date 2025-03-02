@@ -165,8 +165,11 @@ def update_issue(
             return convert_issue(issue)
 
         # Update issue using PyGithub with only provided values
-        # Use the object returned by edit directly
-        updated_issue = issue.edit(**kwargs)
+        # PyGithub's edit() method returns None, not the updated issue
+        issue.edit(**kwargs)
+        
+        # Get fresh issue data to ensure we have the latest state
+        updated_issue = repository.get_issue(issue_number)
         print(f"After edit, updated_issue.title: {updated_issue.title}")  # Show updated issue
 
         # Return the updated issue
@@ -243,14 +246,29 @@ def list_issues(
             if not all(isinstance(label, str) for label in labels):
                 raise GitHubError("Labels must be a list of strings")
 
+        # Process 'since' parameter if provided
+        if since is not None and isinstance(since, str):
+            # Import here to avoid circular imports
+            from ..converters.common.datetime import convert_iso_string_to_datetime
+            since = convert_iso_string_to_datetime(since)
+            logger.debug(f"Converted since parameter to datetime: {since}")
+
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
 
+        # Build kwargs for get_issues
+        kwargs = {"state": state}
+        if sort:
+            kwargs["sort"] = sort
+        if direction:
+            kwargs["direction"] = direction
+        if since:
+            kwargs["since"] = since
+            
         # Get paginated issues
-        logger.debug(f"Getting issues for {owner}/{repo} with state={state}, labels={labels}, sort={sort}, direction={direction}")
+        logger.debug(f"Getting issues for {owner}/{repo} with kwargs: {kwargs}")
         try:
-            # Start with just the required state parameter
-            paginated_issues = repository.get_issues(state=state)
+            paginated_issues = repository.get_issues(**kwargs)
             logger.debug(f"Got PaginatedList of issues: {paginated_issues}")
         except AssertionError as e:
             logger.error(f"PyGithub assertion error: {e}")
@@ -354,6 +372,11 @@ def list_issue_comments(
         # Build kwargs for get_comments
         kwargs = {}
         if since is not None:
+            # Ensure since is a datetime object, not a string
+            if isinstance(since, str):
+                # Import here to avoid circular imports
+                from ..converters.common.datetime import convert_iso_string_to_datetime
+                since = convert_iso_string_to_datetime(since)
             kwargs["since"] = since
 
         # Get paginated comments with only provided parameters
@@ -470,12 +493,21 @@ def remove_issue_label(
         label: Label to remove
 
     Raises:
-        GitHubError: If the API request fails
+        GitHubError: If the API request fails or label doesn't exist
     """
     try:
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
         issue = repository.get_issue(issue_number)
-        issue.remove_from_labels(label)
+        try:
+            issue.remove_from_labels(label)
+        except GithubException as label_e:
+            # Handle specific case for non-existent labels
+            if label_e.status == 404 and "Label does not exist" in str(label_e):
+                logger.warning(f"Label '{label}' does not exist on issue #{issue_number}")
+                # Not raising an error since removing a non-existent label is not a failure
+                return
+            # Re-raise if it's a different error
+            raise label_e
     except GithubException as e:
-        raise GitHubClient.get_instance()._handle_github_exception(e)
+        raise client._handle_github_exception(e)

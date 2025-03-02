@@ -95,6 +95,18 @@ class GitHubClient:
 
         return self._github
 
+    def _handle_github_exception(self, exception: GithubException, resource_hint: Optional[str] = None) -> GitHubError:
+        """Forward to the module-level handler for consistent error handling.
+        
+        Args:
+            exception: PyGithub exception
+            resource_hint: Optional hint about the resource type being accessed
+            
+        Returns:
+            Appropriate GitHubError subclass instance
+        """
+        return handle_github_exception(exception, resource_hint)
+
     def get_repo(self, full_name: str) -> Repository:
         """Get a repository by full name.
 
@@ -114,4 +126,4 @@ class GitHubClient:
             return repo
         except GithubException as e:
             logger.error(f"GitHub exception when getting repo {full_name}: {str(e)}")
-            raise handle_github_exception(e, resource_hint="repository")
+            raise self._handle_github_exception(e, resource_hint="repository")

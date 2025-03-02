@@ -41,7 +41,11 @@ def wait_for_rate_limit_reset(reset_time: datetime, buffer_seconds: int = 5) -> 
         reset_time: When the rate limit will reset
         buffer_seconds: Additional seconds to wait as buffer
     """
-    now = datetime.now()
+    # Ensure both are timezone-aware for comparison
+    now = datetime.now().astimezone()
+    if reset_time.tzinfo is None:
+        reset_time = reset_time.astimezone()  # Local timezone if none specified
+        
     if reset_time > now:
         wait_seconds = (reset_time - now).total_seconds() + buffer_seconds
         logger.info(f"Rate limit exceeded. Waiting {wait_seconds:.1f} seconds until reset.")
@@ -53,7 +57,7 @@ def wait_for_rate_limit_reset(reset_time: datetime, buffer_seconds: int = 5) -> 
 
 
 def exponential_backoff(
-    attempt: int, max_attempts: int = 5, base_delay: float = 2.0
+    attempt: int, max_attempts: int = 5, base_delay: float = 2.0, deterministic: bool = False
 ) -> float:
     """Calculate exponential backoff delay.
 
@@ -61,6 +65,7 @@ def exponential_backoff(
         attempt: Current attempt number (0-based)
         max_attempts: Maximum number of attempts
         base_delay: Base delay in seconds
+        deterministic: If True, don't add jitter (useful for testing)
 
     Returns:
         Delay in seconds
@@ -68,18 +73,25 @@ def exponential_backoff(
     if attempt >= max_attempts:
         raise ValueError(f"Maximum retry attempts ({max_attempts}) exceeded")
     
-    # Calculate exponential backoff with jitter
-    import random
+    # Calculate exponential backoff
     delay = base_delay * (2 ** attempt)
-    jitter = random.uniform(0, 0.1 * delay)  # 10% jitter
-    return delay + jitter
+    
+    # Add jitter unless in deterministic mode
+    if not deterministic:
+        import random
+        jitter = random.uniform(0, 0.1 * delay)  # 10% jitter
+        return delay + jitter
+    
+    return delay
 
 
 def handle_rate_limit_with_backoff(
     github: Github, 
     exception: RateLimitExceededException,
     attempt: int = 0,
-    max_attempts: int = 5
+    max_attempts: int = 5,
+    deterministic: bool = False,
+    test_mode: bool = False
 ) -> None:
     """Handle rate limit exception with exponential backoff.
 
@@ -88,6 +100,8 @@ def handle_rate_limit_with_backoff(
         exception: Rate limit exception
         attempt: Current attempt number (0-based)
         max_attempts: Maximum number of attempts
+        deterministic: If True, use deterministic backoff (for testing)
+        test_mode: If True, use short delays instead of waiting for real reset times (for testing)
 
     Raises:
         RateLimitExceededException: If max attempts are exceeded
@@ -95,6 +109,13 @@ def handle_rate_limit_with_backoff(
     if attempt >= max_attempts:
         logger.error(f"Maximum retry attempts ({max_attempts}) exceeded for rate limit")
         raise exception
+    
+    # In test mode, use exponential backoff with very short delays
+    if test_mode:
+        delay = exponential_backoff(attempt, max_attempts, base_delay=0.1, deterministic=deterministic)
+        logger.info(f"Test mode: Using short delay instead of waiting for reset: {delay:.1f} seconds.")
+        time.sleep(delay)
+        return
     
     # Try to get reset time from exception
     reset_time = None
@@ -111,6 +132,6 @@ def handle_rate_limit_with_backoff(
         wait_for_rate_limit_reset(reset_time)
     else:
         # Otherwise use exponential backoff
-        delay = exponential_backoff(attempt, max_attempts)
+        delay = exponential_backoff(attempt, max_attempts, deterministic=deterministic)
         logger.info(f"Rate limit exceeded. Using exponential backoff: waiting {delay:.1f} seconds.")
         time.sleep(delay)

@@ -1,14 +1,17 @@
 # Active Context
 
 ## Current Focus
-Improving overall test coverage, with a particular focus on implementing real API testing as outlined in ADR-002. We've successfully fixed failing tests, improved error handling, and significantly improved test quality by replacing mocks with realistic data structures.
+Resolving integration test failures with a focus on providing a robust test suite that properly interacts with the GitHub API. We've been addressing key issues related to timezone handling, error reporting, and test performance following our real API testing approach as outlined in ADR-002.
 
 Our current focus is on:
-1. Implementing real API testing through integration tests
-2. Creating realistic test fixtures that don't rely on mocks
-3. Improving converters test coverage with realistic data structures
-4. Addressing low-coverage modules (client, rate_limit, operations)
-5. Ensuring all new tests follow the ADR-002 approach of avoiding mocks
+1. Fixing integration test failures to ensure they are reliable and robust
+2. Improving datetime handling for consistent timezone-aware operations
+3. Enhancing error handling and reporting, particularly for rate limits
+4. Optimizing test performance, especially for rate limit tests
+5. Ensuring tests don't make assumptions about repository state
+6. Maintaining and expanding our ADR-002 approach of real API testing
+# Active Context
+
 
 We've made several improvements to test coverage, fixed bugs, and enhanced error handling. Key enhancements include:
 
@@ -65,11 +68,20 @@ Current test status:
 We've updated our testing strategy (ADR 002) to completely eliminate mock-based testing in favor of real API testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
-- Fixed error handling issues:
-  - Improved datetime handling in error handlers by consistently converting timestamps to datetime objects
-  - Enhanced resource name formatting for better readability
-  - Implemented comprehensive unit tests for error handling with real GitHub exception objects
-  - Increased test coverage for error handlers and formatters
+- Fixed integration test failures:
+  - Improved datetime handling with consistent timezone-aware operations
+  - Enhanced rate limit testing with test_mode and deterministic options
+  - Fixed `update_issue` function to properly handle PyGithub's edit() returning None
+  - Added missing `_handle_github_exception` method to GitHubClient
+  - Added missing reset_timestamp attribute to GitHubRateLimitError
+  - Fixed error handling in the remove_issue_label function
+  - Created comprehensive test failure resolution plan in docs/test_failure_resolution_plan.md
+
+- Fixed rate limit test performance issues:
+  - Added test_mode parameter to handle_rate_limit_with_backoff function
+  - Implemented deterministic mode for backoff calculations
+  - Eliminated long waits for real API rate limit reset times during testing
+  - Fixed exponential backoff testing with predictable calculations
 - Implemented ADR-002 (Real API Testing):
   - Created integration test directory structure with domain-specific organization
   - Implemented test fixtures with retry mechanism for rate limits

@@ -179,30 +179,40 @@ def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retr
     issue = create_test_issue()
     
     try:
-        # List issues with pagination
+        # First get all issues to understand the repository state
+        @with_retry
+        def list_all_issues():
+            return list_issues(owner, repo, state="all")
+        
+        all_issues = list_all_issues()
+        total_issues = len(all_issues)
+        
+        # Use per_page=1 to ensure pagination
         @with_retry
         def list_test_issues_page1():
             return list_issues(owner, repo, page=1, per_page=1)
         
         page1 = list_test_issues_page1()
         
-        # Verify
+        # Verify first page respects per_page parameter
         assert isinstance(page1, list)
-        assert len(page1) <= 1  # Should have at most 1 issue
+        assert len(page1) <= 1  # Should respect per_page=1
         
-        # Get second page
-        @with_retry
-        def list_test_issues_page2():
-            return list_issues(owner, repo, page=2, per_page=1)
-        
-        page2 = list_test_issues_page2()
-        
-        # Verify
-        assert isinstance(page2, list)
-        
-        # Verify pages are different
-        if page1 and page2:
-            assert page1[0]["issue_number"] != page2[0]["issue_number"]
+        # Get second page if repository has enough issues
+        if total_issues > 1:
+            @with_retry
+            def list_test_issues_page2():
+                return list_issues(owner, repo, page=2, per_page=1)
+            
+            page2 = list_test_issues_page2()
+            
+            # Verify second page also respects per_page parameter
+            assert isinstance(page2, list)
+            assert len(page2) <= 1
+            
+            # Verify pages are different when both have content
+            if page1 and page2:
+                assert page1[0]["issue_number"] != page2[0]["issue_number"]
     finally:
         # Cleanup
         try:

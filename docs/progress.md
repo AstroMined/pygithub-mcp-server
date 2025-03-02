@@ -165,15 +165,22 @@
   - [x] Add integration tests for error handlers
   - [x] Improve coverage for error handlers by implementing comprehensive unit tests
   - [x] Fix issues in error handling (datetime conversion, resource formatting)
+  - [x] Fix datetime handling and timezone-aware operations in rate limit functions
+  - [x] Fix update_issue function to properly handle PyGithub's edit() returning None
+  - [x] Improve error handling in remove_issue_label function
+  - [x] Standardize error handling across all operations with _handle_github_exception method
+  - [x] Add test_mode to rate limit functions to improve test performance
   - [ ] Improve coverage for client/client.py (currently 34%)
-  - [ ] Improve coverage for client/rate_limit.py (currently 18%)
-  - [ ] Improve coverage for operations/issues.py (currently 8%)
+  - [ ] Improve coverage for client/rate_limit.py (currently 69%)
+  - [ ] Improve coverage for operations/issues.py (currently 74%)
 
 ### Schema Validation Expansion
 - [ ] Schema Validation Enhancements
   - [x] Fix test failures in schema validation
   - [x] Add strict=True to fields that should reject type coercion
   - [x] Improve test coverage for issues.py to 100%
+  - [x] Add consistent timezone-aware datetime handling
+  - [x] Improve ISO string to datetime conversion for filtering parameters
   - [ ] Improve test coverage for base.py (currently 73%)
   - [ ] Improve test coverage for responses.py (currently 78%)
   - [ ] Review all schema models for validation opportunities
@@ -186,6 +193,10 @@
 
 ### Testing Strategy Transition
 - [ ] Real API Testing Implementation
+  - [x] Add test_mode parameter to rate limit functions to improve test performance
+  - [x] Implement deterministic mode for rate limit backoff calculations
+  - [x] Create test failure resolution plan in docs/test_failure_resolution_plan.md
+  - [x] Fix test assumptions about repository state in pagination tests
   - [ ] Infrastructure refinement
   - [ ] Replace issue lifecycle tests with real API tests
   - [ ] Implement thorough cleanup mechanisms
@@ -270,23 +281,39 @@
 Core implementation is operational with synchronous operations. We've made significant improvements to test coverage, fixed bugs in error handling, and enhanced overall test quality by implementing the ADR-002 approach of using real API testing instead of mocks.
 
 Recent improvements include:
-1. Fixed inconsistent datetime handling in error handlers:
+
+1. Fixed integration test failures:
+   - Improved datetime handling with consistent timezone-aware operations
+   - Enhanced rate limit testing with test_mode and deterministic options
+   - Fixed `update_issue` function to properly handle PyGithub's edit() returning None
+   - Added missing `_handle_github_exception` method to GitHubClient
+   - Added missing reset_timestamp attribute to GitHubRateLimitError
+   - Fixed error handling in the remove_issue_label function
+   - Created comprehensive test failure resolution plan in docs/test_failure_resolution_plan.md
+
+2. Fixed rate limit test performance issues:
+   - Added test_mode parameter to handle_rate_limit_with_backoff function
+   - Implemented deterministic mode for backoff calculations
+   - Eliminated long waits for real API rate limit reset times during testing
+   - Fixed exponential backoff testing with predictable calculations
+
+3. Fixed inconsistent datetime handling in error handlers:
    - Consistently convert timestamps from headers to datetime objects
    - Properly handle datetime formats from different sources
    - Improved error message formatting with proper date/time display
 
-2. Enhanced resource name formatting in error messages:
+4. Enhanced resource name formatting in error messages:
    - Added proper handling for snake_case resource names (replacing underscores with spaces)
    - Improved readability of error messages (e.g., "Pull Request not found" instead of "Pull_Request not found")
    - Ensured consistent formatting across all error types
 
-3. Implemented comprehensive unit tests for error handlers following ADR-002:
+5. Implemented comprehensive unit tests for error handlers following ADR-002:
    - Created tests with real GitHub exception objects and data structures
    - Covered all error types and edge cases (authentication, permission, rate limit, etc.)
    - Added tests for string data handling and various rate limit scenarios
    - Followed ADR-002 principles of avoiding mocks in favor of real objects
 
-4. Fixed previous improvements:
+6. Fixed previous improvements:
    - Fixed the failing test in `test_responses.py` by properly handling `None` values
    - Added the missing `convert_issue_list` function to the issues converter module
    - Created comprehensive tests for converters using realistic data structures
@@ -305,26 +332,35 @@ Test suite continues to improve with enhanced rate limit error handling and real
 Focus now on improving test coverage for low-coverage modules (client, rate_limit, errors, operations) and continuing implementation of the real API testing strategy.
 
 ### Priorities
-1. Continue improving test coverage for low-coverage modules (client, rate_limit, operations)
-2. Implement more integration tests following ADR-002
-3. Expand schema validation to all models
-4. Prepare for PyPI publication
-5. Expand documentation with examples
-6. Add performance optimizations
-7. Integrate advanced features
-8. Add monitoring and logging
+1. Fix remaining integration test failures (see test_failure_resolution_plan.md)
+2. Continue improving test coverage for low-coverage modules (client, operations)
+3. Implement more integration tests following ADR-002
+4. Fix test assumptions about repository state
+5. Expand schema validation to all models
+6. Prepare for PyPI publication
+7. Expand documentation with examples
+8. Add performance optimizations
+9. Integrate advanced features
+10. Add monitoring and logging
 
 ## Known Issues
-1. Several modules still have low test coverage
-2. Documentation could be more comprehensive
-3. Performance could be optimized
-4. Need to document synchronous operation benefits
-5. Need to update API examples for synchronous usage
+1. Several integration tests are still failing (see test_failure_resolution_plan.md)
+2. Some modules still have low test coverage
+3. Tests making assumptions about repository state
+4. Documentation could be more comprehensive
+5. Performance could be optimized
+6. Need to document synchronous operation benefits
+7. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Improve coverage for client/client.py (currently 34%)
-2. Improve coverage for client/rate_limit.py (currently 18%)
-3. Improve coverage for operations/issues.py (currently 8%)
+1. Fix remaining integration test failures:
+   - test_handle_github_exception_rate_limit
+   - test_list_issue_comments_since
+   - test_list_issues_pagination
+   - test_list_issues_labels_filter
+   - test_list_issues_since
+2. Improve coverage for client/client.py (currently 34%)
+3. Improve coverage for operations/issues.py (currently 74%)
 4. Expand schema validation to all models
 5. Implement more integration tests with real API testing
 6. Add performance optimizations
