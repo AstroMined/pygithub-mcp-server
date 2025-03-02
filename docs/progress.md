@@ -155,10 +155,10 @@
   - [x] Improve converter test coverage using realistic data structures
   - [x] Add integration tests for client module
   - [x] Add integration tests for error handlers
+  - [x] Improve coverage for error handlers by implementing comprehensive unit tests
+  - [x] Fix issues in error handling (datetime conversion, resource formatting)
   - [ ] Improve coverage for client/client.py (currently 34%)
   - [ ] Improve coverage for client/rate_limit.py (currently 18%)
-  - [ ] Improve coverage for errors/formatters.py (currently 11%)
-  - [ ] Improve coverage for errors/handlers.py (currently 6%)
   - [ ] Improve coverage for operations/issues.py (currently 8%)
 
 ### Schema Validation Expansion
@@ -259,14 +259,30 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation is operational with synchronous operations. We've made significant improvements to test coverage and quality by implementing the ADR-002 approach of using real API testing instead of mocks.
+Core implementation is operational with synchronous operations. We've made significant improvements to test coverage, fixed bugs in error handling, and enhanced overall test quality by implementing the ADR-002 approach of using real API testing instead of mocks.
 
 Recent improvements include:
-1. Fixed the failing test in `test_responses.py` by properly handling `None` values with `json.dumps(None)` to produce "null" instead of "None".
-2. Added the missing `convert_issue_list` function to the issues converter module.
-3. Created comprehensive tests for converters using realistic data structures that match PyGithub's API.
-4. Implemented integration tests for the client module and error handlers using the real GitHub API.
-5. Removed legacy mock-based tests in favor of the ADR-002 approach.
+1. Fixed inconsistent datetime handling in error handlers:
+   - Consistently convert timestamps from headers to datetime objects
+   - Properly handle datetime formats from different sources
+   - Improved error message formatting with proper date/time display
+
+2. Enhanced resource name formatting in error messages:
+   - Added proper handling for snake_case resource names (replacing underscores with spaces)
+   - Improved readability of error messages (e.g., "Pull Request not found" instead of "Pull_Request not found")
+   - Ensured consistent formatting across all error types
+
+3. Implemented comprehensive unit tests for error handlers following ADR-002:
+   - Created tests with real GitHub exception objects and data structures
+   - Covered all error types and edge cases (authentication, permission, rate limit, etc.)
+   - Added tests for string data handling and various rate limit scenarios
+   - Followed ADR-002 principles of avoiding mocks in favor of real objects
+
+4. Fixed previous improvements:
+   - Fixed the failing test in `test_responses.py` by properly handling `None` values
+   - Added the missing `convert_issue_list` function to the issues converter module
+   - Created comprehensive tests for converters using realistic data structures
+   - Implemented integration tests for the client module and error handlers
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
@@ -281,15 +297,14 @@ Test suite continues to improve with enhanced rate limit error handling and real
 Focus now on improving test coverage for low-coverage modules (client, rate_limit, errors, operations) and continuing implementation of the real API testing strategy.
 
 ### Priorities
-1. Continue improving test coverage for low-coverage modules (client, rate_limit, errors, operations)
+1. Continue improving test coverage for low-coverage modules (client, rate_limit, operations)
 2. Implement more integration tests following ADR-002
 3. Expand schema validation to all models
 4. Prepare for PyPI publication
 5. Expand documentation with examples
 6. Add performance optimizations
 7. Integrate advanced features
-8. Improve error handling
-9. Add monitoring and logging
+8. Add monitoring and logging
 
 ## Known Issues
 1. Several modules still have low test coverage
@@ -301,14 +316,12 @@ Focus now on improving test coverage for low-coverage modules (client, rate_limi
 ## Next Actions
 1. Improve coverage for client/client.py (currently 34%)
 2. Improve coverage for client/rate_limit.py (currently 18%)
-3. Improve coverage for errors/formatters.py (currently 11%)
-4. Improve coverage for errors/handlers.py (currently 6%)
-5. Improve coverage for operations/issues.py (currently 8%)
-6. Expand schema validation to all models
-7. Implement more integration tests with real API testing
-8. Add performance optimizations
-9. Enhance documentation
-10. Prepare for PyPI publication
+3. Improve coverage for operations/issues.py (currently 8%)
+4. Expand schema validation to all models
+5. Implement more integration tests with real API testing
+6. Add performance optimizations
+7. Enhance documentation
+8. Prepare for PyPI publication
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server

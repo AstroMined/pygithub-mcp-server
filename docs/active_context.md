@@ -1,16 +1,16 @@
 # Active Context
 
 ## Current Focus
-Improving overall test coverage, with a particular focus on implementing real API testing as outlined in ADR-002. We've successfully fixed failing tests and significantly improved test quality by replacing mocks with realistic data structures.
+Improving overall test coverage, with a particular focus on implementing real API testing as outlined in ADR-002. We've successfully fixed failing tests, improved error handling, and significantly improved test quality by replacing mocks with realistic data structures.
 
 Our current focus is on:
 1. Implementing real API testing through integration tests
 2. Creating realistic test fixtures that don't rely on mocks
 3. Improving converters test coverage with realistic data structures
-4. Addressing low-coverage modules (client, rate_limit, errors)
+4. Addressing low-coverage modules (client, rate_limit, operations)
 5. Ensuring all new tests follow the ADR-002 approach of avoiding mocks
 
-We've made several improvements to test coverage and fixed failing tests. Key enhancements include:
+We've made several improvements to test coverage, fixed bugs, and enhanced error handling. Key enhancements include:
 
 1. Fixed the handling of `None` values in the `create_tool_response` function by properly using `json.dumps(None)` to produce "null" rather than the string "None".
 
@@ -41,16 +41,35 @@ Current test status:
 - Removed legacy mock-based tests
 - Created new tests with realistic data structures
 - Added integration tests for client module and error handlers
+- Fixed inconsistent datetime handling in error handlers:
+  - Previously, timestamps from X-RateLimit-Reset headers were passed directly to GitHubRateLimitError
+  - Now consistently convert them to datetime objects before passing to error constructors
+  - Improved code correctly handles different datetime formats from PyGithub
+  
+- Improved resource name formatting in error handlers:
+  - Added proper formatting for snake_case resource names by replacing underscores with spaces
+  - Enhanced readability of error messages (e.g., "Pull Request not found" instead of "Pull_Request not found")
+  - Ensured consistent formatting across all error types
+
+- Implemented comprehensive unit tests for error handlers following ADR-002:
+  - Created tests with real GitHub exception objects and data structures
+  - Covered all error types and edge cases (authentication, permission, rate limit, etc.)
+  - Followed ADR-002 principles of avoiding mocks in favor of real objects
+  - Added tests for string data handling and various rate limit scenarios
+
 - Coverage gaps remain in:
   - client/client.py (34% coverage)
   - client/rate_limit.py (18% coverage)
-  - errors/formatters.py (11% coverage)
-  - errors/handlers.py (6% coverage)
   - operations/issues.py (8% coverage)
 
 We've updated our testing strategy (ADR 002) to completely eliminate mock-based testing in favor of real API testing, focusing on behavior and outcomes rather than implementation details.
 
 ## Recent Changes
+- Fixed error handling issues:
+  - Improved datetime handling in error handlers by consistently converting timestamps to datetime objects
+  - Enhanced resource name formatting for better readability
+  - Implemented comprehensive unit tests for error handling with real GitHub exception objects
+  - Increased test coverage for error handlers and formatters
 - Implemented ADR-002 (Real API Testing):
   - Created integration test directory structure with domain-specific organization
   - Implemented test fixtures with retry mechanism for rate limits

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2025-03-02
+
+### Added
+- Added comprehensive unit tests for error handlers module
+- Improved test coverage for datetime converters
+- Added tests with real PyGithub exception structures following ADR-002
+
+### Changed
+- Improved error handling consistency in handlers.py
+- Enhanced snake_case resource name formatting in error messages
+
+### Fixed
+- Fixed inconsistent datetime handling in error handlers (timestamps → datetime)
+- Fixed resource name formatting in error messages
+- Ensured consistent error type mapping in handlers
+- Improved error message clarity and consistency
+
 ## [0.5.1] - 2025-03-01
 
 ### Added

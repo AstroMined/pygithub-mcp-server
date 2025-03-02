@@ -95,14 +95,22 @@ def handle_github_exception(
             if "rate limit" in error_msg.lower():
                 logger.error("Rate limit exceeded")
                 headers = getattr(error, "headers", {}) or {}
-                reset_time = headers.get("X-RateLimit-Reset")
-                msg = "API rate limit exceeded"
-                if reset_time:
-                    from datetime import datetime
-
-                    reset_dt = datetime.fromtimestamp(int(reset_time))
-                    msg += f". Reset at {reset_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
-                return GitHubRateLimitError(msg, reset_time, data)
+                reset_time_str = headers.get("X-RateLimit-Reset")
+                
+                # Convert timestamp string to datetime
+                reset_dt = None
+                if reset_time_str:
+                    try:
+                        from datetime import datetime
+                        reset_dt = datetime.fromtimestamp(int(reset_time_str))
+                        msg = f"API rate limit exceeded. Reset at {reset_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                    except (ValueError, TypeError):
+                        msg = f"API rate limit exceeded. Reset at {reset_time_str}"
+                else:
+                    msg = "API rate limit exceeded"
+                
+                # Pass datetime to GitHubRateLimitError
+                return GitHubRateLimitError(msg, reset_dt, data)
             logger.error("Permission denied")
             return GitHubPermissionError(
                 f"Permission denied: Resource not accessible by integration", data
@@ -111,7 +119,9 @@ def handle_github_exception(
             logger.error("Resource not found")
             msg = "Not Found"
             if resource_type:
-                msg = f"{resource_type.title()} not found"
+                # Format resource type properly by replacing underscores with spaces
+                formatted_resource = resource_type.replace("_", " ").title()
+                msg = f"{formatted_resource} not found"
             return GitHubResourceNotFoundError(msg, data)
         elif error.status == 422:
             logger.error("Validation error")
