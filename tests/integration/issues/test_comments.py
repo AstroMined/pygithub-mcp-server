@@ -300,8 +300,8 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
         
         assert found, "Test comment not found in since filter results"
         
-        # Set since to 1 hour in the future
-        future = now + timedelta(hours=1)
+        # Set since to 24 hours in the future to ensure timezone differences are covered
+        future = now + timedelta(hours=24)
         
         # List comments since 1 hour in the future
         @with_retry

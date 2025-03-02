@@ -5,6 +5,10 @@ This module provides functions for formatting parameters for GitHub API requests
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
+import logging
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 
 def format_query_params(**kwargs: Any) -> Dict[str, str]:
@@ -128,3 +132,29 @@ def build_update_issue_kwargs(params: Dict[str, Any]) -> Dict[str, Any]:
         kwargs["milestone"] = params["milestone"]
     
     return kwargs
+
+
+def convert_labels_parameter(labels: Optional[List[str]]) -> Optional[List[str]]:
+    """Convert labels list to PyGithub-compatible format.
+    
+    Args:
+        labels: List of label strings or None
+        
+    Returns:
+        List of strings for PyGithub or None
+        
+    Raises:
+        ValueError: If labels is not a list of strings
+    """
+    if labels is None:
+        return None
+        
+    if not isinstance(labels, list):
+        raise ValueError("Labels must be a list of strings")
+        
+    if not all(isinstance(label, str) for label in labels):
+        raise ValueError("Labels must be a list of strings")
+    
+    # PyGithub's get_issues method expects a list of strings
+    logger.debug(f"Using labels list: {labels}")
+    return labels

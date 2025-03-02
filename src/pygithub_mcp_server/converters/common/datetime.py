@@ -4,8 +4,9 @@ This module provides functions for converting between datetime objects and ISO f
 and other datetime-related conversions.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Union
+import functools
 
 
 def convert_datetime(dt: Optional[datetime]) -> Optional[str]:
@@ -65,3 +66,54 @@ def convert_iso_string_to_datetime(value: Union[str, datetime]) -> datetime:
     
     # Let fromisoformat handle any remaining conversion errors
     return datetime.fromisoformat(value)
+
+
+def ensure_utc_datetime(dt: Union[str, datetime]) -> datetime:
+    """Ensure datetime is timezone-aware and in UTC.
+    
+    Handles:
+    - Naive datetime objects (assumes UTC)
+    - Timezone-aware datetime objects (converts to UTC)
+    - ISO 8601 strings (converts to UTC datetime)
+    
+    Args:
+        dt: datetime object or ISO string
+        
+    Returns:
+        UTC timezone-aware datetime
+    """
+    # Convert string to datetime if needed
+    if isinstance(dt, str):
+        dt = convert_iso_string_to_datetime(dt)
+        
+    # Make naive datetime timezone-aware (assume UTC)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    # Always convert to UTC to ensure consistent timezone handling
+    else:
+        dt = dt.astimezone(timezone.utc)
+        
+    # Truncate microseconds for consistency with API expectations
+    dt = dt.replace(microsecond=0)
+    
+    return dt
+
+
+def with_utc_datetimes(param_names=None):
+    """Decorator to convert datetime parameters to UTC.
+    
+    Args:
+        param_names: List of parameter names to convert (None for all datetime-like params)
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Convert kwargs that are datetime-like
+            for key, value in list(kwargs.items()):
+                if param_names is None or key in param_names:
+                    if isinstance(value, (str, datetime)):
+                        kwargs[key] = ensure_utc_datetime(value)
+            
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

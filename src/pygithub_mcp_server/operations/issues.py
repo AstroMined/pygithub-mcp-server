@@ -13,6 +13,7 @@ from github.PaginatedList import PaginatedList
 
 from ..converters.issues.issues import convert_issue, convert_label
 from ..converters.issues.comments import convert_issue_comment
+from ..converters.common.datetime import with_utc_datetimes, ensure_utc_datetime
 from ..errors import GitHubError
 from ..client import GitHubClient
 
@@ -181,6 +182,7 @@ def update_issue(
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
+@with_utc_datetimes(['since'])
 def list_issues(
     owner: str,
     repo: str,
@@ -246,19 +248,9 @@ def list_issues(
             if not all(isinstance(label, str) for label in labels):
                 raise GitHubError("Labels must be a list of strings")
 
-        # Process 'since' parameter if provided
+        # Since is already handled by the @with_utc_datetimes decorator
         if since is not None:
-            # Convert string to datetime if needed
-            if isinstance(since, str):
-                # Import here to avoid circular imports
-                from ..converters.common.datetime import convert_iso_string_to_datetime
-                since = convert_iso_string_to_datetime(since)
-                
-            # Ensure since is timezone-aware
-            if since.tzinfo is None:
-                since = since.astimezone()
-                
-            logger.debug(f"Using timezone-aware since parameter: {since.isoformat()}")
+            logger.debug(f"Using UTC since parameter: {since.isoformat()}")
 
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
@@ -273,8 +265,9 @@ def list_issues(
             kwargs["since"] = since
         # Don't pass per_page directly to get_issues, it's handled by the PaginatedList methods
         if labels is not None:
-            # GitHub API expects a comma-separated string for labels
-            kwargs["labels"] = ",".join(labels)
+            # Convert to PyGithub-compatible format
+            from ..converters.parameters import convert_labels_parameter
+            kwargs["labels"] = convert_labels_parameter(labels)
             logger.debug(f"Using labels filter: {kwargs['labels']}")
             
         # Get paginated issues
@@ -352,6 +345,7 @@ def add_issue_comment(
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
+@with_utc_datetimes(['since'])
 def list_issue_comments(
     owner: str,
     repo: str,
@@ -384,17 +378,8 @@ def list_issue_comments(
         # Build kwargs for get_comments
         kwargs = {}
         if since is not None:
-            # Ensure since is a datetime object, not a string
-            if isinstance(since, str):
-                # Import here to avoid circular imports
-                from ..converters.common.datetime import convert_iso_string_to_datetime
-                since = convert_iso_string_to_datetime(since)
-            
-            # Ensure since is timezone-aware
-            if since.tzinfo is None:
-                since = since.astimezone()
-                
-            logger.debug(f"Using timezone-aware since parameter: {since.isoformat()}")
+            # since is already converted to UTC by the decorator
+            logger.debug(f"Using UTC since parameter: {since.isoformat()}")
             kwargs["since"] = since
 
         # Get paginated comments with only provided parameters

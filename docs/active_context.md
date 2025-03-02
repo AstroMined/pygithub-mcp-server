@@ -153,6 +153,9 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
    - Add timezone information to datetime objects with `.astimezone()`
    - Compare apples to apples: ensure all datetimes in comparisons have tz info
    - When accepting string dates, convert to datetime objects early
+   - Truncate microseconds for consistency with API expectations (`.replace(microsecond=0)`)
+   - Use sufficient buffer (24h+) for future date filtering tests to account for timezone handling differences
+   - Store timezone-aware datetimes in all error objects that involve timestamps
 
 3. Error Extraction:
    - GitHub exceptions contain valuable data in headers, not just the body

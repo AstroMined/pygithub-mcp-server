@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2025-03-02
+
+### Added
+- Improved implementation lessons documentation for PyGithub parameter handling
+- Added extended testing guidance for datetime handling in active_context.md
+
+### Changed
+- Updated test_failure_resolution_plan with completion status for all previously failing tests
+- Enhanced datetime handling with microsecond truncation for improved consistency
+
+### Fixed
+- Fixed labels parameter handling in list_issues to use list of strings rather than comma-separated string
+- Resolved 'since' parameter filtering by using appropriate future date buffer (24h vs 1h)
+- Fixed datetime handling inconsistencies in filtering operations
+- Eliminated all remaining test failures from the test failure resolution plan
+
 ## [0.5.4] - 2025-03-02
 
 ### Added

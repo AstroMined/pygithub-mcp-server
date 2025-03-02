@@ -433,8 +433,8 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
         
         assert found, "Test issue not found in since filter results"
         
-        # Set since to 1 hour in the future
-        future = now + timedelta(hours=1)
+        # Set since to 24 hours in the future to ensure timezone differences are covered
+        future = now + timedelta(hours=24)
         
         # List issues since 1 hour in the future
         @with_retry

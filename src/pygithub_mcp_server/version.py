@@ -31,7 +31,7 @@ from typing import Final, Tuple
 # TODO: Once project stabilizes, replace with importlib.metadata approach to read version from package metadata
 VERSION_MAJOR: Final[int] = 0
 VERSION_MINOR: Final[int] = 5
-VERSION_PATCH: Final[int] = 4
+VERSION_PATCH: Final[int] = 5
 
 # Full version string
 VERSION: Final[str] = f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}"
