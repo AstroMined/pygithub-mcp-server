@@ -610,6 +610,19 @@ We've updated our testing strategy (ADR 002) to completely eliminate mock-based 
    - Removing deprecated code forces consumers to update to the new API
    - Complete removal is cleaner than maintaining parallel implementations
 
+22. Python Testing Module Collisions
+   - Test files with identical names in different directories can cause import conflicts
+   - Python caches imported modules by name, causing incorrect module reuse
+   - Pytest specifically checks __file__ attribute to ensure the correct module is loaded
+   - When duplicate test file names exist, pytest will report "import file mismatch" errors
+   - Resolving these conflicts requires either:
+     * Renaming one of the test files to make them unique
+     * Removing outdated test directories that have been migrated to a new structure
+     * Clearing __pycache__ directories after renaming files
+   - Following ADR-002's test directory structure organization prevents these issues
+   - Tests should be properly organized in unit/ and integration/ directories
+   - Legacy test files should be removed rather than maintained in parallel
+
 ## Progress Tracking
 
 ### Completed

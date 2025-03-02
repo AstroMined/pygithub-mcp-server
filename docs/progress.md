@@ -106,6 +106,14 @@
     - Using 'number' instead of 'issue_number'
     - Proper state updates in edit() methods
     - Consistent attribute naming across mocks
+
+- Test organization improvements:
+  - Fixed Python module name collision between test files
+  - Removed legacy test directories (tests/schemas/ and tests/test_operations/)
+  - Organized tests properly according to ADR-002 structure
+  - Ensured all tests can run without import conflicts
+  - Cleaned up __pycache__ directories to prevent cached module issues
+
 - Package renamed to pygithub-mcp-server
 - GitHub repository setup at github.com/AstroMined/pygithub-mcp-server
 - MIT license and .gitignore configuration
