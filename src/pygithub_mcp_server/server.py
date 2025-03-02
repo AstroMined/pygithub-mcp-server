@@ -33,9 +33,9 @@ if not log_dir.exists():
 
 log_file = log_dir / 'pygithub_mcp_server.log'
 logger = logging.getLogger()  # Get root logger
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_file),

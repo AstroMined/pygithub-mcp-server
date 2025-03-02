@@ -211,6 +211,13 @@
 - Log file is created in the project root directory
 - Log format includes timestamps and module names for tracing
 
+## Logging Configuration
+- The project-wide logging level is controlled in `src/pygithub_mcp_server/server.py`
+- This file configures the root logger, which affects all loggers in the system (including third-party libraries)
+- Default log level is set to INFO to prevent excessive debug logging during tests
+- To increase verbosity for debugging, change both logger.setLevel() and logging.basicConfig() to DEBUG
+- To decrease logging during tests beyond what --log-level=INFO can do, ensure the server.py log level is appropriately set
+
 ## Git MCP Server Usage
 - NEVER use `"."` as a file parameter in git_add operations:
   ```javascript
