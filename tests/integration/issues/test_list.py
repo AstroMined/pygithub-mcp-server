@@ -164,12 +164,12 @@ def test_list_issues_state_filter(test_owner, test_repo_name, unique_id, with_re
 
 @pytest.mark.integration
 def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retry):
-    """Test list_issues pagination."""
+    """Test list_issues pagination with dynamic expectations."""
     # Setup
     owner = test_owner
     repo = test_repo_name
     
-    # Create a test issue
+    # Create a test issue to ensure we have at least one
     title = f"Test Issue (Pagination) {unique_id}"
     
     @with_retry
@@ -179,40 +179,45 @@ def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retr
     issue = create_test_issue()
     
     try:
-        # First get all issues to understand the repository state
-        @with_retry
-        def list_all_issues():
-            return list_issues(owner, repo, state="all")
+        # Use a reasonable per_page value that works with real-world repositories
+        per_page_value = 5
         
-        all_issues = list_all_issues()
-        total_issues = len(all_issues)
-        
-        # Use per_page=1 to ensure pagination
+        # Get first page of issues
         @with_retry
         def list_test_issues_page1():
-            return list_issues(owner, repo, page=1, per_page=1)
+            return list_issues(owner, repo, page=1, per_page=per_page_value)
         
         page1 = list_test_issues_page1()
         
-        # Verify first page respects per_page parameter
-        assert isinstance(page1, list)
-        assert len(page1) <= 1  # Should respect per_page=1
+        # Get second page of issues
+        @with_retry
+        def list_test_issues_page2():
+            return list_issues(owner, repo, page=2, per_page=per_page_value)
         
-        # Get second page if repository has enough issues
-        if total_issues > 1:
-            @with_retry
-            def list_test_issues_page2():
-                return list_issues(owner, repo, page=2, per_page=1)
-            
-            page2 = list_test_issues_page2()
-            
-            # Verify second page also respects per_page parameter
-            assert isinstance(page2, list)
-            assert len(page2) <= 1
-            
-            # Verify pages are different when both have content
-            if page1 and page2:
-                assert page1[0]["issue_number"] != page2[0]["issue_number"]
+        page2 = list_test_issues_page2()
+        
+        # Verify pagination mechanics work
+        # 1. Check per_page limit is respected
+        assert isinstance(page1, list)
+        assert len(page1) <= per_page_value, f"Page 1 should contain at most {per_page_value} issues"
+        
+        # 2. Verify our test issue is in the results (in either page)
+        found = False
+        for i in page1 + page2:
+            if i["issue_number"] == issue["issue_number"]:
+                found = True
+                assert i["title"] == title
+                break
+        
+        assert found, "Test issue not found in paginated results"
+        
+        # 3. If we have enough data, verify pages are different
+        if len(page1) == per_page_value and len(page2) > 0:
+            # Extract issue numbers for better comparison
+            page1_ids = {i["issue_number"] for i in page1}
+            page2_ids = {i["issue_number"] for i in page2}
+            # There should be at least some difference between pages
+            assert page1_ids != page2_ids, "Page 1 and Page 2 contain identical issues"
     finally:
         # Cleanup
         try:

@@ -43,11 +43,23 @@ def handle_github_exception(
             reset_time = None
             remaining = 0
             limit = None
+            data = getattr(error, "data", {})
 
             if rate:
                 reset_time = getattr(rate, "reset", None)
                 remaining = getattr(rate, "remaining", 0)
                 limit = getattr(rate, "limit", None)
+            
+            # Check headers if reset_time is still None
+            if reset_time is None:
+                headers = getattr(error, "headers", {}) or {}
+                reset_time_str = headers.get("X-RateLimit-Reset")
+                if reset_time_str:
+                    try:
+                        reset_time = datetime.fromtimestamp(int(reset_time_str))
+                        logger.debug(f"Found reset time in headers: {reset_time}")
+                    except (ValueError, TypeError):
+                        logger.debug(f"Could not convert reset timestamp: {reset_time_str}")
 
             msg = f"API rate limit exceeded ({remaining}/{limit} calls remaining)"
             if reset_time:
@@ -56,7 +68,7 @@ def handle_github_exception(
                 except (AttributeError, TypeError):
                     # Handle case where reset_time doesn't have strftime or isn't a datetime
                     msg += f". Reset at {reset_time}"
-            return GitHubRateLimitError(msg, reset_time, None)
+            return GitHubRateLimitError(msg, reset_time, reset_time, data)
 
         data = error.data if hasattr(error, "data") else {}
         if isinstance(data, str):
@@ -101,7 +113,6 @@ def handle_github_exception(
                 reset_dt = None
                 if reset_time_str:
                     try:
-                        from datetime import datetime
                         reset_dt = datetime.fromtimestamp(int(reset_time_str))
                         msg = f"API rate limit exceeded. Reset at {reset_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}"
                     except (ValueError, TypeError):
@@ -109,8 +120,8 @@ def handle_github_exception(
                 else:
                     msg = "API rate limit exceeded"
                 
-                # Pass datetime to GitHubRateLimitError
-                return GitHubRateLimitError(msg, reset_dt, data)
+                # Pass datetime to both reset_at and reset_timestamp
+                return GitHubRateLimitError(msg, reset_dt, reset_dt, data)
             logger.error("Permission denied")
             return GitHubPermissionError(
                 f"Permission denied: Resource not accessible by integration", data

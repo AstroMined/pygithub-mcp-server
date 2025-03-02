@@ -247,11 +247,18 @@ def list_issues(
                 raise GitHubError("Labels must be a list of strings")
 
         # Process 'since' parameter if provided
-        if since is not None and isinstance(since, str):
-            # Import here to avoid circular imports
-            from ..converters.common.datetime import convert_iso_string_to_datetime
-            since = convert_iso_string_to_datetime(since)
-            logger.debug(f"Converted since parameter to datetime: {since}")
+        if since is not None:
+            # Convert string to datetime if needed
+            if isinstance(since, str):
+                # Import here to avoid circular imports
+                from ..converters.common.datetime import convert_iso_string_to_datetime
+                since = convert_iso_string_to_datetime(since)
+                
+            # Ensure since is timezone-aware
+            if since.tzinfo is None:
+                since = since.astimezone()
+                
+            logger.debug(f"Using timezone-aware since parameter: {since.isoformat()}")
 
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{owner}/{repo}")
@@ -264,6 +271,11 @@ def list_issues(
             kwargs["direction"] = direction
         if since:
             kwargs["since"] = since
+        # Don't pass per_page directly to get_issues, it's handled by the PaginatedList methods
+        if labels is not None:
+            # GitHub API expects a comma-separated string for labels
+            kwargs["labels"] = ",".join(labels)
+            logger.debug(f"Using labels filter: {kwargs['labels']}")
             
         # Get paginated issues
         logger.debug(f"Getting issues for {owner}/{repo} with kwargs: {kwargs}")
@@ -377,6 +389,12 @@ def list_issue_comments(
                 # Import here to avoid circular imports
                 from ..converters.common.datetime import convert_iso_string_to_datetime
                 since = convert_iso_string_to_datetime(since)
+            
+            # Ensure since is timezone-aware
+            if since.tzinfo is None:
+                since = since.astimezone()
+                
+            logger.debug(f"Using timezone-aware since parameter: {since.isoformat()}")
             kwargs["since"] = since
 
         # Get paginated comments with only provided parameters
