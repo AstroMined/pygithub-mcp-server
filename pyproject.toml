@@ -28,7 +28,6 @@ addopts = """
     --cov-report=term-missing
     --cov-report=html
     --cov-branch
-    -v
     --tb=short
 """
 testpaths = ["tests"]
