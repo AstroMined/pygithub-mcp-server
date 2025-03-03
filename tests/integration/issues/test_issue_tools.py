@@ -71,7 +71,7 @@ def issue_cleanup(test_repo_info):
                 "issue_number": issue_number,
                 "state": "closed"
             }
-            logger.info(f"Cleaning up test issue #{issue_number}")
+            logger.debug(f"Cleaning up test issue #{issue_number}")
             update_issue(params)
         except Exception as e:
             logger.warning(f"Failed to clean up issue #{issue_number}: {e}")
@@ -104,9 +104,9 @@ class TestIssueTools:
         assert issue_data["body"] == create_params["body"]
         assert "test" in [label["name"] for label in issue_data["labels"]]
         
-        issue_number = issue_data["number"]
+        issue_number = issue_data["issue_number"]
         issue_cleanup.append(issue_number)
-        logger.info(f"Created test issue #{issue_number}")
+        logger.debug(f"Created test issue #{issue_number}")
         
         # Step 2: Get the issue
         get_params = {
@@ -120,7 +120,7 @@ class TestIssueTools:
         # Verify successful retrieval
         assert not get_result.get("is_error")
         fetched_issue = json.loads(get_result["content"][0]["text"])
-        assert fetched_issue["number"] == issue_number
+        assert fetched_issue["issue_number"] == issue_number
         assert fetched_issue["title"] == create_params["title"]
         
         # Step 3: Update the issue
@@ -266,7 +266,7 @@ class TestIssueTools:
         
         create_result = create_issue(create_params)
         issue_data = json.loads(create_result["content"][0]["text"])
-        issue_number = issue_data["number"]
+        issue_number = issue_data["issue_number"]
         issue_cleanup.append(issue_number)
         
         # Wait a moment to ensure the issue is indexed
@@ -285,7 +285,7 @@ class TestIssueTools:
         assert not list_result.get("is_error")
         issues = json.loads(list_result["content"][0]["text"])
         assert len(issues) > 0
-        assert any(issue["number"] == issue_number for issue in issues)
+        assert any(issue["issue_number"] == issue_number for issue in issues)
         
         # Test filtering by label
         label_filter_params = {
@@ -307,7 +307,7 @@ class TestIssueTools:
         since_params = {
             "owner": test_repo_info["owner"],
             "repo": test_repo_info["repo"],
-            "since": since_date.isoformat()
+            "since": since_date.isoformat() + "Z"  # Add Z for UTC timezone
         }
         
         since_result = list_issues(since_params)

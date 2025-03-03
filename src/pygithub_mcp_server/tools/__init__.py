@@ -22,7 +22,8 @@ def tool():
     """Decorator to register a function as an MCP tool.
     
     This decorator adds the function to the tool registry for later registration
-    with the MCP server.
+    with the MCP server. It also handles automatic conversion of dictionary
+    parameters to Pydantic models based on the function's type annotations.
     
     Example:
         @tool()
@@ -35,11 +36,49 @@ def tool():
     def decorator(func):
         func_name = func.__name__
         logger.debug(f"Registering tool: {func_name}")
-        _tool_registry[func_name] = func
+        
+        import inspect
+        
+        # Get function signature and parameter types
+        sig = inspect.signature(func)
+        param_types = {
+            param.name: param.annotation 
+            for param in sig.parameters.values()
+            if param.annotation != inspect.Parameter.empty
+        }
         
         @wraps(func)
         def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+            # Convert dictionary parameters to Pydantic models
+            converted_args = list(args)
+            for i, arg in enumerate(args):
+                if i < len(sig.parameters) and isinstance(arg, dict):
+                    param_name = list(sig.parameters.keys())[i]
+                    if param_name in param_types:
+                        model_type = param_types[param_name]
+                        # Handle Pydantic v2 models
+                        if hasattr(model_type, "model_validate"):
+                            try:
+                                converted_args[i] = model_type.model_validate(arg)
+                                logger.debug(f"Converted dict to {model_type.__name__} for parameter {param_name}")
+                            except Exception as e:
+                                logger.error(f"Failed to convert dict to {model_type.__name__}: {e}")
+                    
+            for name, value in list(kwargs.items()):
+                if name in param_types and isinstance(value, dict):
+                    model_type = param_types[name]
+                    # Handle Pydantic v2 models
+                    if hasattr(model_type, "model_validate"):
+                        try:
+                            kwargs[name] = model_type.model_validate(value)
+                            logger.debug(f"Converted dict to {model_type.__name__} for parameter {name}")
+                        except Exception as e:
+                            logger.error(f"Failed to convert dict to {model_type.__name__}: {e}")
+            
+            return func(*converted_args, **kwargs)
+        
+        # Store the wrapper in the registry
+        _tool_registry[func_name] = wrapper
         
         return wrapper
     
@@ -70,10 +109,10 @@ def load_tools(mcp, config: Dict[str, Any]) -> None:
     
     for group_name, group_config in config.get("tool_groups", {}).items():
         if not group_config.get("enabled", False):
-            logger.info(f"Tool group '{group_name}' is disabled")
+            logger.debug(f"Tool group '{group_name}' is disabled")
             continue
             
-        logger.info(f"Loading tool group: {group_name}")
+        logger.debug(f"Loading tool group: {group_name}")
         try:
             # Import the tool module dynamically
             module_path = f"pygithub_mcp_server.tools.{group_name}"
@@ -91,7 +130,7 @@ def load_tools(mcp, config: Dict[str, Any]) -> None:
         except Exception as e:
             logger.error(f"Error loading tool group '{group_name}': {e}")
     
-    logger.info(f"Loaded {loaded_count} tool groups")
+    logger.debug(f"Loaded {loaded_count} tool groups")
     
     if loaded_count == 0:
         logger.warning("No tool groups were loaded! Check your configuration.")

@@ -39,7 +39,8 @@ def load_config() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: The merged configuration
     """
-    config = DEFAULT_CONFIG.copy()
+    # Make a deep copy to avoid modifying the original DEFAULT_CONFIG
+    config = json.loads(json.dumps(DEFAULT_CONFIG))
     
     # Load from config file if it exists
     config_path = os.environ.get("PYGITHUB_MCP_CONFIG")
@@ -47,7 +48,7 @@ def load_config() -> Dict[str, Any]:
         try:
             with open(config_path, "r") as f:
                 file_config = json.load(f)
-                logger.info(f"Loaded configuration from {config_path}")
+                logger.debug(f"Loaded configuration from {config_path}")
                 
                 # Merge with default config
                 if "tool_groups" in file_config:
@@ -63,6 +64,8 @@ def load_config() -> Dict[str, Any]:
                         config[key] = value
         except Exception as e:
             logger.error(f"Failed to load configuration from {config_path}: {e}")
+            # Make sure we reset to the default config when an error occurs
+            config = json.loads(json.dumps(DEFAULT_CONFIG))
     
     # Override from environment variables
     for group in config["tool_groups"]:
@@ -70,6 +73,6 @@ def load_config() -> Dict[str, Any]:
         if env_var in os.environ:
             enabled = os.environ[env_var].lower() in ("1", "true", "yes", "on")
             config["tool_groups"][group]["enabled"] = enabled
-            logger.info(f"Setting {group} tool group enabled={enabled} from environment variable")
+            logger.debug(f"Setting {group} tool group enabled={enabled} from environment variable")
     
     return config

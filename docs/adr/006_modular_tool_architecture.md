@@ -149,10 +149,10 @@ def load_tools(mcp, config):
     """Load and register tools based on configuration."""
     for group_name, group_config in config["tool_groups"].items():
         if not group_config.get("enabled", False):
-            logger.info(f"Tool group '{group_name}' is disabled")
+            logger.debug(f"Tool group '{group_name}' is disabled")
             continue
             
-        logger.info(f"Loading tool group: {group_name}")
+        logger.debug(f"Loading tool group: {group_name}")
         try:
             # Import the tool module dynamically
             module_path = f"pygithub_mcp_server.tools.{group_name}"

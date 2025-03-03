@@ -49,11 +49,11 @@ def create_server():
     
     # Load configuration
     config = load_config()
-    logger.info(f"Loaded configuration: {len(config['tool_groups'])} tool groups defined")
+    logger.debug(f"Loaded configuration: {len(config['tool_groups'])} tool groups defined")
     
     # Log which tool groups are enabled
     enabled_groups = [name for name, cfg in config["tool_groups"].items() if cfg.get("enabled", False)]
-    logger.info(f"Enabled tool groups: {', '.join(enabled_groups) or 'none'}")
+    logger.debug(f"Enabled tool groups: {', '.join(enabled_groups) or 'none'}")
     
     # Load and register tools based on configuration
     load_tools(mcp, config)

@@ -48,11 +48,11 @@ def wait_for_rate_limit_reset(reset_time: datetime, buffer_seconds: int = 5) -> 
         
     if reset_time > now:
         wait_seconds = (reset_time - now).total_seconds() + buffer_seconds
-        logger.info(f"Rate limit exceeded. Waiting {wait_seconds:.1f} seconds until reset.")
+        logger.debug(f"Rate limit exceeded. Waiting {wait_seconds:.1f} seconds until reset.")
         time.sleep(wait_seconds)
     else:
         # If reset_time is in the past, wait a small amount of time
-        logger.info(f"Rate limit reset time is in the past. Waiting {buffer_seconds} seconds.")
+        logger.debug(f"Rate limit reset time is in the past. Waiting {buffer_seconds} seconds.")
         time.sleep(buffer_seconds)
 
 
@@ -113,7 +113,7 @@ def handle_rate_limit_with_backoff(
     # In test mode, use exponential backoff with very short delays
     if test_mode:
         delay = exponential_backoff(attempt, max_attempts, base_delay=0.1, deterministic=deterministic)
-        logger.info(f"Test mode: Using short delay instead of waiting for reset: {delay:.1f} seconds.")
+        logger.debug(f"Test mode: Using short delay instead of waiting for reset: {delay:.1f} seconds.")
         time.sleep(delay)
         return
     
@@ -133,5 +133,5 @@ def handle_rate_limit_with_backoff(
     else:
         # Otherwise use exponential backoff
         delay = exponential_backoff(attempt, max_attempts, deterministic=deterministic)
-        logger.info(f"Rate limit exceeded. Using exponential backoff: waiting {delay:.1f} seconds.")
+        logger.debug(f"Rate limit exceeded. Using exponential backoff: waiting {delay:.1f} seconds.")
         time.sleep(delay)

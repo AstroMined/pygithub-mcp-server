@@ -353,7 +353,7 @@ Focus now on improving test coverage for low-coverage modules (client, rate_limi
 10. Add monitoring and logging enhancements
 
 ## Known Issues
-1. Several integration tests are still failing (see test_failure_resolution_plan.md)
+1. ~~Several integration tests are still failing (see test_failure_resolution_plan.md)~~ Fixed issues in test_issue_lifecycle and test_list_issues
 2. Some modules still have low test coverage
 3. Tests making assumptions about repository state
 4. Documentation could be more comprehensive

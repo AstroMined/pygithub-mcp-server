@@ -29,6 +29,12 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
 
 ## Recent Changes
 
+- Fixed integration test issues:
+  - Enhanced tool() decorator to automatically convert dictionary parameters to Pydantic models
+  - Fixed inconsistencies between field names ("number" vs "issue_number") in tests and converters
+  - Added proper timezone designation to ISO datetime strings in tests
+  - Made Pydantic an explicit dependency in pyproject.toml
+
 - Implemented ADR-006 Modular Tool Architecture:
   - Created a configuration system in dedicated `config/` package
   - Implemented a decorator-based tool registration system in `tools/` package

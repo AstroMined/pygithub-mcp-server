@@ -485,4 +485,4 @@ def register(mcp: FastMCP) -> None:
     ]
     
     register_tools(mcp, issue_tools)
-    logger.info(f"Registered {len(issue_tools)} issue tools")
+    logger.debug(f"Registered {len(issue_tools)} issue tools")

@@ -189,7 +189,7 @@ This document outlines the comprehensive plan to resolve all integration test fa
       # In test mode, use short delays instead of waiting for real reset times
       if test_mode:
           delay = exponential_backoff(attempt, max_attempts, base_delay=0.1, deterministic=deterministic)
-          logger.info(f"Test mode: Using short delay instead of waiting for reset: {delay:.1f} seconds.")
+          logger.debug(f"Test mode: Using short delay instead of waiting for reset: {delay:.1f} seconds.")
           time.sleep(delay)
           return
   ```

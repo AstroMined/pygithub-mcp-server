@@ -537,7 +537,7 @@ wheels = [
 
 [[package]]
 name = "pygithub-mcp-server"
-version = "0.1.0"
+version = "0.5.6"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },

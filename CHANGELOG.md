@@ -235,6 +235,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Integration test improvements:
+  - Enhanced tool() decorator to automatically convert dictionary parameters to Pydantic models
+  - Fixed issues in test_issue_lifecycle and test_list_issues integration tests
+  - Aligned field name conventions in tests and converters ("number" vs "issue_number")
+  - Added proper timezone designation to ISO datetime strings in tests
+  - Made Pydantic an explicit dependency in pyproject.toml
+
 - Updated ADR 002 (Real API Testing):
   - Shifted focus to prioritize real API testing over mock-based testing
   - Documented challenges with maintaining complex mocks

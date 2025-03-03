@@ -178,7 +178,7 @@ logger.warning("Permission denied", extra={
 })
 
 # Rate limit
-logger.info("Rate limit hit", extra={
+logger.debug("Rate limit hit", extra={
     "reset_at": e.reset_at,
     "operation": operation_name
 })
