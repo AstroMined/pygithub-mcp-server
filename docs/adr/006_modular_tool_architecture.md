@@ -1,7 +1,7 @@
 # ADR 006: Modular Tool Architecture
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 The PyGithub MCP Server's `server.py` currently defines and registers all tools directly in a monolithic file. While this approach works for the current set of issue-related tools, the roadmap outlines plans for dozens of additional tools across multiple categories (repositories, pull requests, etc.) according to ROADMAP.md.

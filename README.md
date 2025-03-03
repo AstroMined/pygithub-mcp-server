@@ -4,17 +4,26 @@ A Model Context Protocol server that provides tools for interacting with the Git
 
 ## Features
 
+- Modular Tool Architecture:
+  - Configurable tool groups that can be enabled/disabled
+  - Domain-specific organization (issues, repositories, etc.)
+  - Flexible configuration via file or environment variables
+  - Clear separation of concerns with modular design
+  - Easy extension with consistent patterns
+
 - Complete GitHub Issue Management:
   - Create and update issues
   - Get issue details and list repository issues
   - Add, list, update, and delete comments
   - Manage issue labels
   - Handle assignees and milestones
+
 - Smart Parameter Handling:
   - Dynamic kwargs building for optional parameters
   - Proper type conversion for GitHub objects
   - Validation for all input parameters
   - Clear error messages for invalid inputs
+
 - Robust Implementation:
   - Object-oriented GitHub API interactions via PyGithub
   - Centralized GitHub client management
@@ -148,7 +157,9 @@ uv pip install -e .
 
 ## Configuration
 
-1. Add the server to your MCP settings (e.g., `claude_desktop_config.json` or `cline_mcp_settings.json`):
+### Basic Configuration
+
+Add the server to your MCP settings (e.g., `claude_desktop_config.json` or `cline_mcp_settings.json`):
 ```json
 {
   "mcpServers": {
@@ -162,6 +173,41 @@ uv pip install -e .
   }
 }
 ```
+
+### Tool Group Configuration
+
+The server supports selectively enabling or disabling tool groups through configuration. You can configure this in two ways:
+
+#### 1. Configuration File
+
+Create a JSON configuration file (e.g., `pygithub_mcp_config.json`):
+```json
+{
+  "tool_groups": {
+    "issues": {"enabled": true},
+    "repositories": {"enabled": true},
+    "pull_requests": {"enabled": false},
+    "discussions": {"enabled": false},
+    "search": {"enabled": true}
+  }
+}
+```
+
+Then specify this file in your environment:
+```bash
+export PYGITHUB_MCP_CONFIG=/path/to/pygithub_mcp_config.json
+```
+
+#### 2. Environment Variables
+
+Alternatively, use environment variables to configure tool groups:
+```bash
+export PYGITHUB_ENABLE_ISSUES=true
+export PYGITHUB_ENABLE_REPOSITORIES=true
+export PYGITHUB_ENABLE_PULL_REQUESTS=false
+```
+
+By default, only the `issues` tool group is enabled. See `README.config.md` for more detailed configuration options.
 
 ## Development
 
@@ -201,70 +247,56 @@ Use the MCP Inspector's Web UI to:
 
 ```
 tests/
-├── conftest.py          # Shared test fixtures
-├── test_converters.py   # Object conversion tests
-├── test_error_handling.py # Error handling tests
-├── test_github_client.py # Client tests
-└── test_operations/     # Operation-specific tests
-    └── test_issues.py   # Issue operation tests
+├── unit/                # Fast tests without external dependencies
+│   ├── config/          # Configuration tests
+│   ├── tools/           # Tool registration tests
+│   └── ...              # Other unit tests
+└── integration/         # Tests with real GitHub API
+    ├── issues/          # Issue tools tests
+    └── ...              # Other integration tests
 ```
-
 
 ```
 src/
 └── pygithub_mcp_server/
     ├── __init__.py
     ├── __main__.py
-    ├── server.py
-    ├── client/                # GitHub client functionality
+    ├── server.py        # Server factory (create_server)
+    ├── version.py
+    ├── config/          # Configuration system
     │   ├── __init__.py
-    │   ├── client.py          # Core GitHub client
-    │   └── rate_limit.py      # Rate limit handling
-    ├── common/                # Legacy module (deprecated)
-    │   ├── __init__.py
-    │   ├── converters.py
-    │   ├── errors.py
-    │   ├── github.py
-    │   ├── types.py
-    │   ├── utils.py
-    │   └── version.py
-    ├── converters/            # Data transformation
-    │   ├── __init__.py
-    │   ├── parameters.py      # Parameter formatting
-    │   ├── responses.py       # Response formatting
-    │   ├── common/            # Common converters
-    │   │   ├── __init__.py
-    │   │   └── datetime.py    # Date/time conversions
-    │   ├── issues/            # Issue-related converters
-    │   │   ├── __init__.py
-    │   │   ├── issues.py      # Issue converters
-    │   │   └── comments.py    # Issue comment converters
-    │   ├── repositories/      # Repository converters
-    │   │   ├── __init__.py
-    │   │   ├── repositories.py # Repository converters
-    │   │   └── contents.py    # Repository content converters
-    │   └── users/             # User-related converters
+    │   └── settings.py  # Configuration management
+    ├── tools/           # Modular tool system
+    │   ├── __init__.py  # Tool registration framework
+    │   └── issues/      # Issue tools
     │       ├── __init__.py
-    │       └── users.py       # User converters
-    ├── errors/                # Error handling
+    │       └── tools.py # Issue tool implementations
+    ├── client/          # GitHub client functionality
     │   ├── __init__.py
-    │   ├── exceptions.py      # Custom exceptions
-    │   ├── formatters.py      # Error formatting
-    │   └── handlers.py        # Error handling
-    ├── operations/            # GitHub operations
+    │   ├── client.py    # Core GitHub client
+    │   └── rate_limit.py # Rate limit handling
+    ├── converters/      # Data transformation
+    │   ├── __init__.py
+    │   ├── parameters.py # Parameter formatting
+    │   ├── responses.py # Response formatting
+    │   ├── common/      # Common converters
+    │   ├── issues/      # Issue-related converters
+    │   ├── repositories/ # Repository converters
+    │   └── users/       # User-related converters
+    ├── errors/          # Error handling
+    │   ├── __init__.py
+    │   └── exceptions.py # Custom exceptions
+    ├── operations/      # GitHub operations
     │   ├── __init__.py
     │   └── issues.py
-    ├── schemas/               # Data models
+    ├── schemas/         # Data models
     │   ├── __init__.py
     │   ├── base.py
     │   ├── issues.py
-    │   ├── pull_requests.py
-    │   ├── repositories.py
-    │   ├── responses.py
-    │   └── search.py
-    └── utils/                 # General utilities
+    │   └── ...
+    └── utils/           # General utilities
         ├── __init__.py
-        └── environment.py     # Environment utilities
+        └── environment.py # Environment utilities
 ```
 
 ### Troubleshooting

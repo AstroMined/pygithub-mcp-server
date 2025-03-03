@@ -1,6 +1,18 @@
 # Project Progress
 
 ## What Works
+- Modular Tool Architecture (ADR-006):
+  - Implemented configurable tool architecture following ADR-006
+  - Created dedicated `config/` package with flexible configuration system
+  - Implemented decorator-based tool registration in `tools/` package
+  - Migrated issue tools from server.py to `tools/issues/tools.py`
+  - Refactored server.py to use factory pattern with `create_server()`
+  - Added support for selectively enabling/disabling tool groups 
+  - Added configuration file and environment variable override support
+  - Created example configuration file (pygithub_mcp_config.json.example)
+  - Added comprehensive testing strategy for modular architecture
+  - Created testing documentation in docs/testing/modular_architecture_testing.md
+
 - Test coverage improvements and ADR-002 implementation:
   - Fixed failing test in `test_responses.py` by properly handling `None` values
   - Added `convert_issue_list` function to issue converters
@@ -278,46 +290,43 @@
   - [ ] Connection handling
 
 ## Current Status
-Core implementation is operational with synchronous operations. We've made significant improvements to test coverage, fixed bugs in error handling, and enhanced overall test quality by implementing the ADR-002 approach of using real API testing instead of mocks.
+Core implementation is operational with the new modular architecture. We've successfully implemented ADR-006, creating a flexible, configurable tool system that can selectively enable or disable tool groups. This greatly improves the maintainability and extensibility of the codebase.
 
 Recent improvements include:
 
-1. Fixed integration test failures:
-   - Improved datetime handling with consistent timezone-aware operations
-   - Enhanced rate limit testing with test_mode and deterministic options
-   - Fixed `update_issue` function to properly handle PyGithub's edit() returning None
-   - Added missing `_handle_github_exception` method to GitHubClient
-   - Added missing reset_timestamp attribute to GitHubRateLimitError
-   - Fixed error handling in the remove_issue_label function
-   - Created comprehensive test failure resolution plan in docs/test_failure_resolution_plan.md
+1. Implemented Modular Tool Architecture (ADR-006):
+   - Created a configuration system in `config/` package
+   - Implemented a decorator-based tool registration system in `tools/` package
+   - Migrated issue tools from server.py to `tools/issues/tools.py`
+   - Refactored server.py to use a factory pattern with `create_server()`
+   - Added support for selectively enabling/disabling tool groups
+   - Enhanced code organization with clear separation of concerns
+   - Improved maintainability with logical tool grouping
+   - Created foundation for easy expansion with additional tool groups
 
-2. Fixed rate limit test performance issues:
-   - Added test_mode parameter to handle_rate_limit_with_backoff function
-   - Implemented deterministic mode for backoff calculations
-   - Eliminated long waits for real API rate limit reset times during testing
-   - Fixed exponential backoff testing with predictable calculations
+2. Added Configuration Flexibility:
+   - Support for both file-based and environment variable configuration
+   - Clear precedence rules (env vars override file settings)
+   - Sensible defaults for all configuration options
+   - Created example configuration file
+   - Added documentation for configuration options
+   - Enabled selective tool group enablement
+   - Simplified deployment across different environments
 
-3. Fixed inconsistent datetime handling in error handlers:
-   - Consistently convert timestamps from headers to datetime objects
-   - Properly handle datetime formats from different sources
-   - Improved error message formatting with proper date/time display
+3. Created Testing Strategy for Modular Architecture:
+   - Added unit tests for configuration system without mocks
+   - Added unit tests for tool registration system
+   - Created integration tests for issue tools following ADR-002
+   - Established patterns for testing new tool groups
+   - Created testing documentation
 
-4. Enhanced resource name formatting in error messages:
-   - Added proper handling for snake_case resource names (replacing underscores with spaces)
-   - Improved readability of error messages (e.g., "Pull Request not found" instead of "Pull_Request not found")
-   - Ensured consistent formatting across all error types
-
-5. Implemented comprehensive unit tests for error handlers following ADR-002:
-   - Created tests with real GitHub exception objects and data structures
-   - Covered all error types and edge cases (authentication, permission, rate limit, etc.)
-   - Added tests for string data handling and various rate limit scenarios
-   - Followed ADR-002 principles of avoiding mocks in favor of real objects
-
-6. Fixed previous improvements:
-   - Fixed the failing test in `test_responses.py` by properly handling `None` values
-   - Added the missing `convert_issue_list` function to the issues converter module
-   - Created comprehensive tests for converters using realistic data structures
-   - Implemented integration tests for the client module and error handlers
+4. Updated Core System Components:
+   - Fixed imports and exports to match new architecture
+   - Enhanced error handling in tool modules
+   - Improved logging throughout the system
+   - Updated server initialization to use factory pattern
+   - Created consistent patterns for future expansion
+   - Ensured backward compatibility for existing functionality
 
 Schema models have been reorganized into domain-specific files and enhanced with validation rules to prevent empty strings in critical fields. This improves maintainability, discoverability, and error handling. The reorganization establishes a foundation for schema-first development approach for new features.
 
@@ -332,16 +341,16 @@ Test suite continues to improve with enhanced rate limit error handling and real
 Focus now on improving test coverage for low-coverage modules (client, rate_limit, errors, operations) and continuing implementation of the real API testing strategy.
 
 ### Priorities
-1. Fix remaining integration test failures (see test_failure_resolution_plan.md)
-2. Continue improving test coverage for low-coverage modules (client, operations)
-3. Implement more integration tests following ADR-002
-4. Fix test assumptions about repository state
-5. Expand schema validation to all models
-6. Prepare for PyPI publication
-7. Expand documentation with examples
-8. Add performance optimizations
-9. Integrate advanced features
-10. Add monitoring and logging
+1. Implement additional tool groups (repositories, pull_requests, etc.)
+2. Enhance testing coverage for the new architecture
+3. Create documentation for adding new tool groups
+4. Optimize performance for tool loading
+5. Fix remaining integration test failures
+6. Continue improving test coverage for low-coverage modules
+7. Prepare for PyPI publication
+8. Add additional configuration options for advanced use cases
+9. Create architectural diagrams for better understanding
+10. Add monitoring and logging enhancements
 
 ## Known Issues
 1. Several integration tests are still failing (see test_failure_resolution_plan.md)

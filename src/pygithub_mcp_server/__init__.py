@@ -5,8 +5,8 @@ the GitHub API. It exposes tools for common GitHub operations like managing
 issues, repositories, and pull requests.
 """
 
-from .server import mcp
+from .server import create_server
 from .version import VERSION
 
 __version__ = VERSION
-__all__ = ["mcp", "__version__"]
+__all__ = ["create_server", "__version__"]

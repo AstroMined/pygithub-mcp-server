@@ -1,0 +1,18 @@
+{
+  "tool_groups": {
+    "issues": {"enabled": true},
+    "repositories": {"enabled": true},
+    "pull_requests": {"enabled": false},
+    "discussions": {"enabled": false},
+    "search": {"enabled": true},
+    "users": {"enabled": false},
+    "organizations": {"enabled": false},
+    "teams": {"enabled": false},
+    "webhooks": {"enabled": false},
+    "gists": {"enabled": false}
+  },
+  "logging": {
+    "level": "INFO",
+    "file_level": "DEBUG"
+  }
+}

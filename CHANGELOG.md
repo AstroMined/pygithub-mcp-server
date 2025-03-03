@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2025-03-02
+
+### Added
+- Modular Tool Architecture (ADR-006):
+  - Implemented configurable tool architecture with selective tool group enabling
+  - Created dedicated `config/` package with flexible configuration system
+  - Implemented decorator-based tool registration in `tools/` package
+  - Added support for configuration via file or environment variables
+  - Created comprehensive testing strategy for modular architecture
+  - Added example configuration file (pygithub_mcp_config.json.example)
+  - Added detailed documentation in README.config.md
+
+### Changed
+- Refactored server.py to use factory pattern with `create_server()`
+- Migrated issue tools from server.py to `tools/issues/tools.py`
+- Updated package exports to match the new architecture
+- Enhanced documentation to reflect the new modular design
+- Improved test organization with separate unit and integration test directories
+- Improved code organization with clearer separation of concerns
+
+### Documentation
+- Created testing documentation in docs/testing/modular_architecture_testing.md
+- Updated README.md to showcase the new configurable architecture
+- Created configuration guide in README.config.md
+- Added example configuration file (pygithub_mcp_config.json.example)
+- Updated ADR-006 status to "Accepted"
+
 ## [0.5.5] - 2025-03-02
 
 ### Added
