@@ -11,7 +11,7 @@
   - Added configuration file and environment variable override support
   - Created example configuration file (pygithub_mcp_config.json.example)
   - Added comprehensive testing strategy for modular architecture
-  - Created testing documentation in docs/testing/modular_architecture_testing.md
+  - Created consolidated testing documentation in docs/testing/testing_strategy.md
 
 - Test coverage improvements and ADR-002 implementation:
   - Fixed failing test in `test_responses.py` by properly handling `None` values
@@ -23,7 +23,8 @@
   - Improved test quality by following ADR-002 approach
 
 - Integration test infrastructure (ADR-002):
-  - Created integration test directory structure with domain-specific organization
+  - Created integration test directory structure with application-layer organization
+  - Reorganized tests by module layer (operations, tools, etc.) instead of object type
   - Implemented test fixtures with retry mechanism for rate limits
   - Added comprehensive test suite for GitHub issue operations
   - Set up environment configuration for real API testing
