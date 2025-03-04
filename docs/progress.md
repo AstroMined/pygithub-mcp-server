@@ -183,9 +183,12 @@
   - [x] Improve error handling in remove_issue_label function
   - [x] Standardize error handling across all operations with _handle_github_exception method
   - [x] Add test_mode to rate limit functions to improve test performance
-  - [ ] Improve coverage for client/client.py (currently 34%)
-  - [ ] Improve coverage for client/rate_limit.py (currently 69%)
-  - [ ] Improve coverage for operations/issues.py (currently 74%)
+  - [x] Add comprehensive error case tests for tools/issues/tools.py
+  - [x] Implement integration tests for server.py initialization and configuration
+  - [x] Improve coverage for client/rate_limit.py with comprehensive tests
+  - [x] Add parameter validation tests for operations/issues.py
+  - [x] Implement unit tests for __main__.py without mocks
+  - [ ] Continue improving coverage for remaining modules (client/client.py)
 
 ### Schema Validation Expansion
 - [ ] Schema Validation Enhancements

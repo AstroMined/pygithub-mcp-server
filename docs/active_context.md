@@ -1,15 +1,15 @@
 # Active Context
 
 ## Current Focus
-Implementing the modular tool architecture (ADR-006) and improving the overall codebase organization. We've shifted from a monolithic server design to a modular, configurable architecture that supports selective enabling/disabling of tool groups.
+Implementing comprehensive test coverage improvements following ADR-002 principles while continuing to refine the modular tool architecture (ADR-006). We've shifted from a monolithic server design to a modular, configurable architecture that supports selective enabling/disabling of tool groups, and now we're ensuring robust test coverage across all components.
 
 Our current focus is on:
-1. Implementing the modular tool architecture as defined in ADR-006
-2. Creating a flexible configuration system for MCP server tools
-3. Implementing effective testing strategies for the new architecture
-4. Reorganizing the codebase for better maintainability and extensibility
-5. Establishing patterns for future tool group implementations
-6. Maintaining and expanding our ADR-002 approach of real API testing
+1. Improving test coverage for high and medium priority modules identified in testing strategy
+2. Implementing the ADR-002 approach of real API testing across all components
+3. Refining unit testing techniques without using mocks
+4. Creating reusable test fixtures and patterns for integration testing
+5. Maintaining and organizing the modular tool architecture as defined in ADR-006
+6. Establishing patterns for efficient testing of future tool group implementations
 
 We've made several improvements to test coverage, fixed bugs, and enhanced error handling. Key enhancements include:
 
@@ -26,6 +26,20 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
    - Added client module tests using real GitHub API
    - Implemented rate limit handling tests
    - Added error handlers tests with real error conditions
+   
+5. Extended test coverage for high-priority modules:
+   - Added comprehensive error case tests for tools/issues/tools.py
+   - Created server initialization and configuration tests
+   - Improved rate limit handling test coverage
+   - Added parameter validation tests for operations/issues.py
+   - Developed test patterns for main module without using mocks
+
+6. Refined our approach to unit testing without mocks:
+   - Used dataclasses to create test objects instead of MagicMock
+   - Leveraged pytest fixtures for test data preparation
+   - Implemented dependency injection for easier testing
+   - Created context managers for controlled test environments
+   - Focused on testing behavior rather than implementation details
 
 ## Recent Changes
 
@@ -171,6 +185,11 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
    - Configuration can be tested without mocks
    - Integration tests should follow the real API approach
    - Unit tests should verify component behavior in isolation
+   - Dataclasses can replace mock objects for cleaner, type-safe tests
+   - Context managers simplify test environment setup and teardown
+   - Fixture scope affects performance and isolation (session vs function)
+   - Tests should focus on behaviors rather than implementation details
+   - Standard library tools can often replace complex mocking frameworks
 
 4. Code Organization:
    - Logical grouping improves code navigation

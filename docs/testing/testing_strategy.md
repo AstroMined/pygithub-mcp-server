@@ -270,6 +270,126 @@ To support this effort, we should also:
    - Comment management
    - Label management
 
+## Unit Testing Without Mocks
+
+While our integration tests follow the real API approach from ADR-002, we've also refined our unit testing strategy to minimize dependency on mocking frameworks. This approach has several benefits:
+
+### Using Dataclasses Instead of Mock Objects
+
+We've found that Python's standard library `dataclasses` provide a superior alternative to `unittest.mock.MagicMock` for creating test objects:
+
+```python
+# Instead of this:
+mock_repo = MagicMock()
+mock_repo.id = 12345
+mock_repo.name = "test-repo"
+mock_repo.full_name = "test-owner/test-repo"
+mock_repo.owner.login = "test-owner"
+
+# Prefer this:
+@dataclass
+class RepositoryOwner:
+    login: str
+
+@dataclass
+class Repository:
+    id: int
+    name: str
+    full_name: str
+    owner: RepositoryOwner
+    private: bool
+    html_url: str
+    description: str = None
+    
+repo = Repository(
+    id=12345,
+    name="test-repo",
+    full_name="test-owner/test-repo",
+    owner=RepositoryOwner(login="test-owner"),
+    private=False,
+    html_url="https://github.com/test-owner/test-repo",
+    description="Test repository description"
+)
+```
+
+**Benefits:**
+- Type safety - IDE autocomplete works properly
+- No unexpected attribute creation
+- Clear structure that mirrors the real objects
+- Better representation in test failure output
+- More maintainable test code
+- Prevents hidden bugs from typos in attribute names
+
+### Pytest Fixtures and Dependency Injection
+
+Use pytest fixtures to create and inject test objects:
+
+```python
+@pytest.fixture
+def test_repository():
+    """Create a test repository object."""
+    return Repository(
+        id=12345,
+        name="test-repo",
+        # other attributes...
+    )
+
+def test_convert_repository(test_repository):
+    """Test repository conversion function."""
+    result = convert_repository(test_repository)
+    assert result["id"] == 12345
+    # other assertions...
+```
+
+### Context Managers for Test Environment
+
+For environment-dependent code like `__main__.py`:
+
+```python
+@contextmanager
+def capture_stdout():
+    """Capture stdout for testing."""
+    new_stdout = StringIO()
+    old_stdout = sys.stdout
+    sys.stdout = new_stdout
+    try:
+        yield new_stdout
+    finally:
+        sys.stdout = old_stdout
+```
+
+### Testing __main__.py and Module Loading
+
+For testing modules that use `if __name__ == "__main__"` logic:
+
+```python
+def test_module_execution(monkeypatch):
+    # Keep track if main was called
+    main_called = False
+    
+    # Define a function to track if main is called
+    def track_main():
+        nonlocal main_called
+        main_called = True
+    
+    # Patch the main function
+    monkeypatch.setattr('module.__main__.main', track_main)
+    
+    # Simulate module execution with __name__ == "__main__"
+    tmp_name = __main__.__name__
+    __main__.__name__ = "__main__"
+    
+    try:
+        # This should execute the if __name__ == "__main__" block
+        importlib.reload(__main__)
+        
+        # Verify main was called
+        assert main_called is True
+    finally:
+        # Restore original module name
+        __main__.__name__ = tmp_name
+```
+
 ## Best Practices & Standards
 
 1. **No Mocks Policy**
@@ -277,21 +397,38 @@ To support this effort, we should also:
    - Use real API interactions for testing behavior
    - Accept the trade-offs of real API testing for higher confidence
 
-2. **Test Isolation**
+2. **Alternative Approaches to Mocking**
+   - Use dataclasses for test objects instead of MagicMock
+   - Define minimal, focused classes that match expected interfaces
+   - Use default values to simplify test creation
+   - Leverage standard library tools (contextmanager, StringIO, importlib.reload)
+   - Consider using types.SimpleNamespace for simple attribute containers
+   - Apply dependency injection for easier test parameterization
+   - Design functions to accept dependencies rather than create them
+
+3. **Focus on Behavior Testing**
+   - Test what a function does, not how it does it
+   - Verify inputs and outputs, not implementation details
+   - Create equivalence classes of test cases
+   - Focus on high-level outcomes rather than internal steps
+   - Test edge cases thoroughly (None values, empty lists, etc.)
+   - Verify error conditions as carefully as success paths
+
+4. **Test Isolation**
    - Each test should be independent and isolated from others
    - Implement proper setup and teardown
 
-3. **Resource Management**
+5. **Resource Management**
    - Use unique identifiers for test resources
    - Tag all test-created resources for easy identification
    - Always clean up test resources
 
-4. **Rate Limit Handling**
+6. **Rate Limit Handling**
    - Implement exponential backoff
    - Use conditional requests where possible
    - Consider resource-specific rate limits
 
-5. **Error Testing**
+7. **Error Testing**
    - Test both success and error scenarios
    - Test edge cases and boundary conditions
    - Verify error messages and codes

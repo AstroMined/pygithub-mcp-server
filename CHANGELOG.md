@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8] - 2025-03-03
+
+### Added
+- Comprehensive test coverage improvements:
+  - Added integration tests for GitHub issue tools error cases
+  - Created unit tests for server initialization and configuration
+  - Expanded test coverage for rate limit handling
+  - Added parameter validation tests for operations/issues.py
+  - Implemented tests for main module without using mocks
+  - Created tests for repository converters with dataclasses instead of mocks
+
+### Changed
+- Improved unit testing approach:
+  - Used dataclasses to create test objects instead of unittest.mock
+  - Leveraged pytest fixtures for test data preparation
+  - Implemented context managers for test environment control
+  - Enhanced test infrastructure for GitHub API integration testing
+  - Updated test organization for better maintainability
+  - Focused on testing behaviors rather than implementation details
+
+### Documentation
+- Enhanced active_context.md with improved testing strategies
+- Updated progress.md with completed test coverage items
+- Added new implementation lessons for unit testing without mocks
+- Added insights about using dataclasses for cleaner, type-safe tests
+
 ## [0.5.6] - 2025-03-02
 
 ### Added
