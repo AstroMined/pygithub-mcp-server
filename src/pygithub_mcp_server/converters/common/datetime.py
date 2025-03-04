@@ -36,36 +36,52 @@ def convert_iso_string_to_datetime(value: Union[str, datetime]) -> datetime:
     Returns:
         datetime object
         
-    Note:
-        This function assumes the input has already been validated as a proper
-        ISO 8601 format by the schema. It focuses solely on conversion.
+    Raises:
+        ValueError: If the input string is not a valid ISO format
     """
     if isinstance(value, datetime):
         return value
     
-    # Handle 'Z' timezone indicator by replacing with +00:00
-    value = value.replace('Z', '+00:00')
+    # Basic validation before attempting conversion
+    if not isinstance(value, str):
+        raise ValueError(f"Expected string or datetime, got {type(value).__name__}")
     
-    # Handle timezone formats without colons
-    if ('+' in value or '-' in value.split('T')[1]):
-        # Find the position of the timezone sign
-        sign_pos = max(value.rfind('+'), value.rfind('-'))
-        if sign_pos > 0:
-            timezone_part = value[sign_pos:]
-            # If timezone doesn't have a colon
-            if ':' not in timezone_part:
-                if len(timezone_part) == 5:  # Format like "+0500"
-                    # Insert colon between hours and minutes
-                    value = value[:sign_pos+3] + ':' + value[sign_pos+3:]
-                elif len(timezone_part) == 3:  # Format like "+05"
-                    # Add ":00" for minutes
-                    value = value + ":00"
-                elif len(timezone_part) == 2:  # Format like "+5"
-                    # Add "0:00" to make it "+05:00"
-                    value = value[:sign_pos+1] + "0" + value[sign_pos+1:] + ":00"
-    
-    # Let fromisoformat handle any remaining conversion errors
-    return datetime.fromisoformat(value)
+    # Quick validation to catch obvious non-date strings
+    if len(value) < 8:  # Minimum length for a date (YYYY-MM-DD)
+        raise ValueError(f"Invalid date format: {value}")
+        
+    try:
+        # Handle 'Z' timezone indicator by replacing with +00:00
+        value = value.replace('Z', '+00:00')
+        
+        # Handle timezone formats without colons
+        # First check if 'T' exists in the string to avoid index errors
+        if 'T' not in value:
+            # If no 'T' in the string but it might still be a valid date (YYYY-MM-DD)
+            # Let fromisoformat try to handle it
+            pass
+        elif ('+' in value or (value.count('T') > 0 and '-' in value.split('T')[1])):
+            # Find the position of the timezone sign
+            sign_pos = max(value.rfind('+'), value.rfind('-'))
+            if sign_pos > 0:
+                timezone_part = value[sign_pos:]
+                # If timezone doesn't have a colon
+                if ':' not in timezone_part:
+                    if len(timezone_part) == 5:  # Format like "+0500"
+                        # Insert colon between hours and minutes
+                        value = value[:sign_pos+3] + ':' + value[sign_pos+3:]
+                    elif len(timezone_part) == 3:  # Format like "+05"
+                        # Add ":00" for minutes
+                        value = value + ":00"
+                    elif len(timezone_part) == 2:  # Format like "+5"
+                        # Add "0:00" to make it "+05:00"
+                        value = value[:sign_pos+1] + "0" + value[sign_pos+1:] + ":00"
+        
+        # Try converting with fromisoformat
+        return datetime.fromisoformat(value)
+    except (ValueError, TypeError, AttributeError) as e:
+        # Provide a more descriptive error message
+        raise ValueError(f"Invalid isoformat string: '{value}'. Error: {str(e)}")
 
 
 def ensure_utc_datetime(dt: Union[str, datetime]) -> datetime:

@@ -43,6 +43,13 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
 
 ## Recent Changes
 
+- Proposed ADR-007 (Pydantic-First Architecture):
+  - Documented architectural issues with current approach of unpacking Pydantic models
+  - Defined new pattern where Pydantic models flow unchanged through all layers
+  - Added consistent validation error handling with clear conversion to GitHubError
+  - Updated system_patterns.md with comprehensive implementation examples
+  - Established standardized approach for model handling across all layers
+
 - Fixed remaining test failures in GitHub issue tools:
   - Fixed create_issue parameter validation to properly handle missing required fields
   - Improved empty string handling in update_issue for body parameter
@@ -206,7 +213,17 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
    - Proper error handling improves reliability
    - Comprehensive logging aids debugging
 
-5. System Design:
+5. Pydantic-First Architecture:
+   - Passing Pydantic models directly to operations improves type safety
+   - Consistent validation error handling simplifies testing
+   - Reducing parameter unpacking/repacking improves maintainability
+   - Clear ownership of validation in Pydantic models reduces duplication
+   - Decorator pattern for validation error handling provides consistency
+   - Single source of truth for validation logic increases reliability
+   - Clearer layer responsibilities lead to more maintainable code
+   - Self-documenting interfaces improve development experience
+
+6. System Design:
    - Factory pattern simplifies server initialization
    - Decorator pattern streamlines tool registration
    - Strategy pattern in configuration system provides flexibility

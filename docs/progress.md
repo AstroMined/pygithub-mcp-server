@@ -170,6 +170,14 @@
 - Fixed GitHubClient singleton implementation and tests
 
 ## What's Left to Build
+### Architecture Improvements
+- [ ] Implement ADR-007 (Pydantic-First Architecture):
+  - [ ] Create validation_error_to_github_error decorator
+  - [ ] Update operations layer to accept Pydantic models directly
+  - [ ] Update tools layer to pass models without unpacking
+  - [ ] Update tests to use new architecture pattern
+  - [ ] Add comprehensive documentation and examples
+
 ### Test Coverage Improvements
 - [ ] Test Coverage Enhancements
   - [x] Fix failing test in `test_responses.py`

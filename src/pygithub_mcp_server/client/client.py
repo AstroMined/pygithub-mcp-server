@@ -107,6 +107,22 @@ class GitHubClient:
         """
         return handle_github_exception(exception, resource_hint)
 
+    def get_rate_limit(self):
+        """Get rate limit information.
+        
+        Returns:
+            RateLimit: Rate limit information from PyGithub
+            
+        Raises:
+            GitHubError: If rate limit retrieval fails
+        """
+        logger.debug("Getting rate limit information")
+        try:
+            return self.github.get_rate_limit()
+        except GithubException as e:
+            logger.error(f"GitHub exception when getting rate limit: {str(e)}")
+            raise self._handle_github_exception(e, resource_hint="rate_limit")
+            
     def get_repo(self, full_name: str) -> Repository:
         """Get a repository by full name.
 

@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Proposed ADR-007 (Pydantic-First Architecture):
+  - Architectural plan for Pydantic models as primary data interchange format
+  - Consistent validation error handling strategy
+  - Clear layer responsibilities with improved type safety
+  - Implementation patterns in system_patterns.md documentation
+  - Migration plan with phased approach for minimal disruption
+
+## [0.5.10] - 2025-03-04
+
+### Added
+- Documentation and architecture improvements:
+  - Created ADR-007 for Pydantic-First Architecture
+  - Updated system_patterns.md with Pydantic-First implementation patterns
+  - Added new section on validation error handling
+  - Enhanced documentation of data flow between layers
+  - Improved system diagrams showing architecture
+
 ## [0.5.9] - 2025-03-04
 
 ### Fixed

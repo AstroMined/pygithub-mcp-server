@@ -2,6 +2,23 @@
 
 ## Core Architecture
 
+### Pydantic-First Architecture
+```mermaid
+flowchart TD
+    A[Tools Layer] -->|Pydantic Models| B[Operations Layer]
+    B -->|Pydantic Models| C[Client Layer]
+    C --> D[GitHub API]
+    
+    subgraph Schema Layer
+        E[Pydantic Models]
+        F[Validation Logic]
+    end
+    
+    E --> A
+    E --> B
+    F --> E
+```
+
 ### GitHub Integration
 ```mermaid
 flowchart TD
@@ -46,17 +63,117 @@ flowchart TD
 
 ### Implementation Patterns
 
-1. Client Usage
+1. Pydantic-First Operations
 ```python
-# Pattern for operations
-def operation_function(params):
-    client = GitHubClient.get_instance()
-    # Use PyGithub objects
-    # Convert to our schema
-    return result
+# Pattern for operations layer with Pydantic-First architecture
+from typing import List, Dict, Any
+from ..schemas.issues import ListIssuesParams
+from ..errors import validation_error_to_github_error
+
+@validation_error_to_github_error
+def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
+    """List issues in a repository.
+
+    Args:
+        params: Validated parameters for listing issues
+
+    Returns:
+        List of issues from GitHub API
+
+    Raises:
+        GitHubError: If the API request fails or validation fails
+    """
+    try:
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+
+        # Build kwargs from Pydantic model
+        kwargs = {"state": params.state or 'open'}
+        
+        # Add optional parameters only if provided
+        if params.sort:
+            kwargs["sort"] = params.sort
+        if params.direction:
+            kwargs["direction"] = params.direction
+            
+        # Rest of implementation...
+    except GithubException as e:
+        raise client._handle_github_exception(e)
 ```
 
-2. Schema Conversion
+2. Pydantic-First Tools
+```python
+# Pattern for tools layer with Pydantic-First architecture
+from ..schemas.issues import ListIssuesParams
+
+@tool()
+def list_issues(params: ListIssuesParams) -> dict:
+    """List issues from a GitHub repository.
+    
+    Args:
+        params: Parameters for listing issues
+    
+    Returns:
+        List of issues from GitHub API
+    """
+    try:
+        # Pass the validated Pydantic model directly to operations
+        result = issues.list_issues(params)
+        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    except GitHubError as e:
+        return {
+            "content": [{"type": "error", "text": format_github_error(e)}],
+            "is_error": True
+        }
+```
+
+3. Validation Error Handling
+```python
+# Pattern for consistent validation error handling
+import functools
+from pydantic import ValidationError
+from .github import GitHubError
+
+def validation_error_to_github_error(func):
+    """Decorator to convert Pydantic ValidationError to GitHubError."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValidationError as e:
+            errors = e.errors()
+            if errors:
+                field = errors[0].get('loc', ['unknown'])[0]
+                message = errors[0].get('msg', 'Invalid value')
+                error_msg = f"Validation error: {field} - {message}"
+            else:
+                error_msg = "Invalid input data"
+                
+            raise GitHubError(error_msg)
+    return wrapper
+```
+
+4. Testing with Pydantic Models
+```python
+# Pattern for testing with Pydantic models
+def test_operation_with_invalid_data():
+    """Test operation with invalid data in Pydantic model."""
+    # Create a params object with invalid values
+    params = SomeParamsModel(
+        owner="valid-owner",
+        repo="valid-repo",
+        invalid_field="invalid-value"  # Will be caught by validation
+    )
+    
+    # The operation should raise GitHubError
+    with pytest.raises(GitHubError) as exc_info:
+        operations.some_operation(params)
+    
+    # Verify proper error message
+    assert "invalid_field" in str(exc_info.value).lower()
+```
+
+5. Schema Conversion
 ```python
 # Pattern for object conversion
 def convert_github_object(obj):
@@ -66,7 +183,7 @@ def convert_github_object(obj):
     }
 ```
 
-3. Error Handling
+6. Error Handling
 ```python
 # Pattern for error handling
 try:
@@ -76,7 +193,7 @@ except GithubException as e:
     raise GitHubError(str(e))
 ```
 
-4. Optional Parameter Handling
+7. Optional Parameter Handling
 ```python
 # Pattern for handling optional parameters
 def create_something(required_param, **optional_params):
