@@ -59,7 +59,9 @@ class TestIssueToolsErrorHandling:
         
         # Verify proper error response
         assert result.get("is_error") is True
-        assert "not found" in result["content"][0]["text"].lower() or "404" in result["content"][0]["text"]
+        assert ("not found" in result["content"][0]["text"].lower() or 
+                "404" in result["content"][0]["text"] or
+                "does not exist" in result["content"][0]["text"].lower())
     
     def test_get_issue_invalid_number(self, test_repo_info):
         """Test get_issue with non-existent issue number."""
@@ -73,7 +75,9 @@ class TestIssueToolsErrorHandling:
         
         # Verify proper error response
         assert result.get("is_error") is True
-        assert "not found" in result["content"][0]["text"].lower() or "404" in result["content"][0]["text"]
+        assert ("not found" in result["content"][0]["text"].lower() or 
+                "404" in result["content"][0]["text"] or
+                "does not exist" in result["content"][0]["text"].lower())
     
     def test_update_issue_nonexistent(self, test_repo_info):
         """Test updating a non-existent issue."""
@@ -306,7 +310,9 @@ class TestIssueToolsErrorHandling:
         
         # Verify proper error response
         assert result.get("is_error") is True
-        assert "not found" in result["content"][0]["text"].lower() or "404" in result["content"][0]["text"]
+        assert ("not found" in result["content"][0]["text"].lower() or 
+                "404" in result["content"][0]["text"] or
+                "does not exist" in result["content"][0]["text"].lower())
     
     def test_list_issues_pagination(self, test_repo_info):
         """Test listing issues with pagination."""

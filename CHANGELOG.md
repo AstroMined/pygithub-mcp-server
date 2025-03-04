@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2025-03-04
+
+### Fixed
+- Resolved remaining test failures in GitHub issue tools:
+  - Fixed create_issue parameter validation to properly handle missing required fields
+  - Improved empty string handling in update_issue for body parameter
+  - Enhanced pagination in list_issue_comments and list_issues functions
+  - Updated error handling in remove_nonexistent_label while maintaining descriptive messages
+  - Fixed tool parameter validation and error propagation throughout tools
+
+### Changed
+- Improved test assertions to accept more user-friendly error message formats
+- Enhanced error handling philosophy to prioritize descriptive error messages
+- Completed all test failure resolutions from the test failure resolution plan
+
 ## [0.5.8] - 2025-03-03
 
 ### Added

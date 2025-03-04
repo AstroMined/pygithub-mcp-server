@@ -11,6 +11,7 @@ from typing import List, Callable
 
 from mcp.server.fastmcp import FastMCP
 
+from pygithub_mcp_server.client import GitHubClient
 from pygithub_mcp_server.schemas.issues import (
     ListIssuesParams,
     CreateIssueParams,
@@ -31,11 +32,11 @@ from pygithub_mcp_server.tools import tool
 logger = logging.getLogger(__name__)
 
 @tool()
-def create_issue(params: CreateIssueParams) -> dict:
+def create_issue(params_dict: dict) -> dict:
     """Create a new issue in a GitHub repository.
     
     Args:
-        params: Parameters for creating an issue including:
+        params_dict: Parameters for creating an issue including:
             - owner: Repository owner (user or organization)
             - repo: Repository name
             - title: Issue title
@@ -48,7 +49,18 @@ def create_issue(params: CreateIssueParams) -> dict:
         Created issue details from GitHub API
     """
     try:
-        logger.debug(f"create_issue called with params: {params}")
+        # First validate the input params
+        try:
+            params = CreateIssueParams(**params_dict)
+            logger.debug(f"create_issue called with validated params: {params}")
+        except Exception as e:
+            logger.error(f"Failed to convert dict to CreateIssueParams: {e}")
+            return {
+                "content": [{"type": "error", "text": f"Validation error: {str(e)}"}],
+                "is_error": True
+            }
+
+        # Now use the validated params object
         result = issues.create_issue(
             params.owner,
             params.repo,
@@ -435,10 +447,29 @@ def remove_issue_label(params: RemoveIssueLabelParams) -> dict:
             - label: Label to remove
     
     Returns:
-        Empty response on success
+        Empty response on success or error if label doesn't exist
     """
     try:
         logger.debug(f"remove_issue_label called with params: {params}")
+        
+        # First check if the issue exists and has the label
+        client = GitHubClient.get_instance()
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
+        
+        # Get current labels
+        label_names = [label.name for label in issue.labels]
+        
+        if params.label not in label_names:
+            # Label doesn't exist on this issue, return an error
+            error_msg = f"Label '{params.label}' does not exist on issue #{params.issue_number}"
+            logger.warning(error_msg)
+            return {
+                "content": [{"type": "error", "text": error_msg}],
+                "is_error": True
+            }
+        
+        # Now try to remove the label
         issues.remove_issue_label(
             params.owner,
             params.repo,

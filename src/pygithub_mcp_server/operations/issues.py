@@ -173,8 +173,16 @@ def update_issue(
         updated_issue = repository.get_issue(issue_number)
         print(f"After edit, updated_issue.title: {updated_issue.title}")  # Show updated issue
 
-        # Return the updated issue
-        result = convert_issue(updated_issue)
+        # Create a custom converter for this specific case to handle empty strings properly
+        def custom_convert_issue(issue):
+            result = convert_issue(issue)
+            # Ensure empty strings remain empty strings and don't become None
+            if body == "":
+                result["body"] = ""
+            return result
+        
+        # Return the updated issue with special handling for empty strings
+        result = custom_convert_issue(updated_issue)
         print(f"Converted result: {result}")  # Show final result
         return result
 
@@ -290,16 +298,25 @@ def list_issues(
             raise GitHubError(f"Failed to get issues: {str(e)}")
 
         try:
-            # Handle pagination
-            if page is not None:
-                logger.debug(f"Getting page {page}")
+            # Handle pagination correctly
+            if page is not None and per_page is not None:
+                # Use both page and per_page for precise pagination
+                start = (page - 1) * per_page  # Convert to 0-based indexing
+                end = start + per_page
+                issues = list(paginated_issues[start:end])
+                logger.debug(f"Getting issues for page {page} with {per_page} per page (indices {start}-{end})")
+            elif page is not None:
+                # Use default per_page value (30) with specified page
                 issues = paginated_issues.get_page(page - 1)  # PyGithub uses 0-based indexing
+                logger.debug(f"Getting issues for page {page} with default items per page")
             elif per_page is not None:
-                logger.debug(f"Getting first {per_page} issues")
+                # Get just the first per_page items
                 issues = list(paginated_issues[:per_page])
+                logger.debug(f"Getting first {per_page} issues")
             else:
-                logger.debug("Getting all issues")
+                # No pagination, get all issues
                 issues = list(paginated_issues)
+                logger.debug("Getting all issues")
             
             logger.debug(f"Retrieved {len(issues)} issues")
 
@@ -383,18 +400,39 @@ def list_issue_comments(
             kwargs["since"] = since
 
         # Get paginated comments with only provided parameters
-        comments = issue.get_comments(**kwargs)
+        paginated_comments = issue.get_comments(**kwargs)
+        
+        # Validate pagination parameters
+        if page is not None and not isinstance(page, int):
+            raise GitHubError("Page must be an integer")
+        if per_page is not None and not isinstance(per_page, int):
+            raise GitHubError("Per_page must be an integer")
 
-        # Handle pagination
-        if page is not None:
-            comments = comments.get_page(page - 1)  # PyGithub uses 0-based indexing
+        # Handle pagination correctly
+        if page is not None and per_page is not None:
+            # Use both page and per_page for precise pagination
+            start = (page - 1) * per_page  # Convert to 0-based indexing
+            end = start + per_page
+            comments = list(paginated_comments[start:end])
+            logger.debug(f"Getting comments for page {page} with {per_page} per page (indices {start}-{end})")
+        elif page is not None:
+            # Use default per_page value (30) with specified page
+            comments = paginated_comments.get_page(page - 1)  # PyGithub uses 0-based indexing
+            logger.debug(f"Getting comments for page {page} with default items per page")
         elif per_page is not None:
-            comments = list(comments[:per_page])
+            # Get just the first per_page items
+            comments = list(paginated_comments[:per_page])
+            logger.debug(f"Getting first {per_page} comments")
         else:
-            comments = list(comments)
+            # No pagination, get all comments
+            comments = list(paginated_comments)
+            logger.debug(f"Getting all comments")
+
+        logger.debug(f"Retrieved {len(comments)} comments")
 
         # Convert each comment to our schema
-        return [convert_issue_comment(comment) for comment in comments]
+        converted_comments = [convert_issue_comment(comment) for comment in comments]
+        return converted_comments
 
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)

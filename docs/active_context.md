@@ -43,6 +43,14 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
 
 ## Recent Changes
 
+- Fixed remaining test failures in GitHub issue tools:
+  - Fixed create_issue parameter validation to properly handle missing required fields
+  - Improved empty string handling in update_issue for body parameter
+  - Enhanced pagination handling in list_issue_comments and list_issues
+  - Updated error handling in remove_nonexistent_label to maintain descriptive error messages
+  - Modified test assertions to accept more user-friendly error formats 
+  - Fixed tool parameter validation and error propagation
+
 - Fixed integration test issues:
   - Enhanced tool() decorator to automatically convert dictionary parameters to Pydantic models
   - Fixed inconsistencies between field names ("number" vs "issue_number") in tests and converters
