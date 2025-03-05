@@ -14,6 +14,14 @@ from pygithub_mcp_server.operations.issues import (
     update_issue_comment,
     delete_issue_comment,
 )
+from pygithub_mcp_server.schemas.issues import (
+    CreateIssueParams,
+    UpdateIssueParams,
+    IssueCommentParams,
+    ListIssueCommentsParams,
+    UpdateIssueCommentParams,
+    DeleteIssueCommentParams,
+)
 
 
 @pytest.mark.integration
@@ -27,7 +35,11 @@ def test_add_issue_comment(test_owner, test_repo_name, unique_id, with_retry):
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -37,7 +49,12 @@ def test_add_issue_comment(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         
@@ -51,7 +68,12 @@ def test_add_issue_comment(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -69,7 +91,11 @@ def test_list_issue_comments(test_owner, test_repo_name, unique_id, with_retry):
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -79,14 +105,23 @@ def test_list_issue_comments(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         
         # List comments
         @with_retry
         def list_test_comments():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments = list_test_comments()
         
@@ -108,7 +143,12 @@ def test_list_issue_comments(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -126,7 +166,11 @@ def test_update_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -136,7 +180,12 @@ def test_update_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         
@@ -145,9 +194,13 @@ def test_update_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         
         @with_retry
         def update_test_comment():
-            return update_issue_comment(
-                owner, repo, issue["issue_number"], comment["id"], updated_body
-            )
+            return update_issue_comment(UpdateIssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                comment_id=comment["id"],
+                body=updated_body
+            ))
         
         updated = update_test_comment()
         
@@ -159,7 +212,11 @@ def test_update_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         # List comments to verify update
         @with_retry
         def list_test_comments():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments = list_test_comments()
         
@@ -177,7 +234,12 @@ def test_update_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -195,7 +257,11 @@ def test_delete_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -205,14 +271,23 @@ def test_delete_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         
         # Verify comment exists
         @with_retry
         def list_test_comments_before():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments_before = list_test_comments_before()
         
@@ -227,14 +302,23 @@ def test_delete_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         # Delete the comment
         @with_retry
         def delete_test_comment():
-            return delete_issue_comment(owner, repo, issue["issue_number"], comment["id"])
+            return delete_issue_comment(DeleteIssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                comment_id=comment["id"]
+            ))
         
         delete_test_comment()
         
         # Verify comment is deleted
         @with_retry
         def list_test_comments_after():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments_after = list_test_comments_after()
         
@@ -245,7 +329,12 @@ def test_delete_issue_comment(test_owner, test_repo_name, unique_id, with_retry)
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -263,7 +352,11 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -273,7 +366,12 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         
@@ -286,7 +384,12 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
         # List comments since 1 hour ago
         @with_retry
         def list_test_comments_since():
-            return list_issue_comments(owner, repo, issue["issue_number"], since=since.isoformat())
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                since=since.isoformat()
+            ))
         
         recent_comments = list_test_comments_since()
         
@@ -306,7 +409,12 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
         # List comments since 1 hour in the future
         @with_retry
         def list_test_comments_future():
-            return list_issue_comments(owner, repo, issue["issue_number"], since=future.isoformat())
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                since=future.isoformat()
+            ))
         
         future_comments = list_test_comments_future()
         
@@ -318,7 +426,12 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -336,7 +449,11 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
     # Create an issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -346,7 +463,12 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def add_test_comment():
-            return add_issue_comment(owner, repo, issue["issue_number"], comment_body)
+            return add_issue_comment(IssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=comment_body
+            ))
         
         comment = add_test_comment()
         assert comment["body"] == comment_body
@@ -354,7 +476,11 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         # List comments
         @with_retry
         def list_test_comments():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments = list_test_comments()
         found = False
@@ -369,9 +495,13 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def update_test_comment():
-            return update_issue_comment(
-                owner, repo, issue["issue_number"], comment["id"], updated_body
-            )
+            return update_issue_comment(UpdateIssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                comment_id=comment["id"],
+                body=updated_body
+            ))
         
         updated = update_test_comment()
         assert updated["body"] == updated_body
@@ -379,7 +509,11 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         # List comments again to verify update
         @with_retry
         def list_test_comments_after_update():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments_after_update = list_test_comments_after_update()
         found_updated = False
@@ -393,14 +527,23 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         # Delete comment
         @with_retry
         def delete_test_comment():
-            return delete_issue_comment(owner, repo, issue["issue_number"], comment["id"])
+            return delete_issue_comment(DeleteIssueCommentParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                comment_id=comment["id"]
+            ))
         
         delete_test_comment()
         
         # List comments again to verify deletion
         @with_retry
         def list_test_comments_after_delete():
-            return list_issue_comments(owner, repo, issue["issue_number"])
+            return list_issue_comments(ListIssueCommentsParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         comments_after_delete = list_test_comments_after_delete()
         for c in comments_after_delete:
@@ -410,7 +553,12 @@ def test_comment_lifecycle(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:

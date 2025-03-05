@@ -7,6 +7,11 @@ import pytest
 from datetime import datetime
 
 from pygithub_mcp_server.operations.issues import create_issue, get_issue, update_issue
+from pygithub_mcp_server.schemas.issues import (
+    CreateIssueParams,
+    GetIssueParams,
+    UpdateIssueParams,
+)
 
 
 @pytest.mark.integration
@@ -20,7 +25,11 @@ def test_update_issue_title(test_owner, test_repo_name, unique_id, with_retry):
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -30,7 +39,12 @@ def test_update_issue_title(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def update_test_issue():
-            return update_issue(owner, repo, issue["issue_number"], title=updated_title)
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                title=updated_title
+            ))
         
         updated = update_test_issue()
         
@@ -42,7 +56,11 @@ def test_update_issue_title(test_owner, test_repo_name, unique_id, with_retry):
         # Verify with get_issue
         @with_retry
         def get_test_issue():
-            return get_issue(owner, repo, issue["issue_number"])
+            return get_issue(GetIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         fetched = get_test_issue()
         assert fetched["title"] == updated_title
@@ -51,7 +69,12 @@ def test_update_issue_title(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -70,7 +93,12 @@ def test_update_issue_body(test_owner, test_repo_name, unique_id, with_retry):
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title, body=body)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title,
+            body=body
+        ))
     
     issue = create_test_issue()
     
@@ -80,7 +108,12 @@ def test_update_issue_body(test_owner, test_repo_name, unique_id, with_retry):
         
         @with_retry
         def update_test_issue():
-            return update_issue(owner, repo, issue["issue_number"], body=updated_body)
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                body=updated_body
+            ))
         
         updated = update_test_issue()
         
@@ -92,7 +125,11 @@ def test_update_issue_body(test_owner, test_repo_name, unique_id, with_retry):
         # Verify with get_issue
         @with_retry
         def get_test_issue():
-            return get_issue(owner, repo, issue["issue_number"])
+            return get_issue(GetIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         fetched = get_test_issue()
         assert fetched["body"] == updated_body
@@ -101,7 +138,12 @@ def test_update_issue_body(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -119,7 +161,11 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     assert issue["state"] == "open"
@@ -128,7 +174,12 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
         # Close the issue
         @with_retry
         def close_test_issue():
-            return update_issue(owner, repo, issue["issue_number"], state="closed")
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                state="closed"
+            ))
         
         closed = close_test_issue()
         
@@ -139,7 +190,11 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
         # Verify with get_issue
         @with_retry
         def get_closed_issue():
-            return get_issue(owner, repo, issue["issue_number"])
+            return get_issue(GetIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         fetched_closed = get_closed_issue()
         assert fetched_closed["state"] == "closed"
@@ -147,7 +202,12 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
         # Reopen the issue
         @with_retry
         def reopen_test_issue():
-            return update_issue(owner, repo, issue["issue_number"], state="open")
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                state="open"
+            ))
         
         reopened = reopen_test_issue()
         
@@ -157,7 +217,11 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
         # Verify with get_issue
         @with_retry
         def get_reopened_issue():
-            return get_issue(owner, repo, issue["issue_number"])
+            return get_issue(GetIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         fetched_reopened = get_reopened_issue()
         assert fetched_reopened["state"] == "open"
@@ -166,7 +230,12 @@ def test_update_issue_state(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def ensure_closed():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             ensure_closed()
         except Exception as e:
@@ -184,7 +253,11 @@ def test_update_issue_labels(test_owner, test_repo_name, unique_id, with_retry):
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -192,10 +265,12 @@ def test_update_issue_labels(test_owner, test_repo_name, unique_id, with_retry):
         # Update issue labels
         @with_retry
         def update_test_issue_labels():
-            return update_issue(
-                owner, repo, issue["issue_number"], 
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
                 labels=["test-label", "bug"]
-            )
+            ))
         
         updated = update_test_issue_labels()
         
@@ -208,10 +283,12 @@ def test_update_issue_labels(test_owner, test_repo_name, unique_id, with_retry):
         # Update with different labels (should replace, not add)
         @with_retry
         def update_test_issue_labels_again():
-            return update_issue(
-                owner, repo, issue["issue_number"], 
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
                 labels=["enhancement"]
-            )
+            ))
         
         updated_again = update_test_issue_labels_again()
         
@@ -223,7 +300,12 @@ def test_update_issue_labels(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -241,7 +323,11 @@ def test_update_issue_multiple_fields(test_owner, test_repo_name, unique_id, wit
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -252,13 +338,15 @@ def test_update_issue_multiple_fields(test_owner, test_repo_name, unique_id, wit
         
         @with_retry
         def update_test_issue_multiple():
-            return update_issue(
-                owner, repo, issue["issue_number"],
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
                 title=updated_title,
                 body=updated_body,
                 labels=["test-label"],
                 assignees=[owner]  # Assign to the repo owner
-            )
+            ))
         
         updated = update_test_issue_multiple()
         
@@ -272,7 +360,12 @@ def test_update_issue_multiple_fields(test_owner, test_repo_name, unique_id, wit
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -290,7 +383,11 @@ def test_update_issue_no_changes(test_owner, test_repo_name, unique_id, with_ret
     # Create issue
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -298,7 +395,11 @@ def test_update_issue_no_changes(test_owner, test_repo_name, unique_id, with_ret
         # Update with no changes
         @with_retry
         def update_test_issue_no_changes():
-            return update_issue(owner, repo, issue["issue_number"])
+            return update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"]
+            ))
         
         updated = update_test_issue_no_changes()
         
@@ -311,7 +412,12 @@ def test_update_issue_no_changes(test_owner, test_repo_name, unique_id, with_ret
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:

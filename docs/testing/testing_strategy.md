@@ -423,6 +423,34 @@ def test_module_execution(monkeypatch):
    - Tag all test-created resources for easy identification
    - Always clean up test resources
 
+6. **Pagination in Tests**
+   - Always add pagination limits when testing list operations
+   - Use reasonable page sizes (20-30 items) to avoid performance issues
+   - Be aware that repositories can grow to contain hundreds or thousands of items
+   - Testing examples:
+     ```python
+     # Good - Using pagination limits
+     issues = list_issues(ListIssuesParams(
+         owner=owner,
+         repo=repo,
+         state="closed",
+         per_page=20,   # Limit results to avoid hanging
+         page=1         # Only get first page
+     ))
+     
+     # Problematic - No pagination limits (will try to fetch all items)
+     issues = list_issues(ListIssuesParams(
+         owner=owner,
+         repo=repo,
+         state="closed"
+     ))
+     ```
+   - For operations that need to find specific items:
+     - Create test items with unique identifiers
+     - Place test items at the beginning of lists (e.g., with naming that sorts first)
+     - Use targeted queries where possible (labels, state filters, etc.)
+   - Consider time limits for tests that could potentially run long
+
 6. **Rate Limit Handling**
    - Implement exponential backoff
    - Use conditional requests where possible

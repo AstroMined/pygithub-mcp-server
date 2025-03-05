@@ -64,9 +64,37 @@ The implementation follows this pattern:
            # Unexpected error handling
    ```
 
+## Testing Notes
+
+During integration testing, we identified an important issue with handling large GitHub repositories:
+
+- **Issue**: Tests were hanging or taking extremely long time to complete when accessing repositories with a large number of issues (in our case, 481+ closed issues).
+- **Cause**: When using the `list_issues` operation with state filters (e.g., `state="closed"`), the code was attempting to retrieve all matching issues at once without pagination limits.
+- **Solution**: Added pagination parameters to all `list_issues` calls in tests:
+  ```python
+  # Before (problematic with large repos):
+  issues = list_issues(ListIssuesParams(
+      owner=owner,
+      repo=repo,
+      state="closed"
+  ))
+  
+  # After (works efficiently with large repos):
+  issues = list_issues(ListIssuesParams(
+      owner=owner,
+      repo=repo,
+      state="closed",
+      per_page=20,    # Limit results to avoid hanging
+      page=1          # Only get first page
+  ))
+  ```
+
+This change ensures tests run efficiently even in repositories with hundreds or thousands of issues. If tests continue to experience performance issues with other operations, consider applying similar pagination strategies.
+
 ## Next Steps
 
-1. Run integration tests to verify all refactored code works correctly
+1. ✅ Run integration tests to verify all refactored code works correctly
 2. Apply the same Pydantic-first pattern to other modules (repositories, pull requests, etc.)
 3. Update documentation to reflect the new architecture
 4. Improve error handling and validation where needed
+5. Monitor test performance with growing repositories and apply pagination where needed

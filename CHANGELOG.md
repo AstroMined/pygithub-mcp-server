@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.12] - 2025-03-05
+
+### Fixed
+- Resolved issues with tests hanging on large repositories:
+  - Fixed tests that were failing when accessing repositories with many issues (481+ closed issues)
+  - Added pagination parameters (per_page and page) to all list_issues calls in tests
+  - Improved test reliability and performance with repositories of any size
+  - Enhanced test lifecycle management to avoid exhaustive data retrieval
+
+### Added
+- New test best practices:
+  - Added documentation on pagination best practices in testing_strategy.md
+  - Created guidelines for handling large data sets in tests
+  - Updated implementation_status.md with lessons learned about GitHub API pagination
+  - Added examples of proper pagination parameter usage in tests
+
 ## [0.5.11] - 2025-03-05
 
 ### Added

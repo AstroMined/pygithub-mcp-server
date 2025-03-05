@@ -11,6 +11,11 @@ from pygithub_mcp_server.operations.issues import (
     list_issues,
     update_issue,
 )
+from pygithub_mcp_server.schemas.issues import (
+    CreateIssueParams,
+    ListIssuesParams,
+    UpdateIssueParams,
+)
 
 
 @pytest.mark.integration
@@ -25,7 +30,11 @@ def test_list_issues_basic(test_owner, test_repo_name, unique_id, with_retry):
     
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -33,7 +42,12 @@ def test_list_issues_basic(test_owner, test_repo_name, unique_id, with_retry):
         # List issues
         @with_retry
         def list_test_issues():
-            return list_issues(owner, repo)
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         issues = list_test_issues()
         
@@ -55,7 +69,12 @@ def test_list_issues_basic(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -66,38 +85,84 @@ def test_list_issues_basic(test_owner, test_repo_name, unique_id, with_retry):
 def test_list_issues_state_filter(test_owner, test_repo_name, unique_id, with_retry):
     """Test list_issues with state filter."""
     # Setup
+    print("\n--- DEBUG: Starting test_list_issues_state_filter ---")
     owner = test_owner
     repo = test_repo_name
     
     # Create an open issue
     open_title = f"Test Issue (Open) {unique_id}"
+    print(f"DEBUG: Creating open issue with title: {open_title}")
     
-    @with_retry
-    def create_open_issue():
-        return create_issue(owner, repo, open_title)
-    
-    open_issue = create_open_issue()
+    try:
+        @with_retry
+        def create_open_issue():
+            result = create_issue(CreateIssueParams(
+                owner=owner,
+                repo=repo,
+                title=open_title
+            ))
+            print(f"DEBUG: Open issue created successfully with number: {result.get('issue_number', 'UNKNOWN')}")
+            return result
+        
+        open_issue = create_open_issue()
+        print(f"DEBUG: Open issue creation completed, issue number: {open_issue.get('issue_number', 'UNKNOWN')}")
+    except Exception as e:
+        print(f"DEBUG ERROR: Failed to create open issue: {type(e).__name__}: {str(e)}")
+        raise
     
     # Create a closed issue
     closed_title = f"Test Issue (Closed) {unique_id}"
+    print(f"DEBUG: Creating closed issue with title: {closed_title}")
     
-    @with_retry
-    def create_closed_issue():
-        issue = create_issue(owner, repo, closed_title)
-        update_issue(owner, repo, issue["issue_number"], state="closed")
-        return issue
-    
-    closed_issue = create_closed_issue()
+    try:
+        @with_retry
+        def create_closed_issue():
+            issue = create_issue(CreateIssueParams(
+                owner=owner,
+                repo=repo,
+                title=closed_title
+            ))
+            print(f"DEBUG: Closed issue created, now closing it. Issue number: {issue.get('issue_number', 'UNKNOWN')}")
+            
+            update_issue(UpdateIssueParams(
+                owner=owner,
+                repo=repo,
+                issue_number=issue["issue_number"],
+                state="closed"
+            ))
+            print(f"DEBUG: Issue {issue.get('issue_number', 'UNKNOWN')} successfully closed")
+            return issue
+        
+        closed_issue = create_closed_issue()
+        print(f"DEBUG: Closed issue creation completed, issue number: {closed_issue.get('issue_number', 'UNKNOWN')}")
+    except Exception as e:
+        print(f"DEBUG ERROR: Failed to create/close issue: {type(e).__name__}: {str(e)}")
+        raise
     
     try:
         # List open issues
-        @with_retry
-        def list_open_issues():
-            return list_issues(owner, repo, state="open")
-        
-        open_issues = list_open_issues()
+        print("DEBUG: Listing open issues")
+        try:
+            @with_retry
+            def list_open_issues():
+                result = list_issues(ListIssuesParams(
+                    owner=owner,
+                    repo=repo,
+                    state="open",
+                    per_page=20,    # Limit results to avoid hanging
+                    page=1          # Only get first page
+                ))
+                print(f"DEBUG: Retrieved {len(result)} open issues")
+                return result
+            
+            open_issues = list_open_issues()
+            print("DEBUG: Open issues listing completed")
+        except Exception as e:
+            print(f"DEBUG ERROR: Failed to list open issues: {type(e).__name__}: {str(e)}")
+            raise
         
         # Verify open issue is in the list
+        print("DEBUG: Verifying open issue is in the list")
         found_open = False
         for i in open_issues:
             if i["issue_number"] == open_issue["issue_number"]:
@@ -106,19 +171,37 @@ def test_list_issues_state_filter(test_owner, test_repo_name, unique_id, with_re
                 break
         
         assert found_open, "Open test issue not found in open issues list"
+        print("DEBUG: Open issue verification passed")
         
         # Verify closed issue is not in the list
+        print("DEBUG: Verifying closed issue is NOT in the open issues list")
         for i in open_issues:
             assert i["issue_number"] != closed_issue["issue_number"], "Closed issue found in open issues list"
+        print("DEBUG: Closed issue verification passed (not in open issues)")
         
         # List closed issues
-        @with_retry
-        def list_closed_issues():
-            return list_issues(owner, repo, state="closed")
-        
-        closed_issues = list_closed_issues()
+        print("DEBUG: Listing closed issues")
+        try:
+            @with_retry
+            def list_closed_issues():
+                result = list_issues(ListIssuesParams(
+                    owner=owner,
+                    repo=repo,
+                    state="closed",
+                    per_page=20,    # Limit results to avoid hanging
+                    page=1          # Only get first page
+                ))
+                print(f"DEBUG: Retrieved {len(result)} closed issues")
+                return result
+            
+            closed_issues = list_closed_issues()
+            print("DEBUG: Closed issues listing completed")
+        except Exception as e:
+            print(f"DEBUG ERROR: Failed to list closed issues: {type(e).__name__}: {str(e)}")
+            raise
         
         # Verify closed issue is in the list
+        print("DEBUG: Verifying closed issue is in the list")
         found_closed = False
         for i in closed_issues:
             if i["issue_number"] == closed_issue["issue_number"]:
@@ -127,39 +210,70 @@ def test_list_issues_state_filter(test_owner, test_repo_name, unique_id, with_re
                 break
         
         assert found_closed, "Closed test issue not found in closed issues list"
+        print("DEBUG: Closed issue verification passed")
         
         # Verify open issue is not in the list
+        print("DEBUG: Verifying open issue is NOT in the closed issues list")
         for i in closed_issues:
             assert i["issue_number"] != open_issue["issue_number"], "Open issue found in closed issues list"
+        print("DEBUG: Open issue verification passed (not in closed issues)")
         
         # List all issues
-        @with_retry
-        def list_all_issues():
-            return list_issues(owner, repo, state="all")
-        
-        all_issues = list_all_issues()
+        print("DEBUG: Listing all issues")
+        try:
+            @with_retry
+            def list_all_issues():
+                result = list_issues(ListIssuesParams(
+                    owner=owner,
+                    repo=repo,
+                    state="all",
+                    per_page=20,    # Limit results to avoid hanging
+                    page=1          # Only get first page
+                ))
+                print(f"DEBUG: Retrieved {len(result)} total issues")
+                return result
+            
+            all_issues = list_all_issues()
+            print("DEBUG: All issues listing completed")
+        except Exception as e:
+            print(f"DEBUG ERROR: Failed to list all issues: {type(e).__name__}: {str(e)}")
+            raise
         
         # Verify both issues are in the list
+        print("DEBUG: Verifying both issues are in the 'all issues' list")
         found_open = False
         found_closed = False
         for i in all_issues:
             if i["issue_number"] == open_issue["issue_number"]:
                 found_open = True
+                print(f"DEBUG: Found open issue {open_issue['issue_number']} in all issues list")
             elif i["issue_number"] == closed_issue["issue_number"]:
                 found_closed = True
+                print(f"DEBUG: Found closed issue {closed_issue['issue_number']} in all issues list")
         
         assert found_open, "Open test issue not found in all issues list"
         assert found_closed, "Closed test issue not found in all issues list"
+        print("DEBUG: Both issues verification passed")
     finally:
         # Cleanup
+        print("DEBUG: Starting cleanup")
         try:
             @with_retry
             def close_open_issue():
-                return update_issue(owner, repo, open_issue["issue_number"], state="closed")
+                result = update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=open_issue["issue_number"],
+                    state="closed"
+                ))
+                print(f"DEBUG: Successfully closed open issue {open_issue['issue_number']} during cleanup")
+                return result
             
             close_open_issue()
         except Exception as e:
-            print(f"Failed to close open issue during cleanup: {e}")
+            print(f"DEBUG ERROR: Failed to close open issue during cleanup: {type(e).__name__}: {str(e)}")
+
+        print("DEBUG: Test completed")
 
 
 @pytest.mark.integration
@@ -174,7 +288,11 @@ def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retr
     
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -185,14 +303,24 @@ def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retr
         # Get first page of issues
         @with_retry
         def list_test_issues_page1():
-            return list_issues(owner, repo, page=1, per_page=per_page_value)
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                page=1,
+                per_page=per_page_value
+            ))
         
         page1 = list_test_issues_page1()
         
         # Get second page of issues
         @with_retry
         def list_test_issues_page2():
-            return list_issues(owner, repo, page=2, per_page=per_page_value)
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                page=2,
+                per_page=per_page_value
+            ))
         
         page2 = list_test_issues_page2()
         
@@ -223,7 +351,12 @@ def test_list_issues_pagination(test_owner, test_repo_name, unique_id, with_retr
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -242,8 +375,17 @@ def test_list_issues_labels_filter(test_owner, test_repo_name, unique_id, with_r
     
     @with_retry
     def create_test_issue():
-        issue = create_issue(owner, repo, title)
-        update_issue(owner, repo, issue["issue_number"], labels=["bug", "test-label"])
+        issue = create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
+        update_issue(UpdateIssueParams(
+            owner=owner,
+            repo=repo,
+            issue_number=issue["issue_number"],
+            labels=["bug", "test-label"]
+        ))
         return issue
     
     issue = create_test_issue()
@@ -252,7 +394,13 @@ def test_list_issues_labels_filter(test_owner, test_repo_name, unique_id, with_r
         # List issues with bug label
         @with_retry
         def list_bug_issues():
-            return list_issues(owner, repo, labels=["bug"])
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                labels=["bug"],
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         bug_issues = list_bug_issues()
         
@@ -270,7 +418,13 @@ def test_list_issues_labels_filter(test_owner, test_repo_name, unique_id, with_r
         # List issues with test-label
         @with_retry
         def list_test_label_issues():
-            return list_issues(owner, repo, labels=["test-label"])
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                labels=["test-label"],
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         test_label_issues = list_test_label_issues()
         
@@ -288,7 +442,13 @@ def test_list_issues_labels_filter(test_owner, test_repo_name, unique_id, with_r
         # List issues with non-existent label
         @with_retry
         def list_nonexistent_label_issues():
-            return list_issues(owner, repo, labels=[f"nonexistent-{unique_id}"])
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                labels=[f"nonexistent-{unique_id}"],
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         nonexistent_label_issues = list_nonexistent_label_issues()
         
@@ -300,7 +460,12 @@ def test_list_issues_labels_filter(test_owner, test_repo_name, unique_id, with_r
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:
@@ -319,7 +484,11 @@ def test_list_issues_sort_and_direction(test_owner, test_repo_name, unique_id, w
     
     @with_retry
     def create_test_issue1():
-        return create_issue(owner, repo, title1)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title1
+        ))
     
     issue1 = create_test_issue1()
     
@@ -331,7 +500,11 @@ def test_list_issues_sort_and_direction(test_owner, test_repo_name, unique_id, w
     
     @with_retry
     def create_test_issue2():
-        return create_issue(owner, repo, title2)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title2
+        ))
     
     issue2 = create_test_issue2()
     
@@ -339,7 +512,14 @@ def test_list_issues_sort_and_direction(test_owner, test_repo_name, unique_id, w
         # List issues sorted by created, ascending
         @with_retry
         def list_created_asc():
-            return list_issues(owner, repo, sort="created", direction="asc")
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                sort="created",
+                direction="asc",
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         created_asc = list_created_asc()
         
@@ -362,7 +542,14 @@ def test_list_issues_sort_and_direction(test_owner, test_repo_name, unique_id, w
         # List issues sorted by created, descending
         @with_retry
         def list_created_desc():
-            return list_issues(owner, repo, sort="created", direction="desc")
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                sort="created",
+                direction="desc",
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         created_desc = list_created_desc()
         
@@ -386,8 +573,18 @@ def test_list_issues_sort_and_direction(test_owner, test_repo_name, unique_id, w
         try:
             @with_retry
             def close_issues():
-                update_issue(owner, repo, issue1["issue_number"], state="closed")
-                update_issue(owner, repo, issue2["issue_number"], state="closed")
+                update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue1["issue_number"],
+                    state="closed"
+                ))
+                update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue2["issue_number"],
+                    state="closed"
+                ))
             
             close_issues()
         except Exception as e:
@@ -406,7 +603,11 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
     
     @with_retry
     def create_test_issue():
-        return create_issue(owner, repo, title)
+        return create_issue(CreateIssueParams(
+            owner=owner,
+            repo=repo,
+            title=title
+        ))
     
     issue = create_test_issue()
     
@@ -420,7 +621,13 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
         # List issues since 1 hour ago
         @with_retry
         def list_issues_since():
-            return list_issues(owner, repo, since=since.isoformat())
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                since=since.isoformat(),
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         recent_issues = list_issues_since()
         
@@ -439,7 +646,13 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
         # List issues since 1 hour in the future
         @with_retry
         def list_issues_future():
-            return list_issues(owner, repo, since=future.isoformat())
+            return list_issues(ListIssuesParams(
+                owner=owner,
+                repo=repo,
+                since=future.isoformat(),
+                per_page=20,    # Limit results to avoid hanging
+                page=1          # Only get first page
+            ))
         
         future_issues = list_issues_future()
         
@@ -451,7 +664,12 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
         try:
             @with_retry
             def close_issue():
-                return update_issue(owner, repo, issue["issue_number"], state="closed")
+                return update_issue(UpdateIssueParams(
+                    owner=owner,
+                    repo=repo,
+                    issue_number=issue["issue_number"],
+                    state="closed"
+                ))
             
             close_issue()
         except Exception as e:

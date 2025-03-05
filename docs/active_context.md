@@ -43,6 +43,14 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
 
 ## Recent Changes
 
+- Fixed test issues with large repositories:
+  - Discovered tests were hanging when accessing repositories with large numbers of issues (481+ closed issues)
+  - Identified root cause: list operations attempting to retrieve all matching issues without pagination limits
+  - Implemented solution by adding pagination parameters (per_page and page) to all list_issues calls in tests
+  - Updated testing documentation to establish best practices for pagination in tests
+  - Added examples and guidelines to testing_strategy.md and implementation_status.md
+  - Ensured tests run efficiently even with repositories containing hundreds of issues
+
 - Implemented ADR-007 (Pydantic-First Architecture):
   - Refactored all issue operations to accept Pydantic models directly
   - Updated all issue tools to pass models directly to operations

@@ -71,8 +71,11 @@ def retry_on_rate_limit(func):
     def wrapper(*args, **kwargs):
         max_retries = 3
         retry_count = 0
+        last_exception = None
+        
         while retry_count < max_retries:
             try:
+                print(f"DEBUG: Executing {func.__name__} (attempt {retry_count + 1}/{max_retries})")
                 return func(*args, **kwargs)
             except GithubException as e:
                 if e.status == 403 and "rate limit" in str(e).lower():
@@ -80,9 +83,20 @@ def retry_on_rate_limit(func):
                     wait_time = 2 ** retry_count  # Exponential backoff
                     print(f"Rate limit hit, waiting {wait_time} seconds...")
                     time.sleep(wait_time)
+                    last_exception = e
                 else:
+                    print(f"DEBUG: GitHub exception in {func.__name__}: {e.status} - {e.data}")
                     raise
-        raise GithubException(403, {"message": "Rate limit exceeded after retries"})
+            except Exception as e:
+                print(f"DEBUG: Unexpected exception in {func.__name__}: {type(e).__name__}: {str(e)}")
+                raise
+        
+        if last_exception:
+            print(f"DEBUG: Rate limit exceeded after {max_retries} retries in {func.__name__}")
+            raise GithubException(403, {"message": f"Rate limit exceeded after {max_retries} retries"})
+        
+        # This should never happen since we either return or raise above
+        raise RuntimeError(f"Unexpected error in retry logic for {func.__name__}")
     return wrapper
 
 
