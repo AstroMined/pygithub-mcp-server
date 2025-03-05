@@ -1,7 +1,7 @@
 # ADR 007: Pydantic-First Architecture
 
 ## Status
-Proposed
+Implemented
 
 ## Context
 Our current architecture has three distinct layers:
@@ -71,10 +71,9 @@ from typing import List, Dict, Any
 from github import GithubException
 
 from ..client import GitHubClient
-from ..errors import GitHubError, validation_error_to_github_error
+from ..errors import GitHubError
 from ..schemas.issues import ListIssuesParams
 
-@validation_error_to_github_error
 def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
     """List issues in a repository.
 
@@ -85,13 +84,14 @@ def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
         List of issues from GitHub API
 
     Raises:
-        GitHubError: If the API request fails or validation fails
+        GitHubError: If the API request fails
     """
     try:
+        # No need for parameter validation as Pydantic already validated the input
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{params.owner}/{params.repo}")
 
-        # Build kwargs for get_issues from params
+        # Build kwargs for get_issues using fields from the Pydantic model
         kwargs = {}
         
         # Default to 'open' if state is None
@@ -176,40 +176,41 @@ def list_issues(params: ListIssuesParams) -> dict:
         }
 ```
 
-### 3. Validation Error Handling
+### 3. Error Handling
 
-We'll add a decorator to convert Pydantic validation errors to GitHubError:
+Pydantic already handles validation when the models are instantiated, so we don't need additional validation in the operations layer. The tools layer is responsible for handling different types of errors and converting them to appropriate responses:
 
 ```python
-# src/pygithub_mcp_server/errors/validation.py
+# src/pygithub_mcp_server/tools/issues/tools.py
 
-import functools
-from pydantic import ValidationError
-from .github import GitHubError
-
-def validation_error_to_github_error(func):
-    """Decorator to convert Pydantic ValidationError to GitHubError.
+@tool()
+def list_issues(params: ListIssuesParams) -> dict:
+    """List issues from a GitHub repository."""
+    try:
+        # Pydantic model already validated by type annotation
+        # Pass directly to operations layer
+        result = issues.list_issues(params)
+        return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     
-    This ensures consistent error handling across the application.
-    """
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ValidationError as e:
-            # Convert Pydantic validation error to our standard GitHubError
-            errors = e.errors()
-            if errors:
-                # Format the first error as a clear message
-                field = errors[0].get('loc', ['unknown'])[0]
-                message = errors[0].get('msg', 'Invalid value')
-                error_msg = f"Validation error: {field} - {message}"
-            else:
-                error_msg = "Invalid input data"
-                
-            raise GitHubError(error_msg)
-    return wrapper
+    except GitHubError as e:
+        # Handle GitHub-specific errors
+        return {
+            "content": [{"type": "error", "text": format_github_error(e)}],
+            "is_error": True
+        }
+    except Exception as e:
+        # Handle unexpected errors
+        return {
+            "content": [{"type": "error", "text": f"Internal server error: {str(e)}"}],
+            "is_error": True
+        }
 ```
+
+This approach has several benefits:
+- Validation happens at the earliest possible stage (model instantiation)
+- Errors are handled consistently across all tools
+- No need for additional decorators or wrapper functions
+- Clean and straightforward code
 
 ### 4. Test Layer Consistency
 
@@ -261,14 +262,14 @@ def test_list_issues_invalid_since(test_owner, test_repo_name):
 The implementation will be phased to minimize disruption:
 
 1. **Phase 1: Foundation (Week 1)**
-   - Create validation_error_to_github_error decorator
-   - Update error handling utilities
-   - Document new patterns
+   - Define implementation patterns and conventions
+   - Document approach in system_patterns.md
+   - Create example implementations
 
 2. **Phase 2: Issues Module (Week 2)**
-   - Convert issues operations to accept Pydantic models
-   - Update issues tools to pass models directly
-   - Update affected tests
+   - Convert issues operations to accept Pydantic models directly
+   - Update issues tools to pass models directly to operations
+   - Update affected tests for the new parameter structure
    - Validate all functionality works as expected
 
 3. **Phase 3: Remaining Modules (Week 3+)**

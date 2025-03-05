@@ -16,30 +16,28 @@ from ..converters.issues.comments import convert_issue_comment
 from ..converters.common.datetime import with_utc_datetimes, ensure_utc_datetime
 from ..errors import GitHubError
 from ..client import GitHubClient
+from ..schemas.issues import (
+    ListIssuesParams,
+    GetIssueParams,
+    CreateIssueParams,
+    UpdateIssueParams,
+    IssueCommentParams,
+    ListIssueCommentsParams,
+    UpdateIssueCommentParams,
+    DeleteIssueCommentParams,
+    AddIssueLabelsParams,
+    RemoveIssueLabelParams,
+)
 
 # Get logger
 logger = logging.getLogger(__name__)
 
 
-def create_issue(
-    owner: str,
-    repo: str,
-    title: str,
-    body: Optional[str] = None,
-    assignees: Optional[List[str]] = None,
-    labels: Optional[List[str]] = None,
-    milestone: Optional[int] = None,
-) -> Dict[str, Any]:
+def create_issue(params: CreateIssueParams) -> Dict[str, Any]:
     """Create a new issue in a repository.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        title: Issue title
-        body: Issue description
-        assignees: List of usernames to assign
-        labels: List of labels to add
-        milestone: Milestone number to assign
+        params: Validated parameters for creating an issue
 
     Returns:
         Created issue details from GitHub API
@@ -49,24 +47,24 @@ def create_issue(
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
 
-        # Build kwargs for create_issue
-        kwargs = {"title": title}  # title is required
+        # Build kwargs for create_issue using fields from the Pydantic model
+        kwargs = {"title": params.title}  # title is required
 
         # Add optional parameters only if provided
-        if body is not None:
-            kwargs["body"] = body
-        if assignees:  # Only add if non-empty list
-            kwargs["assignees"] = assignees
-        if labels:  # Only add if non-empty list
-            kwargs["labels"] = labels
-        if milestone is not None:
+        if params.body is not None:
+            kwargs["body"] = params.body
+        if params.assignees:  # Only add if non-empty list
+            kwargs["assignees"] = params.assignees
+        if params.labels:  # Only add if non-empty list
+            kwargs["labels"] = params.labels
+        if params.milestone is not None:
             try:
-                kwargs["milestone"] = repository.get_milestone(milestone)
+                kwargs["milestone"] = repository.get_milestone(params.milestone)
             except Exception as e:
-                logger.error(f"Failed to get milestone {milestone}: {e}")
-                raise GitHubError(f"Invalid milestone number: {milestone}")
+                logger.error(f"Failed to get milestone {params.milestone}: {e}")
+                raise GitHubError(f"Invalid milestone number: {params.milestone}")
 
         # Create issue using PyGithub
         issue = repository.create_issue(**kwargs)
@@ -78,13 +76,11 @@ def create_issue(
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
+def get_issue(params: GetIssueParams) -> Dict[str, Any]:
     """Get details about a specific issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number
+        params: Validated parameters for getting an issue
 
     Returns:
         Issue details from GitHub API
@@ -94,36 +90,18 @@ def get_issue(owner: str, repo: str, issue_number: int) -> Dict[str, Any]:
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
         return convert_issue(issue)
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def update_issue(
-    owner: str,
-    repo: str,
-    issue_number: int,
-    title: Optional[str] = None,
-    body: Optional[str] = None,
-    state: Optional[str] = None,
-    labels: Optional[List[str]] = None,
-    assignees: Optional[List[str]] = None,
-    milestone: Optional[Union[int, None]] = None,
-) -> Dict[str, Any]:
+def update_issue(params: UpdateIssueParams) -> Dict[str, Any]:
     """Update an existing issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number to update
-        title: New title
-        body: New description
-        state: New state (open or closed)
-        labels: New labels
-        assignees: New assignees
-        milestone: New milestone number (None to clear)
+        params: Validated parameters for updating an issue
 
     Returns:
         Updated issue details from GitHub API
@@ -132,34 +110,34 @@ def update_issue(
         GitHubError: If the API request fails
     """
     try:
-        print(f"\nupdate_issue called with title={title}")  # Show input parameters
+        logger.debug(f"update_issue called with params: {params}")
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
-        print(f"Got issue with title: {issue.title}")  # Show issue before update
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
+        logger.debug(f"Got issue with title: {issue.title}")
 
         # Build kwargs with only provided values
         kwargs = {}
         
-        if title is not None:
-            kwargs["title"] = title
-            print(f"Adding title={title} to kwargs")  # Confirm title is added to kwargs
-        if body is not None:
-            kwargs["body"] = body
-        if state is not None:
-            kwargs["state"] = state
-        if labels is not None:
-            kwargs["labels"] = labels
-        if assignees is not None:
-            kwargs["assignees"] = assignees
-        if milestone is not None:
+        if params.title is not None:
+            kwargs["title"] = params.title
+            logger.debug(f"Adding title={params.title} to kwargs")
+        if params.body is not None:
+            kwargs["body"] = params.body
+        if params.state is not None:
+            kwargs["state"] = params.state
+        if params.labels is not None:
+            kwargs["labels"] = params.labels
+        if params.assignees is not None:
+            kwargs["assignees"] = params.assignees
+        if params.milestone is not None:
             try:
-                kwargs["milestone"] = repository.get_milestone(milestone)
+                kwargs["milestone"] = repository.get_milestone(params.milestone)
             except Exception as e:
-                logger.error(f"Failed to get milestone {milestone}: {e}")
-                raise GitHubError(f"Invalid milestone number: {milestone}")
+                logger.error(f"Failed to get milestone {params.milestone}: {e}")
+                raise GitHubError(f"Invalid milestone number: {params.milestone}")
 
-        print(f"kwargs for edit: {kwargs}")  # Show final kwargs
+        logger.debug(f"kwargs for edit: {kwargs}")
 
         # If no changes provided, return current issue state
         if not kwargs:
@@ -170,50 +148,31 @@ def update_issue(
         issue.edit(**kwargs)
         
         # Get fresh issue data to ensure we have the latest state
-        updated_issue = repository.get_issue(issue_number)
-        print(f"After edit, updated_issue.title: {updated_issue.title}")  # Show updated issue
+        updated_issue = repository.get_issue(params.issue_number)
+        logger.debug(f"After edit, updated_issue.title: {updated_issue.title}")
 
         # Create a custom converter for this specific case to handle empty strings properly
         def custom_convert_issue(issue):
             result = convert_issue(issue)
             # Ensure empty strings remain empty strings and don't become None
-            if body == "":
+            if params.body == "":
                 result["body"] = ""
             return result
         
         # Return the updated issue with special handling for empty strings
         result = custom_convert_issue(updated_issue)
-        print(f"Converted result: {result}")  # Show final result
+        logger.debug(f"Converted result: {result}")
         return result
 
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-@with_utc_datetimes(['since'])
-def list_issues(
-    owner: str,
-    repo: str,
-    state: Optional[str] = None,
-    labels: Optional[List[str]] = None,
-    sort: Optional[str] = None,
-    direction: Optional[str] = None,
-    since: Optional[datetime] = None,
-    page: Optional[int] = None,
-    per_page: Optional[int] = None,
-) -> List[Dict[str, Any]]:
+def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
     """List issues in a repository.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        state: Issue state (open, closed, all)
-        labels: Filter by labels
-        sort: Sort field (created, updated, comments)
-        direction: Sort direction (asc, desc)
-        since: Filter by date
-        page: Page number for pagination
-        per_page: Number of results per page (max 100)
+        params: Validated parameters for listing issues
 
     Returns:
         List of issues from GitHub API
@@ -222,64 +181,32 @@ def list_issues(
         GitHubError: If the API request fails
     """
     try:
-        # Validate parameters
-        valid_states = {'open', 'closed', 'all'}
-        # Default to 'open' if state is None
-        if state is None:
-            state = 'open'
-        elif state not in valid_states:
-            raise GitHubError(f"Invalid state: {state}. Must be one of: {valid_states}")
-
-        valid_sorts = {'created', 'updated', 'comments'}
-        if sort is not None and sort not in valid_sorts:
-            raise GitHubError(f"Invalid sort: {sort}. Must be one of: {valid_sorts}")
-
-        valid_directions = {'asc', 'desc'}
-        if direction is not None and direction not in valid_directions:
-            raise GitHubError(f"Invalid direction: {direction}. Must be one of: {valid_directions}")
-
-        # Validate page and per_page
-        if page is not None:
-            if not isinstance(page, int) or page < 1:
-                raise GitHubError("Invalid page number. Must be a positive integer.")
-
-        if per_page is not None:
-            if not isinstance(per_page, int) or per_page < 1:
-                raise GitHubError("Invalid per_page value. Must be a positive integer.")
-            if per_page > 100:
-                raise GitHubError("per_page cannot exceed 100")
-
-        # Handle labels parameter
-        if labels is not None:
-            if not isinstance(labels, list):
-                raise GitHubError("Labels must be a list")
-            if not all(isinstance(label, str) for label in labels):
-                raise GitHubError("Labels must be a list of strings")
-
-        # Since is already handled by the @with_utc_datetimes decorator
-        if since is not None:
-            logger.debug(f"Using UTC since parameter: {since.isoformat()}")
-
+        # No need for parameter validation as Pydantic already validated the input
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
 
-        # Build kwargs for get_issues
+        # Default to 'open' if state is None
+        state = params.state or 'open'
+
+        # Build kwargs for get_issues using fields from the Pydantic model
         kwargs = {"state": state}
-        if sort:
-            kwargs["sort"] = sort
-        if direction:
-            kwargs["direction"] = direction
-        if since:
-            kwargs["since"] = since
-        # Don't pass per_page directly to get_issues, it's handled by the PaginatedList methods
-        if labels is not None:
+        
+        # Add optional parameters only if provided
+        if params.sort:
+            kwargs["sort"] = params.sort
+        if params.direction:
+            kwargs["direction"] = params.direction
+        if params.since:
+            kwargs["since"] = params.since
+            logger.debug(f"Using UTC since parameter: {params.since.isoformat()}")
+        if params.labels is not None:
             # Convert to PyGithub-compatible format
             from ..converters.parameters import convert_labels_parameter
-            kwargs["labels"] = convert_labels_parameter(labels)
+            kwargs["labels"] = convert_labels_parameter(params.labels)
             logger.debug(f"Using labels filter: {kwargs['labels']}")
             
         # Get paginated issues
-        logger.debug(f"Getting issues for {owner}/{repo} with kwargs: {kwargs}")
+        logger.debug(f"Getting issues for {params.owner}/{params.repo} with kwargs: {kwargs}")
         try:
             paginated_issues = repository.get_issues(**kwargs)
             logger.debug(f"Got PaginatedList of issues: {paginated_issues}")
@@ -299,20 +226,20 @@ def list_issues(
 
         try:
             # Handle pagination correctly
-            if page is not None and per_page is not None:
+            if params.page is not None and params.per_page is not None:
                 # Use both page and per_page for precise pagination
-                start = (page - 1) * per_page  # Convert to 0-based indexing
-                end = start + per_page
+                start = (params.page - 1) * params.per_page  # Convert to 0-based indexing
+                end = start + params.per_page
                 issues = list(paginated_issues[start:end])
-                logger.debug(f"Getting issues for page {page} with {per_page} per page (indices {start}-{end})")
-            elif page is not None:
+                logger.debug(f"Getting issues for page {params.page} with {params.per_page} per page (indices {start}-{end})")
+            elif params.page is not None:
                 # Use default per_page value (30) with specified page
-                issues = paginated_issues.get_page(page - 1)  # PyGithub uses 0-based indexing
-                logger.debug(f"Getting issues for page {page} with default items per page")
-            elif per_page is not None:
+                issues = paginated_issues.get_page(params.page - 1)  # PyGithub uses 0-based indexing
+                logger.debug(f"Getting issues for page {params.page} with default items per page")
+            elif params.per_page is not None:
                 # Get just the first per_page items
-                issues = list(paginated_issues[:per_page])
-                logger.debug(f"Getting first {per_page} issues")
+                issues = list(paginated_issues[:params.per_page])
+                logger.debug(f"Getting first {params.per_page} issues")
             else:
                 # No pagination, get all issues
                 issues = list(paginated_issues)
@@ -335,16 +262,11 @@ def list_issues(
         raise error
 
 
-def add_issue_comment(
-    owner: str, repo: str, issue_number: int, body: str
-) -> Dict[str, Any]:
+def add_issue_comment(params: IssueCommentParams) -> Dict[str, Any]:
     """Add a comment to an issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number to comment on
-        body: Comment text
+        params: Validated parameters for adding a comment
 
     Returns:
         Created comment details from GitHub API
@@ -354,32 +276,19 @@ def add_issue_comment(
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
-        comment = issue.create_comment(body)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
+        comment = issue.create_comment(params.body)
         return convert_issue_comment(comment)
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-@with_utc_datetimes(['since'])
-def list_issue_comments(
-    owner: str,
-    repo: str,
-    issue_number: int,
-    since: Optional[datetime] = None,
-    page: Optional[int] = None,
-    per_page: Optional[int] = None,
-) -> List[Dict[str, Any]]:
+def list_issue_comments(params: ListIssueCommentsParams) -> List[Dict[str, Any]]:
     """List comments on an issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number
-        since: Filter by date
-        page: Page number for pagination
-        per_page: Number of results per page (max 100)
+        params: Validated parameters for listing comments
 
     Returns:
         List of comments from GitHub API
@@ -389,40 +298,33 @@ def list_issue_comments(
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
 
         # Build kwargs for get_comments
         kwargs = {}
-        if since is not None:
-            # since is already converted to UTC by the decorator
-            logger.debug(f"Using UTC since parameter: {since.isoformat()}")
-            kwargs["since"] = since
+        if params.since is not None:
+            logger.debug(f"Using UTC since parameter: {params.since.isoformat()}")
+            kwargs["since"] = params.since
 
         # Get paginated comments with only provided parameters
         paginated_comments = issue.get_comments(**kwargs)
         
-        # Validate pagination parameters
-        if page is not None and not isinstance(page, int):
-            raise GitHubError("Page must be an integer")
-        if per_page is not None and not isinstance(per_page, int):
-            raise GitHubError("Per_page must be an integer")
-
         # Handle pagination correctly
-        if page is not None and per_page is not None:
+        if params.page is not None and params.per_page is not None:
             # Use both page and per_page for precise pagination
-            start = (page - 1) * per_page  # Convert to 0-based indexing
-            end = start + per_page
+            start = (params.page - 1) * params.per_page  # Convert to 0-based indexing
+            end = start + params.per_page
             comments = list(paginated_comments[start:end])
-            logger.debug(f"Getting comments for page {page} with {per_page} per page (indices {start}-{end})")
-        elif page is not None:
+            logger.debug(f"Getting comments for page {params.page} with {params.per_page} per page (indices {start}-{end})")
+        elif params.page is not None:
             # Use default per_page value (30) with specified page
-            comments = paginated_comments.get_page(page - 1)  # PyGithub uses 0-based indexing
-            logger.debug(f"Getting comments for page {page} with default items per page")
-        elif per_page is not None:
+            comments = paginated_comments.get_page(params.page - 1)  # PyGithub uses 0-based indexing
+            logger.debug(f"Getting comments for page {params.page} with default items per page")
+        elif params.per_page is not None:
             # Get just the first per_page items
-            comments = list(paginated_comments[:per_page])
-            logger.debug(f"Getting first {per_page} comments")
+            comments = list(paginated_comments[:params.per_page])
+            logger.debug(f"Getting first {params.per_page} comments")
         else:
             # No pagination, get all comments
             comments = list(paginated_comments)
@@ -438,17 +340,11 @@ def list_issue_comments(
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def update_issue_comment(
-    owner: str, repo: str, issue_number: int, comment_id: int, body: str
-) -> Dict[str, Any]:
+def update_issue_comment(params: UpdateIssueCommentParams) -> Dict[str, Any]:
     """Update an issue comment.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number containing the comment
-        comment_id: Comment ID to update
-        body: New comment text
+        params: Validated parameters for updating a comment
 
     Returns:
         Updated comment details from GitHub API
@@ -458,47 +354,39 @@ def update_issue_comment(
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
-        comment = issue.get_comment(comment_id)
-        comment.edit(body)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
+        comment = issue.get_comment(params.comment_id)
+        comment.edit(params.body)
         return convert_issue_comment(comment)
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def delete_issue_comment(owner: str, repo: str, issue_number: int, comment_id: int) -> None:
+def delete_issue_comment(params: DeleteIssueCommentParams) -> None:
     """Delete an issue comment.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number containing the comment
-        comment_id: Comment ID to delete
+        params: Validated parameters for deleting a comment
 
     Raises:
         GitHubError: If the API request fails
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
-        comment = issue.get_comment(comment_id)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
+        comment = issue.get_comment(params.comment_id)
         comment.delete()
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def add_issue_labels(
-    owner: str, repo: str, issue_number: int, labels: List[str]
-) -> List[Dict[str, Any]]:
+def add_issue_labels(params: AddIssueLabelsParams) -> List[Dict[str, Any]]:
     """Add labels to an issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number
-        labels: Labels to add
+        params: Validated parameters for adding labels to an issue
 
     Returns:
         Updated list of labels from GitHub API
@@ -508,44 +396,39 @@ def add_issue_labels(
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
 
         # Add labels to the issue
-        issue.add_to_labels(*labels)
+        issue.add_to_labels(*params.labels)
 
         # Get fresh issue data to get updated labels
-        updated_issue = repository.get_issue(issue_number)
+        updated_issue = repository.get_issue(params.issue_number)
         return [convert_label(label) for label in updated_issue.labels]
 
     except GithubException as e:
         raise GitHubClient.get_instance()._handle_github_exception(e)
 
 
-def remove_issue_label(
-    owner: str, repo: str, issue_number: int, label: str
-) -> None:
+def remove_issue_label(params: RemoveIssueLabelParams) -> None:
     """Remove a label from an issue.
 
     Args:
-        owner: Repository owner (user or organization)
-        repo: Repository name
-        issue_number: Issue number
-        label: Label to remove
+        params: Validated parameters for removing a label from an issue
 
     Raises:
         GitHubError: If the API request fails or label doesn't exist
     """
     try:
         client = GitHubClient.get_instance()
-        repository = client.get_repo(f"{owner}/{repo}")
-        issue = repository.get_issue(issue_number)
+        repository = client.get_repo(f"{params.owner}/{params.repo}")
+        issue = repository.get_issue(params.issue_number)
         try:
-            issue.remove_from_labels(label)
+            issue.remove_from_labels(params.label)
         except GithubException as label_e:
             # Handle specific case for non-existent labels
             if label_e.status == 404 and "Label does not exist" in str(label_e):
-                logger.warning(f"Label '{label}' does not exist on issue #{issue_number}")
+                logger.warning(f"Label '{params.label}' does not exist on issue #{params.issue_number}")
                 # Not raising an error since removing a non-existent label is not a failure
                 return
             # Re-raise if it's a different error

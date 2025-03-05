@@ -7,13 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.11] - 2025-03-05
+
 ### Added
-- Proposed ADR-007 (Pydantic-First Architecture):
-  - Architectural plan for Pydantic models as primary data interchange format
-  - Consistent validation error handling strategy
-  - Clear layer responsibilities with improved type safety
-  - Implementation patterns in system_patterns.md documentation
-  - Migration plan with phased approach for minimal disruption
+- Implemented ADR-007 (Pydantic-First Architecture):
+  - Refactored all issue operations to accept Pydantic models directly
+  - Updated all issue tools to pass models directly to operations
+  - Leveraged Pydantic's built-in validation instead of custom decorators
+  - Simplified error handling across all layers
+  - Updated ADR-007 documentation to reflect implementation discoveries
+  - Streamlined data flow between all layers with improved type safety
+
+### Changed
+- Improved architecture by removing unnecessary validation decorators
+- Simplified code by leveraging Pydantic's built-in validation capabilities
+- Enhanced type safety throughout the issue operations and tools
+- Reduced code duplication by eliminating parameter unpacking/repacking
 
 ## [0.5.10] - 2025-03-04
 

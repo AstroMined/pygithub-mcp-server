@@ -60,16 +60,8 @@ def create_issue(params_dict: dict) -> dict:
                 "is_error": True
             }
 
-        # Now use the validated params object
-        result = issues.create_issue(
-            params.owner,
-            params.repo,
-            title=params.title,
-            body=params.body,
-            assignees=params.assignees,
-            labels=params.labels,
-            milestone=params.milestone
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.create_issue(params)
         logger.debug(f"Got result: {result}")
         response = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
         logger.debug(f"Returning response: {response}")
@@ -110,17 +102,8 @@ def list_issues(params: ListIssuesParams) -> dict:
     """
     try:
         logger.debug(f"list_issues called with params: {params}")
-        result = issues.list_issues(
-            params.owner,
-            params.repo,
-            state=params.state,
-            labels=params.labels,
-            sort=params.sort,
-            direction=params.direction,
-            since=params.since,
-            page=params.page,
-            per_page=params.per_page
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.list_issues(params)
         logger.debug(f"Got result: {result}")
         response = {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
         logger.debug(f"Returning response: {response}")
@@ -156,11 +139,8 @@ def get_issue(params: GetIssueParams) -> dict:
     """
     try:
         logger.debug(f"get_issue called with params: {params}")
-        result = issues.get_issue(
-            params.owner,
-            params.repo,
-            params.issue_number
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.get_issue(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -200,17 +180,8 @@ def update_issue(params: UpdateIssueParams) -> dict:
     """
     try:
         logger.debug(f"update_issue called with params: {params}")
-        result = issues.update_issue(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            title=params.title,
-            body=params.body,
-            state=params.state,
-            labels=params.labels,
-            assignees=params.assignees,
-            milestone=params.milestone
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.update_issue(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -245,12 +216,8 @@ def add_issue_comment(params: IssueCommentParams) -> dict:
     """
     try:
         logger.debug(f"add_issue_comment called with params: {params}")
-        result = issues.add_issue_comment(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            params.body
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.add_issue_comment(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -287,14 +254,8 @@ def list_issue_comments(params: ListIssueCommentsParams) -> dict:
     """
     try:
         logger.debug(f"list_issue_comments called with params: {params}")
-        result = issues.list_issue_comments(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            since=params.since,
-            page=params.page,
-            per_page=params.per_page
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.list_issue_comments(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -330,13 +291,8 @@ def update_issue_comment(params: UpdateIssueCommentParams) -> dict:
     """
     try:
         logger.debug(f"update_issue_comment called with params: {params}")
-        result = issues.update_issue_comment(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            params.comment_id,
-            params.body
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.update_issue_comment(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -371,12 +327,8 @@ def delete_issue_comment(params: DeleteIssueCommentParams) -> dict:
     """
     try:
         logger.debug(f"delete_issue_comment called with params: {params}")
-        issues.delete_issue_comment(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            params.comment_id
-        )
+        # Pass the Pydantic model directly to the operation
+        issues.delete_issue_comment(params)
         logger.debug("Comment deleted successfully")
         return {"content": [{"type": "text", "text": "Comment deleted successfully"}]}
     except GitHubError as e:
@@ -411,12 +363,8 @@ def add_issue_labels(params: AddIssueLabelsParams) -> dict:
     """
     try:
         logger.debug(f"add_issue_labels called with params: {params}")
-        result = issues.add_issue_labels(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            params.labels
-        )
+        # Pass the Pydantic model directly to the operation
+        result = issues.add_issue_labels(params)
         logger.debug(f"Got result: {result}")
         return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
     except GitHubError as e:
@@ -470,12 +418,7 @@ def remove_issue_label(params: RemoveIssueLabelParams) -> dict:
             }
         
         # Now try to remove the label
-        issues.remove_issue_label(
-            params.owner,
-            params.repo,
-            params.issue_number,
-            params.label
-        )
+        issues.remove_issue_label(params)
         logger.debug("Label removed successfully")
         return {"content": [{"type": "text", "text": "Label removed successfully"}]}
     except GitHubError as e:
