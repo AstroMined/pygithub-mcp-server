@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.13] - 2025-03-05
+
+### Added
+- Implemented robust pagination utility:
+  - Created unified pagination approach in converters/common/pagination.py
+  - Added get_paginated_items and get_paginated_slice functions for safe PaginatedList handling
+  - Implemented comprehensive error handling for index errors and empty results
+  - Created unit tests using dataclasses instead of mocks following ADR-002
+  - Added integration tests using real GitHub API
+  - Made list_issues and list_issue_comments use the pagination utility consistently
+
+### Changed
+- Improved test organization:
+  - Fixed Python module name collisions between unit and integration test files
+  - Renamed test files to prevent import conflicts (test_pagination_unit.py and test_pagination_integration.py)
+  - Replaced mock-based testing with dataclass fixtures for cleaner, type-safe tests
+  - Enhanced test maintenance by eliminating unittest.mock dependencies
+  - Enhanced error handling for PageinatedList edge cases
+  - Improved consistency in API pagination approach across operations
+
 ## [0.5.12] - 2025-03-05
 
 ### Fixed

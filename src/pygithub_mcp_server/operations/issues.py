@@ -14,6 +14,7 @@ from github.PaginatedList import PaginatedList
 from ..converters.issues.issues import convert_issue, convert_label
 from ..converters.issues.comments import convert_issue_comment
 from ..converters.common.datetime import with_utc_datetimes, ensure_utc_datetime
+from ..converters.common.pagination import get_paginated_items
 from ..errors import GitHubError
 from ..client import GitHubClient
 from ..schemas.issues import (
@@ -225,25 +226,8 @@ def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
             raise GitHubError(f"Failed to get issues: {str(e)}")
 
         try:
-            # Handle pagination correctly
-            if params.page is not None and params.per_page is not None:
-                # Use both page and per_page for precise pagination
-                start = (params.page - 1) * params.per_page  # Convert to 0-based indexing
-                end = start + params.per_page
-                issues = list(paginated_issues[start:end])
-                logger.debug(f"Getting issues for page {params.page} with {params.per_page} per page (indices {start}-{end})")
-            elif params.page is not None:
-                # Use default per_page value (30) with specified page
-                issues = paginated_issues.get_page(params.page - 1)  # PyGithub uses 0-based indexing
-                logger.debug(f"Getting issues for page {params.page} with default items per page")
-            elif params.per_page is not None:
-                # Get just the first per_page items
-                issues = list(paginated_issues[:params.per_page])
-                logger.debug(f"Getting first {params.per_page} issues")
-            else:
-                # No pagination, get all issues
-                issues = list(paginated_issues)
-                logger.debug("Getting all issues")
+            # Use our pagination utility to safely handle paginated lists
+            issues = get_paginated_items(paginated_issues, params.page, params.per_page)
             
             logger.debug(f"Retrieved {len(issues)} issues")
 
@@ -310,25 +294,8 @@ def list_issue_comments(params: ListIssueCommentsParams) -> List[Dict[str, Any]]
         # Get paginated comments with only provided parameters
         paginated_comments = issue.get_comments(**kwargs)
         
-        # Handle pagination correctly
-        if params.page is not None and params.per_page is not None:
-            # Use both page and per_page for precise pagination
-            start = (params.page - 1) * params.per_page  # Convert to 0-based indexing
-            end = start + params.per_page
-            comments = list(paginated_comments[start:end])
-            logger.debug(f"Getting comments for page {params.page} with {params.per_page} per page (indices {start}-{end})")
-        elif params.page is not None:
-            # Use default per_page value (30) with specified page
-            comments = paginated_comments.get_page(params.page - 1)  # PyGithub uses 0-based indexing
-            logger.debug(f"Getting comments for page {params.page} with default items per page")
-        elif params.per_page is not None:
-            # Get just the first per_page items
-            comments = list(paginated_comments[:params.per_page])
-            logger.debug(f"Getting first {params.per_page} comments")
-        else:
-            # No pagination, get all comments
-            comments = list(paginated_comments)
-            logger.debug(f"Getting all comments")
+        # Use our pagination utility for consistent pagination handling
+        comments = get_paginated_items(paginated_comments, params.page, params.per_page)
 
         logger.debug(f"Retrieved {len(comments)} comments")
 

@@ -43,6 +43,15 @@ We've made several improvements to test coverage, fixed bugs, and enhanced error
 
 ## Recent Changes
 
+- Implemented robust pagination utility:
+  - Created a unified pagination approach in `converters/common/pagination.py`
+  - Implemented get_paginated_items and get_paginated_slice functions to safely handle GitHub's PaginatedList
+  - Added comprehensive unit tests using dataclasses instead of mocks
+  - Created integration tests with real GitHub API
+  - Fixed test file naming to prevent import conflicts between unit and integration tests
+  - Improved resilience against common pagination issues like IndexError and empty results
+  - Made existing operations (list_issues, list_issue_comments) consistently use the pagination utility
+
 - Fixed test issues with large repositories:
   - Discovered tests were hanging when accessing repositories with large numbers of issues (481+ closed issues)
   - Identified root cause: list operations attempting to retrieve all matching issues without pagination limits

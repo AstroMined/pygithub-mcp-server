@@ -624,7 +624,7 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
             return list_issues(ListIssuesParams(
                 owner=owner,
                 repo=repo,
-                since=since.isoformat(),
+                since=since.isoformat() + "Z",  # Add UTC timezone indicator
                 per_page=20,    # Limit results to avoid hanging
                 page=1          # Only get first page
             ))
@@ -649,7 +649,7 @@ def test_list_issues_since(test_owner, test_repo_name, unique_id, with_retry):
             return list_issues(ListIssuesParams(
                 owner=owner,
                 repo=repo,
-                since=future.isoformat(),
+                since=future.isoformat() + "Z",  # Add UTC timezone indicator
                 per_page=20,    # Limit results to avoid hanging
                 page=1          # Only get first page
             ))

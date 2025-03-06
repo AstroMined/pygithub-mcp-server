@@ -388,7 +388,7 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
                 owner=owner,
                 repo=repo,
                 issue_number=issue["issue_number"],
-                since=since.isoformat()
+                since=since.isoformat() + "Z"  # Add UTC timezone indicator
             ))
         
         recent_comments = list_test_comments_since()
@@ -413,7 +413,7 @@ def test_list_issue_comments_since(test_owner, test_repo_name, unique_id, with_r
                 owner=owner,
                 repo=repo,
                 issue_number=issue["issue_number"],
-                since=future.isoformat()
+                since=future.isoformat() + "Z"  # Add UTC timezone indicator
             ))
         
         future_comments = list_test_comments_future()
