@@ -7,6 +7,7 @@ operations module to improve code coverage.
 import logging
 import pytest
 from datetime import datetime, timedelta
+from pydantic_core import ValidationError
 
 from pygithub_mcp_server.errors import GitHubError
 from pygithub_mcp_server.operations.issues import (
@@ -37,7 +38,7 @@ class TestIssueOperationsValidation:
     
     def test_list_issues_invalid_state(self, test_owner, test_repo_name):
         """Test list_issues with invalid state parameter."""
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
@@ -49,7 +50,7 @@ class TestIssueOperationsValidation:
     
     def test_list_issues_invalid_sort(self, test_owner, test_repo_name):
         """Test list_issues with invalid sort parameter."""
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
@@ -61,7 +62,7 @@ class TestIssueOperationsValidation:
     
     def test_list_issues_invalid_direction(self, test_owner, test_repo_name):
         """Test list_issues with invalid direction parameter."""
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
@@ -74,90 +75,90 @@ class TestIssueOperationsValidation:
     def test_list_issues_invalid_page(self, test_owner, test_repo_name):
         """Test list_issues with invalid page parameter."""
         # Test negative page
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 page=-1
             ))
         
-        assert "Invalid page number" in str(exc_info.value)
+        assert "Page number must be a positive integer" in str(exc_info.value)
         
         # Test non-integer page
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 page="not_a_number"
             ))
         
-        assert "Invalid page number" in str(exc_info.value)
+        assert "Input should be a valid integer" in str(exc_info.value)
     
     def test_list_issues_invalid_per_page(self, test_owner, test_repo_name):
         """Test list_issues with invalid per_page parameter."""
         # Test negative per_page
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 per_page=-1
             ))
         
-        assert "Invalid per_page value" in str(exc_info.value)
+        assert "Results per page must be a positive integer" in str(exc_info.value)
         
         # Test non-integer per_page
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 per_page="not_a_number"
             ))
         
-        assert "Invalid per_page value" in str(exc_info.value)
+        assert "Input should be a valid integer" in str(exc_info.value)
         
         # Test too large per_page
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 per_page=101
             ))
         
-        assert "per_page cannot exceed 100" in str(exc_info.value)
+        assert "Results per page cannot exceed 100" in str(exc_info.value)
     
     def test_list_issues_invalid_labels(self, test_owner, test_repo_name):
         """Test list_issues with invalid labels parameter."""
         # Test non-list labels
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 labels="not_a_list"
             ))
         
-        assert "Labels must be a list" in str(exc_info.value)
+        assert "Input should be a valid list" in str(exc_info.value)
         
         # Test labels with non-string items
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 labels=["valid", 123]
             ))
         
-        assert "Labels must be a list of strings" in str(exc_info.value)
+        assert "Input should be a valid string" in str(exc_info.value)
     
     def test_list_issues_invalid_since(self, test_owner, test_repo_name):
         """Test list_issues with invalid since parameter."""
         # Test non-datetime since
-        with pytest.raises(GitHubError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             list_issues(ListIssuesParams(
                 owner=test_owner,
                 repo=test_repo_name,
                 since="not_a_date"
             ))
         
-        assert "since parameter" in str(exc_info.value).lower()
+        assert "Invalid ISO format datetime" in str(exc_info.value)
     
     def test_update_issue_with_no_changes(self, test_owner, test_repo_name, unique_id, with_retry):
         """Test update_issue with no changes provided."""
@@ -263,7 +264,7 @@ class TestIssueOperationsValidation:
         
         try:
             # Test non-datetime since
-            with pytest.raises(GitHubError) as exc_info:
+            with pytest.raises(ValidationError) as exc_info:
                 list_issue_comments(ListIssueCommentsParams(
                     owner=test_owner,
                     repo=test_repo_name,
@@ -271,7 +272,7 @@ class TestIssueOperationsValidation:
                     since="not_a_date"
                 ))
             
-            assert "since parameter" in str(exc_info.value).lower()
+            assert "Invalid ISO format datetime" in str(exc_info.value)
         finally:
             # Close the issue
             update_issue(UpdateIssueParams(

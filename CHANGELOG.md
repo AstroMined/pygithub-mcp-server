@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.14] - 2025-03-05
+
+### Changed
+- Updated test framework to fully align with ADR-007 (Pydantic-First Architecture):
+  - Modified parameter validation tests to expect ValidationError directly from Pydantic
+  - Updated test assertions to check for appropriate Pydantic validation error messages
+  - Improved test reliability by matching exception types with actual implementation behavior
+  - Completed test alignment with the Pydantic-First Architecture principles
+
+### Fixed
+- Fixed integration test failures in parameter validation tests:
+  - Fixed test_list_issues_invalid_state and similar validation tests
+  - Updated expected error assertions in all validation tests
+  - Improved error message testing to match Pydantic's actual error format
+  - Enhanced test maintainability by removing unnecessary error conversion
+
 ## [0.5.13] - 2025-03-05
 
 ### Added

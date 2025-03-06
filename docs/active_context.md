@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Focus
-Implementing comprehensive test coverage improvements following ADR-002 principles while continuing to refine the modular tool architecture (ADR-006). We've shifted from a monolithic server design to a modular, configurable architecture that supports selective enabling/disabling of tool groups, and now we're ensuring robust test coverage across all components.
+Implementing comprehensive test coverage improvements following ADR-002 principles while continuing to refine the modular tool architecture (ADR-006) and completing the Pydantic-First Architecture implementation (ADR-007). We've shifted from a monolithic server design to a modular, configurable architecture that supports selective enabling/disabling of tool groups, and now we're ensuring robust test coverage across all components.
 
 Our current focus is on:
 1. Improving test coverage for high and medium priority modules identified in testing strategy
@@ -10,6 +10,7 @@ Our current focus is on:
 4. Creating reusable test fixtures and patterns for integration testing
 5. Maintaining and organizing the modular tool architecture as defined in ADR-006
 6. Establishing patterns for efficient testing of future tool group implementations
+7. Completing the test suite alignment with ADR-007 Pydantic-First Architecture
 
 We've made several improvements to test coverage, fixed bugs, and enhanced error handling. Key enhancements include:
 
