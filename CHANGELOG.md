@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.15] - 2025-03-07
+
+### Added
+- Implemented Repository Tools Group (ADR-006):
+  - Created operations/repositories.py with comprehensive repository operations
+  - Implemented tools/repositories/ module following modular architecture
+  - Added support for repository management, file operations, and branch operations
+  - Created extensive unit tests using dataclasses instead of mocks (ADR-002)
+  - Added safe integration tests for read operations
+- Enhanced test suite:
+  - Added schema validation tests for repository-related schemas
+  - Created unit tests for repository operations using dataclasses
+  - Implemented tool tests with proper error handling scenarios
+
 ## [0.5.14] - 2025-03-05
 
 ### Changed

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_CONFIG = {
     "tool_groups": {
         "issues": {"enabled": True},
-        "repositories": {"enabled": False},
+        "repositories": {"enabled": True},
         "pull_requests": {"enabled": False},
         "discussions": {"enabled": False},
         "search": {"enabled": False},

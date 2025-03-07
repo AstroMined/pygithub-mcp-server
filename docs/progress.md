@@ -57,6 +57,17 @@
   - add_issue_labels: Add labels
   - remove_issue_label: Remove labels
 
+- Complete set of GitHub repository tools:
+  - get_repository: Get repository details
+  - create_repository: Create new repositories
+  - fork_repository: Fork existing repositories
+  - search_repositories: Search for repositories
+  - get_file_contents: Get file or directory contents
+  - create_or_update_file: Create or update files
+  - push_files: Push multiple files in one commit
+  - create_branch: Create new branches
+  - list_commits: List repository commits
+
 ### Testing Improvements
 - Testing infrastructure following ADR-002:
   - Integration test directory structure with application-layer organization
@@ -126,13 +137,14 @@
 - [ ] Connection pooling
 
 ### Feature Enhancements
-- [ ] Additional tool groups (repositories, pull_requests, etc.)
+- [x] Repository tools group (implemented in v0.5.15)
+- [ ] Additional tool groups (pull_requests, discussions, users, etc.)
 - [ ] GraphQL support
 - [ ] Webhook support
 - [ ] Real-time updates
 
 ## Current Status
-Core implementation is operational with the new modular architecture. All GitHub issue operations have been implemented as MCP tools with proper parameter handling, error management, and logging.
+Core implementation is operational with the new modular architecture. All GitHub issue and repository operations have been implemented as MCP tools with proper parameter handling, error management, and logging.
 
 We've successfully implemented:
 - ADR-002: Real API Testing Strategy
