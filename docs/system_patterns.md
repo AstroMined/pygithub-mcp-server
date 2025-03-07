@@ -1,5 +1,159 @@
 # System Patterns
 
+> **Note:** This document provides detailed implementation patterns and best practices for the PyGithub MCP Server. For a high-level overview of the technology stack and architecture, please refer to [`tech_context.md`](tech_context.md).
+
+## System Architecture Overview
+
+This diagram provides a comprehensive view of how the various architectural decisions work together in the PyGithub MCP Server:
+
+```mermaid
+flowchart TD
+    subgraph "MCP Server"
+        direction TB
+        
+        subgraph "Tools Layer (ADR-006)"
+            ToolReg["Tool Registration System"]
+            IssueTools["Issue Tools"]
+            RepoTools["Repository Tools"]
+            PRTools["PR Tools"]
+            Config["Configuration System"]
+            
+            ToolReg --> IssueTools
+            ToolReg --> RepoTools
+            ToolReg --> PRTools
+            Config --> ToolReg
+        end
+        
+        subgraph "Operations Layer"
+            Issues["Issue Operations"]
+            Repos["Repository Operations"]
+            PRs["PR Operations"]
+            
+            IssueTools --> Issues
+            RepoTools --> Repos
+            PRTools --> PRs
+        end
+        
+        subgraph "Client Layer (ADR-001)"
+            Client["GitHub Client"]
+            RateLimit["Rate Limit Handling"]
+            
+            Issues --> Client
+            Repos --> Client
+            PRs --> Client
+            Client --> RateLimit
+        end
+        
+        PyGithub["PyGithub Library"]
+        Client --> PyGithub
+    end
+    
+    GitHub["GitHub API"]
+    PyGithub --> GitHub
+    
+    subgraph "Schema Layer (ADR-003, ADR-004)"
+        direction TB
+        BaseModels["Base Models"]
+        IssueModels["Issue Models"]
+        RepoModels["Repository Models"]
+        PRModels["PR Models"]
+        Validation["Field Validators"]
+        
+        BaseModels --- IssueModels
+        BaseModels --- RepoModels
+        BaseModels --- PRModels
+        Validation -.- IssueModels
+        Validation -.- RepoModels
+        Validation -.- PRModels
+    end
+    
+    IssueTools <-.-> IssueModels
+    RepoTools <-.-> RepoModels
+    PRTools <-.-> PRModels
+    
+    Issues <-.-> IssueModels
+    Repos <-.-> RepoModels
+    PRs <-.-> PRModels
+    
+    subgraph "Data Transformation (ADR-005)"
+        direction TB
+        IssueConv["Issue Converters"]
+        RepoConv["Repository Converters"]
+        UserConv["User Converters"]
+        CommonConv["Common Converters"]
+        
+        IssueConv --> CommonConv
+        RepoConv --> CommonConv
+        UserConv --> CommonConv
+    end
+    
+    Client --> IssueConv
+    Client --> RepoConv
+    Client --> UserConv
+    
+    subgraph "Testing (ADR-002)"
+        direction TB
+        UnitTests["Unit Tests"]
+        IntegTests["Integration Tests"]
+        TestData["Test Data Classes"]
+        
+        UnitTests --- TestData
+        IntegTests --> GitHub
+    end
+    
+    style IssueModels fill:#f9f,stroke:#333,stroke-width:2px
+    style RepoModels fill:#f9f,stroke:#333,stroke-width:2px
+    style PRModels fill:#f9f,stroke:#333,stroke-width:2px
+    style BaseModels fill:#f9f,stroke:#333,stroke-width:2px
+    
+    style Client fill:#bbf,stroke:#333,stroke-width:2px
+    style PyGithub fill:#bbf,stroke:#333,stroke-width:2px
+    
+    style Issues fill:#bfb,stroke:#333,stroke-width:2px
+    style Repos fill:#bfb,stroke:#333,stroke-width:2px
+    style PRs fill:#bfb,stroke:#333,stroke-width:2px
+    
+    style IssueTools fill:#fbb,stroke:#333,stroke-width:2px
+    style RepoTools fill:#fbb,stroke:#333,stroke-width:2px
+    style PRTools fill:#fbb,stroke:#333,stroke-width:2px
+    style ToolReg fill:#fbb,stroke:#333,stroke-width:2px
+    style Config fill:#fbb,stroke:#333,stroke-width:2px
+```
+
+### Request Flow (ADR-007: Pydantic-First Architecture)
+
+This diagram shows the end-to-end flow of a request through the system, highlighting how the Pydantic-First Architecture works:
+
+```mermaid
+sequenceDiagram
+    participant MCP as MCP Server
+    participant Tool as Tools Layer
+    participant Op as Operations Layer
+    participant Client as Client Layer
+    participant PyGithub as PyGithub
+    participant GitHub as GitHub API
+    
+    MCP->>Tool: JSON Request
+    Note over Tool: Convert JSON to<br/>Pydantic Model
+    Tool->>Op: Pass Pydantic Model
+    Note over Op: Validation already<br/>happened during<br/>model instantiation
+    Op->>Client: Pass validated model
+    Client->>PyGithub: PyGithub API call
+    PyGithub->>GitHub: HTTP Request
+    GitHub-->>PyGithub: HTTP Response
+    PyGithub-->>Client: PyGithub Object
+    Note over Client: Convert PyGithub Object<br/>to response schema
+    Client-->>Op: Return schema data
+    Op-->>Tool: Return data
+    Note over Tool: Format as MCP Response
+    Tool-->>MCP: JSON Response
+    
+    Note right of Tool: ADR-006:<br/>Modular Tool Architecture
+    Note right of Op: ADR-007:<br/>Pydantic-First Architecture
+    Note right of Client: ADR-001:<br/>PyGithub Integration
+    Note right of PyGithub: ADR-002:<br/>Real API Testing
+```
+
 ## Core Architecture
 
 ### Pydantic-First Architecture
@@ -49,28 +203,79 @@ flowchart TD
 
 2. Operation Modules
    - Use GitHub client for API interactions
-   - Convert between schemas and objects
+   - Accept Pydantic models directly (ADR-007)
    - Maintain consistent patterns
    - Focus on specific domains
    - Handle pagination
 
 3. Schema Layer
    - Models based on PyGithub objects
-   - Pydantic validation
+   - Organized by domain (ADR-003)
+   - Enhanced validation (ADR-004)
    - Clear type definitions
    - Documented relationships
-   - Conversion utilities
 
-### Implementation Patterns
+4. Tools Layer
+   - Organized by domain (ADR-006)
+   - Configuration-driven registration
+   - Decorator-based tool system
+   - Consistent error handling
+   - Clean MCP protocol interface
 
-1. Pydantic-First Operations
+## Best Practices
+
+### 1. Pydantic Model Usage
+- Define all input parameters as Pydantic models
+- Let Pydantic handle validation at model instantiation
+- Pass models directly between layers
+- Define field validators for special validation needs
+- Use strict=True to prevent unwanted type coercion
+
+### 2. Tool Implementation
+- Organize tools by domain (issues, repositories, etc.)
+- Use the @tool() decorator for registration
+- Register tools through the module's register function
+- Consistent error handling across all tools
+- Clear parameter validation through Pydantic models
+
+### 3. Error Handling
+- Use GitHubError for all client-facing errors
+- Provide clear error messages with context
+- Handle rate limits with exponential backoff
+- Include resource information in error messages
+- Consistent formatting across all error types
+
+### 4. Testing
+- Test with real API interactions when possible
+- Use dataclasses instead of MagicMock for test objects
+- Focus on testing behavior rather than implementation
+- Implement proper cleanup for test resources
+- Tag resources created during tests for identification
+
+### 5. Configuration
+- Use environment variables for deployment configuration
+- Provide sensible defaults for all settings
+- Clear precedence rules for configuration sources
+- Document all configuration options
+- Support selective tool group enabling/disabling
+
+### 6. Optional Parameter Handling
+- Only include parameters in kwargs when they have non-None values
+- Convert primitive types to PyGithub objects before passing (e.g., milestone number → Milestone object)
+- Handle object conversion errors explicitly
+- Document parameter requirements in docstrings
+- Test with various parameter combinations
+
+## Implementation Patterns
+
+### 1. Pydantic-First Operations
 ```python
 # Pattern for operations layer with Pydantic-First architecture
 from typing import List, Dict, Any
 from ..schemas.issues import ListIssuesParams
-from ..errors import validation_error_to_github_error
+from ..client import GitHubClient
+from github import GithubException
 
-@validation_error_to_github_error
 def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
     """List issues in a repository.
 
@@ -95,16 +300,26 @@ def list_issues(params: ListIssuesParams) -> List[Dict[str, Any]]:
             kwargs["sort"] = params.sort
         if params.direction:
             kwargs["direction"] = params.direction
-            
-        # Rest of implementation...
+        if params.since:
+            kwargs["since"] = params.since
+        
+        # Get paginated issues and handle pagination
+        paginated_issues = repository.get_issues(**kwargs)
+        issues = get_paginated_items(paginated_issues, params.page, params.per_page)
+        
+        # Convert each issue to our schema
+        return [convert_issue(issue) for issue in issues]
     except GithubException as e:
         raise client._handle_github_exception(e)
 ```
 
-2. Pydantic-First Tools
+### 2. Pydantic-First Tools
 ```python
 # Pattern for tools layer with Pydantic-First architecture
 from ..schemas.issues import ListIssuesParams
+from pygithub_mcp_server.tools import tool
+from pygithub_mcp_server.operations import issues
+from pygithub_mcp_server.errors import GitHubError, format_github_error
 
 @tool()
 def list_issues(params: ListIssuesParams) -> dict:
@@ -127,7 +342,45 @@ def list_issues(params: ListIssuesParams) -> dict:
         }
 ```
 
-3. Validation Error Handling
+### 3. Tool Registration and Configuration
+```python
+# In tools/issues/__init__.py
+def register(mcp):
+    """Register all issue tools with the MCP server."""
+    from pygithub_mcp_server.tools import register_tools
+    from .tools import create_issue, list_issues, get_issue, update_issue
+    
+    register_tools(mcp, [
+        create_issue,
+        list_issues,
+        get_issue,
+        update_issue,
+        # Other issue tools
+    ])
+
+# In server.py
+from pygithub_mcp_server.config import load_config
+from pygithub_mcp_server.tools import load_tools
+
+def create_server():
+    """Create and configure the MCP server."""
+    # Create FastMCP server instance
+    mcp = FastMCP(
+        "pygithub-mcp-server",
+        version=VERSION,
+        description="GitHub API operations via MCP"
+    )
+    
+    # Load configuration
+    config = load_config()
+    
+    # Load and register tools based on configuration
+    load_tools(mcp, config)
+    
+    return mcp
+```
+
+### 4. Validation Error Handling
 ```python
 # Pattern for consistent validation error handling
 import functools
@@ -153,37 +406,30 @@ def validation_error_to_github_error(func):
     return wrapper
 ```
 
-4. Testing with Pydantic Models
-```python
-# Pattern for testing with Pydantic models
-def test_operation_with_invalid_data():
-    """Test operation with invalid data in Pydantic model."""
-    # Create a params object with invalid values
-    params = SomeParamsModel(
-        owner="valid-owner",
-        repo="valid-repo",
-        invalid_field="invalid-value"  # Will be caught by validation
-    )
-    
-    # The operation should raise GitHubError
-    with pytest.raises(GitHubError) as exc_info:
-        operations.some_operation(params)
-    
-    # Verify proper error message
-    assert "invalid_field" in str(exc_info.value).lower()
-```
-
-5. Schema Conversion
+### 5. Schema Conversion
 ```python
 # Pattern for object conversion
-def convert_github_object(obj):
+def convert_issue(issue):
+    """Convert a PyGithub Issue object to our schema format."""
     return {
-        "field": obj.field,
-        # Map PyGithub fields to our schema
+        "number": issue.number,
+        "title": issue.title,
+        "body": issue.body,
+        "state": issue.state,
+        "created_at": issue.created_at.isoformat(),
+        "updated_at": issue.updated_at.isoformat(),
+        "user": {
+            "login": issue.user.login,
+            "id": issue.user.id,
+            "url": issue.user.html_url
+        },
+        "labels": [{"name": label.name, "color": label.color} for label in issue.labels],
+        "comments": issue.comments,
+        "url": issue.html_url
     }
 ```
 
-6. Error Handling
+### 6. Error Handling
 ```python
 # Pattern for error handling
 try:
@@ -193,25 +439,44 @@ except GithubException as e:
     raise GitHubError(str(e))
 ```
 
-7. Optional Parameter Handling
+### 7. Pagination Handling
 ```python
-# Pattern for handling optional parameters
-def create_something(required_param, **optional_params):
-    # Build kwargs with required parameters
-    kwargs = {"required": required_param}
+# In converters/common/pagination.py
+def get_paginated_items(paginated_list, page=None, per_page=None):
+    """Get items from a PyGithub PaginatedList with pagination support.
     
-    # Add optional parameters only if provided
-    if "milestone" in optional_params:
+    Args:
+        paginated_list: PyGithub PaginatedList object
+        page: Optional page number (1-based)
+        per_page: Optional items per page
+        
+    Returns:
+        List of items from the paginated list
+    """
+    if page is not None and per_page is not None:
+        # Use both page and per_page for precise pagination
+        start = (page - 1) * per_page
+        end = start + per_page
         try:
-            kwargs["milestone"] = get_milestone_object(optional_params["milestone"])
-        except Exception as e:
-            raise GitHubError(f"Invalid milestone: {e}")
-    
-    if "labels" in optional_params and optional_params["labels"]:
-        kwargs["labels"] = optional_params["labels"]
-    
-    # Make API call with only provided parameters
-    return client.create_something(**kwargs)
+            return list(paginated_list[start:end])
+        except IndexError:
+            # Handle case where start is beyond the list length
+            return []
+    elif page is not None:
+        # Use default per_page value (30) with specified page
+        try:
+            return paginated_list.get_page(page - 1)
+        except IndexError:
+            return []
+    elif per_page is not None:
+        # Get just the first per_page items
+        try:
+            return list(paginated_list[:per_page])
+        except IndexError:
+            return []
+    else:
+        # No pagination, get all items (use with caution!)
+        return list(paginated_list)
 ```
 
 ## System Flow
@@ -273,7 +538,13 @@ class GitHubObjectFactory:
     def create_from_github_object(obj):
         if isinstance(obj, github.Issue.Issue):
             return convert_issue(obj)
+        elif isinstance(obj, github.Repository.Repository):
+            return convert_repository(obj)
+        elif isinstance(obj, github.PullRequest.PullRequest):
+            return convert_pull_request(obj)
         # ... other object types
+        else:
+            raise ValueError(f"Unsupported GitHub object type: {type(obj)}")
 ```
 
 ### 3. Strategy Pattern (Error Handling)
@@ -282,41 +553,124 @@ class ErrorHandler:
     def handle_error(self, error):
         if isinstance(error, RateLimitExceededException):
             return handle_rate_limit(error)
-        # ... other error types
+        elif isinstance(error, UnknownObjectException):
+            return handle_not_found(error)
+        elif isinstance(error, GithubException):
+            if error.status == 403:
+                return handle_permission_error(error)
+            # ... other status codes
+        return handle_unknown_error(error)
+```
+
+### 4. Decorator Pattern (Tool Registration)
+```python
+def tool():
+    """Decorator to register a function as an MCP tool."""
+    def decorator(func):
+        func._is_tool = True
+        return func
+    return decorator
 ```
 
 ## Testing Patterns
 
-### 1. Unit Testing
+### 1. Unit Testing with Dataclasses
 ```python
-def test_issue_conversion():
+from dataclasses import dataclass
+
+@dataclass
+class RepositoryOwner:
+    login: str
+    id: int
+    html_url: str
+
+@dataclass
+class Repository:
+    id: int
+    name: str
+    full_name: str
+    owner: RepositoryOwner
+    private: bool
+    html_url: str
+    description: str = None
+
+def test_convert_repository():
     # Given
-    mock_issue = create_mock_issue()
+    owner = RepositoryOwner(
+        login="test-user",
+        id=12345,
+        html_url="https://github.com/test-user"
+    )
+    repo = Repository(
+        id=98765,
+        name="test-repo",
+        full_name="test-user/test-repo",
+        owner=owner,
+        private=False,
+        html_url="https://github.com/test-user/test-repo",
+        description="Test repository"
+    )
+    
     # When
-    result = convert_github_object(mock_issue)
+    result = convert_repository(repo)
+    
     # Then
-    assert_valid_schema(result)
+    assert result["id"] == 98765
+    assert result["name"] == "test-repo"
+    assert result["owner"]["login"] == "test-user"
 ```
 
-### 2. Integration Testing
+### 2. Integration Testing with Real API
 ```python
-def test_list_issues_integration():
-    # Given
-    client = GitHubClient.get_instance()
-    # When
-    issues = client.list_issues(owner, repo)
-    # Then
-    assert_valid_response(issues)
+@pytest.mark.integration
+def test_create_issue_integration(test_owner, test_repo, test_cleanup):
+    """Test creating an issue in a real GitHub repository."""
+    # Generate a unique title to identify this test issue
+    test_id = str(uuid.uuid4())[:8]
+    title = f"Test Issue {test_id}"
+    body = f"This is a test issue created by the integration test suite {test_id}."
+    
+    # Create parameters for the operation
+    params = CreateIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        title=title,
+        body=body
+    )
+    
+    # Call the operation directly
+    result = issues.create_issue(params)
+    
+    # Add to cleanup for after-test removal
+    test_cleanup.add_issue(test_owner, test_repo, result["number"])
+    
+    # Verify the response structure and content
+    assert result["title"] == title
+    assert result["body"] == body
+    assert result["state"] == "open"
+    assert "number" in result
 ```
 
-### 3. Mock Testing
+### 3. Context Managers for Testing
 ```python
-def test_error_handling():
-    # Given
-    mock_github = create_mock_github_with_error()
-    # When
-    with pytest.raises(GitHubError):
-        client.operation()
+@contextmanager
+def capture_stdout():
+    """Capture stdout for testing."""
+    new_stdout = StringIO()
+    old_stdout = sys.stdout
+    sys.stdout = new_stdout
+    try:
+        yield new_stdout
+    finally:
+        sys.stdout = old_stdout
+
+def test_main_function():
+    """Test main function output."""
+    with capture_stdout() as stdout:
+        main(["--version"])
+        output = stdout.getvalue()
+    
+    assert "version" in output.lower()
 ```
 
 ## Documentation Patterns
@@ -484,9 +838,9 @@ class PaginationModel(BaseModel):
         return v
 ```
 
-## Testing Patterns
+## Schema Validation Testing
 
-### 1. Schema Validation Testing
+### 1. Basic Validation Testing
 ```python
 def test_valid_data(valid_data):
     """Test that valid data passes validation."""

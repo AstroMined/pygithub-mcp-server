@@ -101,26 +101,150 @@ Memory Bank updates occur when:
 
 1. Discovering new project patterns
 2. After implementing significant changes
-3. When user requests with **update memory bank** (MUST review ALL files)
+3. When user requests with **end coding session** (triggers comprehensive end-of-session process)
 4. When context needs clarification
+
+## End Coding Session Protocol
+
+When the user requests to **end coding session**, I MUST execute this comprehensive protocol:
 
 ```mermaid
 flowchart TD
-    Start[Update Process]
+    Start[End Coding Session] --> MB[Update Memory Bank]
+    MB --> V[Update Version Information]
+    V --> CL[Update CHANGELOG.md]
+    CL --> R[Prepare Commit Message]
     
-    subgraph Process
-        P1[Review ALL Files]
-        P2[Document Current State]
-        P3[Clarify Next Steps]
-        P4[Update .clinerules]
+    subgraph Update Memory Bank
+        M1[Review ALL Memory Bank Files]
+        M2[Update active_context.md with Recent Changes]
+        M3[Update progress.md with Work Completed/Remaining]
+        M4[Update Other Files as Needed]
         
-        P1 --> P2 --> P3 --> P4
+        M1 --> M2 --> M3 --> M4
     end
     
-    Start --> Process
+    subgraph Update Version Information
+        V1[Determine New Version Based on Changes]
+        V2[Update src/pygithub_mcp_server/version.py]
+        V3[Update pyproject.toml]
+        
+        V1 --> V2 --> V3
+    end
+    
+    subgraph Update CHANGELOG.md
+        C1[Create New Version Entry]
+        C2[Document Added Features]
+        C3[Document Changed Features]
+        C4[Document Fixed Issues]
+        
+        C1 --> C2 --> C3 --> C4
+    end
+    
+    subgraph Prepare Commit Message
+        G1[Summarize Work Done]
+        G2[Reference Any ADRs/Issues]
+        G3[Include Version Information]
+        
+        G1 --> G2 --> G3
+    end
 ```
 
-Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state. Also ensure to update README.md and CHANGELOG.md to reflect any changes made during the current session.
+### Memory Bank Update Process
+
+1. **Review ALL Memory Bank Files**:
+   - Read every file, even if some don't need updates
+   - Note any inconsistencies or outdated information
+   - Identify which files need updates based on the work done
+
+2. **Update Primary Files**:
+   - `active_context.md`: 
+     - Update "Recent Changes" with detailed descriptions of work completed
+     - Update "Next Steps" with what should be done next
+     - Update "Current Considerations" with insights gained
+     - Update "Implementation Lessons" with new knowledge acquired
+   - `progress.md`:
+     - Move completed work from "What's Left to Build" to "What Works"
+     - Update "Current Status" with the overall project state
+     - Update "Known Issues" with any new or resolved issues
+     - Update "Next Actions" with immediate next steps
+   
+3. **Update Secondary Files**:
+   - `tech_context.md`: If changes affect the technology stack or architecture
+   - `system_patterns.md`: If new patterns or implementations were added
+   - `product_context.md`: If product features or goals changed
+   - `project_brief.md`: Rarely - only if core requirements changed
+   - Additional documentation files: If specialized documentation was affected
+
+4. **Review ADR Implementation Status**:
+   - Check if work involved implementing an ADR
+   - Update ADR status from "Accepted" to "Implemented" if applicable
+   - Add implementation notes to the ADR with any insights gained
+
+### Version Update Process
+
+1. **Determine New Version Number**:
+   - Use semantic versioning: MAJOR.MINOR.PATCH
+   - MAJOR: Breaking changes
+   - MINOR: New features, non-breaking changes
+   - PATCH: Bug fixes, small improvements
+
+2. **Update Version Files**:
+   - `src/pygithub_mcp_server/version.py`:
+     - Update VERSION_MAJOR, VERSION_MINOR, and VERSION_PATCH constants
+     - Keep VERSION and VERSION_TUPLE in sync
+   - `pyproject.toml`:
+     - Update the version field under [project]
+     - Ensure it matches version.py exactly
+
+### CHANGELOG.md Update Process
+
+1. **Create New Version Entry**:
+   - Add a new section at the top of the CHANGELOG.md file
+   - Format: `## [x.y.z] - YYYY-MM-DD` (using today's date)
+   - Move items from "Unreleased" section if applicable
+
+2. **Document Changes**:
+   - **Added**: New features or capabilities
+   - **Changed**: Changes to existing functionality
+   - **Deprecated**: Features that will be removed in future versions
+   - **Removed**: Features that were removed
+   - **Fixed**: Bug fixes
+   - **Security**: Security-related changes
+
+3. **Write Detailed, User-Focused Entries**:
+   - Focus on what users/developers will care about
+   - Use full sentences and clear descriptions
+   - Group related changes together
+   - Include references to ADRs where applicable
+
+### Commit Message Preparation
+
+1. **Craft a Descriptive Summary**:
+   - Start with a clear, concise summary line (50-72 chars)
+   - Include the version number in the summary
+   - Capture the essence of the changes
+
+2. **Provide Detailed Body**:
+   - Add a blank line after the summary
+   - List key changes with bullet points
+   - Reference any relevant ADRs or issues
+   - Explain why changes were made, not just what changed
+
+3. **Format Example**:
+```
+Implement ADR-006 Modular Tool Architecture (v0.5.6)
+
+- Created dedicated config/ package with flexible configuration system
+- Implemented decorator-based tool registration system in tools/ package
+- Migrated issue tools from server.py to tools/issues/tools.py
+- Added support for selectively enabling/disabling tool groups
+- Created comprehensive tests for the new architecture
+- Added example configuration file and documentation
+
+This completes the implementation of ADR-006 and sets up the foundation
+for expanding tool groups in the future.
+```
 
 ## Project Intelligence (.clinerules)
 

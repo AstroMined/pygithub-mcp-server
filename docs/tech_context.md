@@ -1,12 +1,14 @@
 # Technical Context
 
+> **Note:** This document provides a high-level overview of the technology stack and architecture. For detailed implementation patterns, code examples, and best practices, please refer to [`system_patterns.md`](system_patterns.md).
+
 ## Technology Stack
 
 ### Core Dependencies
 - Python 3.10+
 - MCP Python SDK
 - PyGithub for GitHub API interaction
-- Pydantic for schema validation
+- Pydantic for schema validation and data modeling
 - pytest for testing
 
 ### Development Tools
@@ -23,87 +25,170 @@
 src/
 └── pygithub_mcp_server/
     ├── __init__.py
-    ├── server.py           # Main server implementation
-    ├── common/
-    │   ├── errors.py      # Custom error classes
-    │   ├── types.py       # Pydantic models and types
-    │   ├── utils.py       # Utility functions
-    │   ├── version.py     # Version information
-    │   └── github.py      # GitHub client singleton
-    └── operations/
-        ├── branches.py    # Branch operations
-        ├── commits.py     # Commit operations
-        ├── files.py       # File operations
-        ├── issues.py      # Issue operations
-        ├── pulls.py       # Pull request operations
-        ├── repository.py  # Repository operations
-        └── search.py      # Search operations
+    ├── server.py           # Server factory implementation
+    ├── schemas/            # Pydantic models organized by domain
+    │   ├── __init__.py     # Re-exports all schemas for backward compatibility
+    │   ├── base.py         # Base models used across multiple domains
+    │   ├── repositories.py # Repository-related schemas
+    │   ├── issues.py       # Issue and issue comment related schemas
+    │   ├── pull_requests.py # Pull request and PR comment schemas
+    │   ├── search.py       # Search-related schemas
+    │   └── responses.py    # Response type schemas
+    ├── tools/              # Tool implementations organized by domain
+    │   ├── __init__.py     # Tool registration system
+    │   ├── issues/         # Issue-related tools
+    │   │   ├── __init__.py # Issue tools exports
+    │   │   └── tools.py    # Issue tool implementations
+    │   ├── repositories/   # Repository-related tools
+    │   │   ├── __init__.py
+    │   │   └── tools.py
+    │   └── [other domains]
+    ├── config/             # Configuration management
+    │   ├── __init__.py     # Re-exports configuration functions
+    │   └── settings.py     # Configuration system
+    ├── operations/         # Domain operations (business logic)
+    │   ├── issues.py       # Issue operations
+    │   ├── repositories.py # Repository operations
+    │   └── [other operations]
+    ├── client/             # GitHub client
+    │   ├── __init__.py     # Re-exports client
+    │   ├── client.py       # Core GitHub client
+    │   └── rate_limit.py   # Rate limit handling
+    ├── errors/             # Error handling
+    │   ├── __init__.py     # Re-exports errors
+    │   ├── exceptions.py   # Custom exceptions
+    │   ├── formatters.py   # Error formatting
+    │   └── handlers.py     # Error handling
+    ├── converters/         # Data transformation functions
+    │   ├── __init__.py     # Re-exports all converters
+    │   ├── issues/         # Issue-related converters
+    │   ├── repositories/   # Repository-related converters
+    │   ├── users/          # User-related converters
+    │   ├── common/         # Common converters (datetime, pagination)
+    │   ├── responses.py    # Tool response formatting
+    │   └── parameters.py   # Parameter formatting
+    └── utils/              # General utilities
+        ├── __init__.py     # Re-exports utilities
+        ├── environment.py  # Environment utilities
+        └── general.py      # General-purpose utilities
 
 # Project Root
-├── .gitignore            # Git ignore patterns
-├── LICENSE.md            # MIT License
-├── README.md            # Project documentation
-├── pyproject.toml       # Project configuration
-└── docs/               # Documentation directory
+├── .gitignore               # Git ignore patterns
+├── LICENSE.md               # MIT License
+├── README.md                # Project documentation
+├── ROADMAP.md               # Development roadmap
+├── pygithub_mcp_config.json.example  # Configuration example
+├── pyproject.toml           # Project configuration
+├── docs/                    # Documentation directory
+│   ├── adr/                 # Architectural Decision Records
+│   ├── guides/              # User guides
+│   └── [other documentation]
+└── tests/                   # Test suite
+    ├── unit/                # Unit tests (no external dependencies)
+    │   ├── client/          # Tests for client module
+    │   ├── config/          # Tests for configuration
+    │   └── [other unit tests]
+    └── integration/         # Tests that use the real GitHub API
+        ├── operations/      # Tests for API operations
+        ├── tools/           # Tests for MCP tools
+        └── [other integration tests]
 ```
 
 ### Key Technical Decisions
 
-1. PyGithub Integration
-   - Object-oriented API interaction
+1. **Pydantic-First Architecture (ADR-007)**
+   - Pydantic models as primary data interchange format between all layers
+   - Operations layer accepts Pydantic models directly
+   - No unpacking of models between layers
+   - All validation logic lives in Pydantic models
+   - Consistent error handling across all layers
+
+2. **PyGithub Integration (ADR-001)**
+   - Object-oriented API interaction via PyGithub
    - Built-in pagination support
    - Automatic rate limiting
    - Rich object model
    - Singleton client pattern
 
-2. Schema Design
-   - PyGithub-aligned schemas
-   - Strong type validation
-   - Clear object relationships
-   - Comprehensive field coverage
-   - Conversion utilities
+3. **Real API Testing (ADR-002)**
+   - Elimination of mocks in favor of real API interactions
+   - Test behavior rather than implementation details
+   - Use dataclasses instead of MagicMock for unit tests
+   - Test organization mirrors application architecture
+   - Robust cleanup mechanisms for test resources
 
-3. Error Handling
-   - PyGithub exception mapping
-   - Custom error hierarchy
-   - Consistent error patterns
-   - Clear error messages
-   - Rate limit handling
+4. **Schema Organization (ADR-003)**
+   - Domain-specific schema files
+   - Clear separation of concerns
+   - Re-exports for backward compatibility
+   - Schema-first development approach
+
+5. **Enhanced Schema Validation (ADR-004)**
+   - Custom field validators for critical fields
+   - Validation for non-empty strings
+   - Improved error messages
+   - Alignment with PyGithub expectations
+
+6. **Module Reorganization (ADR-005)**
+   - Converters directory with domain-specific modules
+   - Minimal utils module with truly general utilities
+   - Error handling in dedicated module
+   - Client functionality in dedicated module
+
+7. **Modular Tool Architecture (ADR-006)**
+   - Tool modules organized by domain
+   - Configuration-driven tool registration
+   - Decorator-based tool system
+   - Selectively enable/disable tool groups
 
 ## Development Setup
 
 1. Environment Setup
 ```bash
 uv venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e .
 ```
 
-2. Testing
+2. Configuration
 ```bash
-pytest
-pytest --cov=github tests/
+# Copy example configuration
+cp pygithub_mcp_config.json.example pygithub_mcp_config.json
+# Edit configuration file
+# Set environment variable
+export PYGITHUB_MCP_CONFIG=/path/to/pygithub_mcp_config.json
+# Or set specific tool group environments
+export PYGITHUB_ENABLE_REPOSITORIES=true
 ```
 
-3. Linting and Formatting
+3. Testing
+```bash
+# Run unit tests (fast, no external dependencies)
+pytest tests/unit/
+
+# Run integration tests (requires credentials)
+pytest tests/integration/ --run-integration
+```
+
+4. Linting and Formatting
 ```bash
 black .
 isort .
-pylint github tests
-mypy github
+pylint src tests
+mypy src
 ```
 
 ## GitHub API Integration
 
 1. Authentication
 - Personal Access Token required
-- Token passed via environment variable
+- Token passed via environment variable (`GITHUB_TOKEN`)
 - PyGithub authentication handling
 - Session management via PyGithub
 
 2. Rate Limiting
 - Automatic handling by PyGithub
-- Built-in retries and backoff
+- Built-in retries and exponential backoff
 - Clear rate limit errors
 - Rate limit tracking
 
@@ -115,118 +200,24 @@ mypy github
 
 ## Testing Strategy
 
-1. Unit Tests
-- PyGithub object mocking
-- Schema validation testing
-- Conversion testing
-- Error case coverage
+The project follows a comprehensive testing strategy detailed in ADR-002:
 
-2. Integration Tests
-- Full PyGithub interaction
-- Rate limit handling
-- Error recovery
-- Pagination testing
+1. **Unit Tests**
+   - Python dataclasses for test objects instead of mocks
+   - Focus on component behaviors in isolation
+   - Test schema validation, conversion logic, and configuration
+   - Fast execution without external dependencies
 
-3. Mock Testing
-- PyGithub response mocking
-- Error simulation
-- Rate limit testing
-- Object conversion testing
+2. **Integration Tests**
+   - Real GitHub API interactions
+   - Test full feature workflows
+   - Comprehensive cleanup mechanisms to prevent test pollution
+   - Rate limit handling with exponential backoff
 
-## Documentation
+3. **Test Organization**
+   - Mirrors application architecture for better maintainability
+   - Separation of unit and integration tests
+   - Clear test markers for selective execution
+   - Environment-based configuration for test credentials
 
-1. Code Documentation
-- Google style docstrings
-- Type hints throughout
-- PyGithub object mapping
-- Clear function/class purposes
-
-2. API Documentation
-- Tool interface documentation
-- Schema documentation
-- PyGithub object relationships
-- Error handling documentation
-
-3. Usage Examples
-- Basic usage examples
-- PyGithub patterns
-- Error handling examples
-- Pagination examples
-
-## Implementation Patterns
-
-1. Client Usage
-```python
-from pygithub_mcp_server.common.github import GitHubClient
-
-def operation():
-    client = GitHubClient.get_instance()
-    return client.operation()
-```
-
-2. Error Handling
-```python
-try:
-    result = github_operation()
-    return convert_to_schema(result)
-except GithubException as e:
-    raise GitHubError(str(e))
-```
-
-3. Schema Conversion
-```python
-def convert_to_schema(github_obj):
-    """Convert PyGithub object to our schema."""
-    return {
-        "field": github_obj.field,
-        # ... other fields
-    }
-```
-
-4. Optional Parameter Handling
-```python
-def github_operation(required_param, **optional_params):
-    # Build kwargs with required parameters
-    kwargs = {"required": required_param}
-    
-    # Add optional parameters only if provided
-    if optional_params.get("body"):
-        kwargs["body"] = optional_params["body"]
-    
-    # Convert primitive types to PyGithub objects
-    if optional_params.get("milestone"):
-        kwargs["milestone"] = get_milestone_object(optional_params["milestone"])
-    
-    # Make API call with only provided parameters
-    return client.operation(**kwargs)
-```
-
-## Best Practices
-
-1. PyGithub Usage
-- Use object-oriented interface
-- Handle pagination properly
-- Respect rate limits
-- Convert objects consistently
-- Build kwargs dynamically for optional parameters
-- Only include non-None values in method calls
-- Convert primitive types to PyGithub objects
-- Handle object conversion errors explicitly
-
-2. Error Management
-- Map exceptions properly
-- Provide clear messages
-- Handle rate limits
-- Log errors appropriately
-
-3. Testing
-- Mock PyGithub objects
-- Test error cases
-- Verify conversions
-- Check pagination
-
-4. Documentation
-- Document object mappings
-- Explain conversions
-- Show usage examples
-- Note limitations
+For detailed testing patterns including code examples, see the [System Patterns](system_patterns.md#testing-patterns) document.

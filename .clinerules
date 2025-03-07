@@ -1,82 +1,40 @@
 # PyGithub MCP Server Project Rules
 
-## Project Structure
-- Follow src/ layout pattern for all Python MCP servers
-- Keep operations modular and separated by domain (issues, repos, etc.)
-- Maintain clear separation between common utilities and domain operations
-- Use __init__.py files to expose clean public APIs
+This file contains project-specific preferences, troubleshooting tips, and practical guidelines that complement the formal documentation in the `docs/` directory.
 
-## Build and Environment
+> Note: For comprehensive information on system architecture and implementation patterns, refer to `docs/system_patterns.md`. For details on the technology stack and development setup, see `docs/tech_context.md`.
+
+## Development Environment Tips
+
+### Build and Environment
 - Use uv for dependency management and virtual environments
-- Build with `uv build` (build isolation works fine)
-- Always specify requires-python in pyproject.toml
-- Keep dependencies in virtual environment for isolation
-- Activate virtual environment before running tools if not already activated:
+- Activate virtual environment before running tools:
   ```bash
-  source .venv/bin/activate
+  source .venv/bin/activate  # On Windows: .venv\Scripts\activate
   ```
 - No need to source the venv repeatedly if you're already in it - only source it once per session
 
-## MCP Configuration
+### MCP Configuration
 - Use direct venv Python interpreter in MCP settings:
   ```json
   {
     "command": "/path/to/project/.venv/bin/python",
-    "args": ["-m", "package_name"]
+    "args": ["-m", "pygithub_mcp_server"]
   }
   ```
 - Avoid using uvx/uv run in MCP settings to prevent dependency resolution issues
 - Always include necessary environment variables (e.g., GITHUB_PERSONAL_ACCESS_TOKEN)
 
-## Development Patterns
-- Use Pydantic models for request/response validation
-- Keep operations synchronous for reliability
-- Follow consistent error handling patterns using custom exceptions
-- Document all public functions and classes thoroughly
-
-## Testing
-
-### Testing Strategy
-- Prioritize real API testing over mock-based testing
-- Use mocks only for edge cases that cannot be reliably reproduced with the real API
-- Focus on testing behavior and outcomes rather than implementation details
-- Implement thorough cleanup mechanisms to prevent test pollution
-- Use test tagging to allow skipping integration tests when appropriate
-- Implement robust retry mechanisms for network issues
-- Consider caching strategies for frequently accessed data
-
-### Real API Testing
-- Set up test environment variables in .env file:
-  ```
-  GITHUB_TEST_TOKEN=your-test-token
-  GITHUB_TEST_OWNER=test-owner
-  GITHUB_TEST_REPO=test-repo
-  ```
-- Run integration tests with pytest:
-  ```bash
-  pytest tests/integration/ -v
-  ```
-- Skip integration tests when needed:
-  ```bash
-  pytest -k "not integration"
-  ```
-- Always implement cleanup to prevent test pollution
-- Use descriptive test names that reflect the behavior being tested
-- Test both success and error scenarios
-- Implement exponential backoff for rate limit handling
-
-### MCP Tool Testing
-- Human-driven user acceptance testing to test MCP tools using MCP Inspector during development:
+## MCP Tool Testing
+- Human-driven user acceptance testing can be done using MCP Inspector:
   ```bash
   source .venv/bin/activate  # Must activate venv first
-  npx @modelcontextprotocol/inspector -e GITHUB_PERSONAL_ACCESS_TOKEN=your-token-here uv run pygithub-mcp-server
+  npx @modelcontextprotocol/inspector -e GITHUB_PERSONAL_ACCESS_TOKEN=your-token-here uv run pygithub_mcp_server
   ```
 - Use MCP Inspector's Web UI to experiment with available tools
-- Verify tool operations with real GitHub repositories
-- Test both success and error cases
-- Document example payloads that work
+- Test both success and error cases with real GitHub repositories
 
-### Pytest Usage
+## Pytest Usage Tips
 - Run tests efficiently without verbose output by default:
   ```bash
   pytest tests/test_file.py -q --tb=no --cov=path/to/coverage
@@ -87,138 +45,31 @@
   ```
 - Keep test output clean and manageable
 - Use coverage reporting to identify gaps
-- Run specific test functions when debugging issues
 
-## Documentation
-- Keep memory bank up to date with all significant changes
-- Document all implementation lessons in active_context.md
-- Include example configurations and usage patterns
-- Maintain clear next steps and progress tracking
+## Logging Configuration
+- The project-wide logging level is controlled in `src/pygithub_mcp_server/server.py`
+- This file configures the root logger, which affects all loggers in the system
+- Default log level is set to INFO to prevent excessive debug logging during tests
+- To increase verbosity for debugging, change both logger.setLevel() and logging.basicConfig() to DEBUG
+- To decrease logging during tests beyond what --log-level=INFO can do, ensure the server.py log level is appropriately set
 
-## Documentation
-- PyGithub documentation available in docs/PyGithub/
-- API reference in docs/PyGithub/api/
-- Examples in docs/PyGithub/examples/
-- Guides in docs/PyGithub/guides/
+## Common Troubleshooting
 
-## Known Patterns
-1. Tool Registration:
-   ```python
-   @mcp.tool()
-   def tool_name(params: ParamsModel) -> dict:
-       """Tool docstring with clear Args and Returns."""
-       # Implementation
-       return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
-   ```
-
-2. PyGithub Integration:
-   ```python
-   try:
-       client = GitHubClient.get_instance()
-       repository = client.get_repo(f"{owner}/{repo}")
-       result = repository.operation(...)  # PyGithub operation
-       return convert_object(result)  # Convert to our schema
-   except GithubException as e:
-       # GitHubClient handles exception
-       raise
-   ```
-
-3. Object Conversion:
-   ```python
-   def convert_object(obj: PyGithubObject) -> Dict[str, Any]:
-       """Convert PyGithub object to our schema."""
-       return {
-           "field": obj.field,
-           "nested": convert_nested(obj.nested),
-           "datetime": obj.datetime.isoformat() if obj.datetime else None,
-       }
-   ```
-
-4. Error Handling:
-   ```python
-   try:
-       result = api_operation()
-       return create_tool_response(result)
-   except GitHubError as e:
-       return create_tool_response(str(e), is_error=True)
-   ```
-
-5. Resource Organization:
-   - Common utilities in common/
-   - API operations in operations/
-   - Types and models in common/types.py
-   - Error definitions in common/errors.py
-   - GitHub client in common/github.py
-   - Object converters in common/converters.py
-
-6. Optional Parameter Handling:
-   ```python
-   # Don't pass optional parameters directly to PyGithub methods
-   # BAD - can trigger assertion errors:
-   repository.create_issue(
-       title=title,
-       body=body,  # body might be None
-       milestone=milestone,  # milestone might be None
-   )
-
-   # GOOD - build kwargs with only provided values:
-   kwargs = {"title": title}  # required params
-   if body is not None:
-       kwargs["body"] = body
-   if milestone is not None:
-       kwargs["milestone"] = get_milestone_object(milestone)
-   repository.create_issue(**kwargs)
-   ```
-
-   Key practices:
-   - Only include parameters in kwargs when they have non-None values
-   - Convert primitive types to PyGithub objects before passing (e.g., milestone number → Milestone object)
-   - Handle object conversion errors explicitly
-   - Document parameter requirements in docstrings
-   - Test with various parameter combinations
-
-7. Mocking Guidelines:
-   ```python
-   # BAD - patching global name won't affect imported references
-   monkeypatch.setattr('github.Auth', mock_auth)  # Won't work
-   
-   # GOOD - patch the module where it's used
-   monkeypatch.setattr('pygithub_mcp_server.common.github.Auth', mock_auth)  # Works
-   ```
-
-   Key practices:
-   - Only mock when absolutely necessary (e.g., rate limit errors, rare error conditions)
-   - Keep mocks as simple as possible
-   - Document why mocking is necessary for each case
-   - Identify where the module is actually imported and used
-   - Patch at the point of use, not the global module
-   - Preserve real types when needed for isinstance() checks
-   - Use Mock(spec=...) to ensure proper interface
-   - Consider creating a dummy module if patching multiple attributes
-   - Regularly review mocked tests to see if they can be replaced with real API tests
-
-## Troubleshooting
+### MCP Server Issues
 - If MCP server fails to start, verify venv Python path in settings
 - For dependency errors, ensure all requirements are installed in venv
 - For GitHub API errors, check token permissions and validity
 - For build errors, ensure virtual environment is activated
 - When using MCP Inspector, ensure GITHUB_PERSONAL_ACCESS_TOKEN is set in environment
 
-## Debugging
+### Debugging Techniques
 - Check pygithub_mcp_server.log for detailed error logs
 - Log file contains all API interactions and error traces
 - Both file and console logging enabled
 - Log file is created in the project root directory
 - Log format includes timestamps and module names for tracing
 
-## Logging Configuration
-- The project-wide logging level is controlled in `src/pygithub_mcp_server/server.py`
-- This file configures the root logger, which affects all loggers in the system (including third-party libraries)
-- Default log level is set to INFO to prevent excessive debug logging during tests
-- To increase verbosity for debugging, change both logger.setLevel() and logging.basicConfig() to DEBUG
-- To decrease logging during tests beyond what --log-level=INFO can do, ensure the server.py log level is appropriately set
-
-## Git MCP Server Usage
+### Git MCP Server Cautions
 - NEVER use `"."` as a file parameter in git_add operations:
   ```javascript
   // DANGEROUS - can track .git directory and cause repository corruption
@@ -250,3 +101,12 @@
   4. Selectively add back your changes with specific paths
 
 - Periodically verify ignored paths with `git check-ignore -v <path>`
+
+## Command Reference
+
+### Common Tasks
+- Update documentation: `python -m scripts.update_docs`
+- Run specific test group: `pytest tests/integration/ -v --run-integration`
+- Check linting: `python -m pylint src tests`
+- Format code: `python -m black src tests`
+- Generate coverage report: `pytest --cov=src/pygithub_mcp_server`
