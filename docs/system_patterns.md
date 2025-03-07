@@ -246,11 +246,16 @@ flowchart TD
 - Consistent formatting across all error types
 
 ### 4. Testing
-- Test with real API interactions when possible
-- Use dataclasses instead of MagicMock for test objects
+- Use real API interactions instead of mocks for integration tests
+- Use dataclasses instead of MagicMock for unit tests
 - Focus on testing behavior rather than implementation
 - Implement proper cleanup for test resources
 - Tag resources created during tests for identification
+- Separate unit tests from integration tests by directory structure
+- Mark integration tests with @pytest.mark.integration
+- Test both success and error paths
+- Verify that tests remain isolated and don't affect each other
+- Use dependency injection for easier test parameterization
 
 ### 5. Configuration
 - Use environment variables for deployment configuration
@@ -571,18 +576,49 @@ def tool():
         return func
     return decorator
 ```
-
 ## Testing Patterns
 
-### 1. Unit Testing with Dataclasses
+### 1. Testing Philosophy and Principles
+
+Based on ADR 002, our testing approach follows these core principles:
+
+- **No Mocks for Integration Tests**: Use real API interactions instead of mock objects for accurate behavior verification 
+- **Dataclasses for Unit Tests**: Use Python's dataclasses instead of MagicMock for cleaner, type-safe test objects
+- **Behavior-Focused Testing**: Test what functions do, not how they do it
+- **Isolated Tests**: Each test should be independent and not affect others
+- **Test Coverage Prioritization**: Focus on high-risk and critical paths first
+
+Testing follows a layer-based structure that mirrors the application architecture:
+
+```
+tests/
+├── unit/                  # Fast tests with no external dependencies
+│   ├── client/            # Tests for client module
+│   ├── config/            # Tests for configuration
+│   ├── converters/        # Tests for converters
+│   ├── schemas/           # Tests for schema validation
+│   └── utils/             # Tests for utility functions
+└── integration/           # Tests using the real GitHub API
+    ├── client/            # Tests for client with real API
+    ├── operations/        # Tests for API operations with real endpoints
+    │   ├── issues/        # Tests for issue operations
+    │   ├── repositories/  # Tests for repository operations
+    │   └── users/         # Tests for user operations
+    └── tools/             # Tests for MCP tools with real API
+```
+
+### 2. Unit Testing with Dataclasses
+
+In accordance with ADR 002, we use Python's dataclasses instead of MagicMock objects for cleaner, more maintainable tests:
+
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class RepositoryOwner:
     login: str
-    id: int
-    html_url: str
+    id: int = 12345
+    html_url: str = "https://github.com/test-user"
 
 @dataclass
 class Repository:
@@ -590,25 +626,18 @@ class Repository:
     name: str
     full_name: str
     owner: RepositoryOwner
-    private: bool
-    html_url: str
+    private: bool = False
+    html_url: str = "https://github.com/test-user/test-repo"
     description: str = None
 
 def test_convert_repository():
     # Given
-    owner = RepositoryOwner(
-        login="test-user",
-        id=12345,
-        html_url="https://github.com/test-user"
-    )
+    owner = RepositoryOwner(login="test-user")
     repo = Repository(
         id=98765,
         name="test-repo",
         full_name="test-user/test-repo",
-        owner=owner,
-        private=False,
-        html_url="https://github.com/test-user/test-repo",
-        description="Test repository"
+        owner=owner
     )
     
     # When
@@ -620,17 +649,27 @@ def test_convert_repository():
     assert result["owner"]["login"] == "test-user"
 ```
 
-### 2. Integration Testing with Real API
+Benefits of this approach include:
+- Type safety with IDE autocomplete
+- No unexpected attribute creation
+- Clear object structure that mirrors real objects
+- Better representation in test failure output
+- Prevention of bugs from typos in attribute names
+
+### 3. Integration Testing with Real API
+
+For integration tests, we interact with the actual GitHub API:
+
 ```python
 @pytest.mark.integration
 def test_create_issue_integration(test_owner, test_repo, test_cleanup):
     """Test creating an issue in a real GitHub repository."""
-    # Generate a unique title to identify this test issue
+    # Generate a unique identifier for this test
     test_id = str(uuid.uuid4())[:8]
     title = f"Test Issue {test_id}"
-    body = f"This is a test issue created by the integration test suite {test_id}."
+    body = f"This is a test issue created by integration tests - {test_id}"
     
-    # Create parameters for the operation
+    # Create the Pydantic model (already validated)
     params = CreateIssueParams(
         owner=test_owner,
         repo=test_repo,
@@ -638,20 +677,82 @@ def test_create_issue_integration(test_owner, test_repo, test_cleanup):
         body=body
     )
     
-    # Call the operation directly
+    # Call the operation (no mocks)
     result = issues.create_issue(params)
     
-    # Add to cleanup for after-test removal
+    # Register for cleanup
     test_cleanup.add_issue(test_owner, test_repo, result["number"])
     
-    # Verify the response structure and content
+    # Assertions against real API response
     assert result["title"] == title
     assert result["body"] == body
     assert result["state"] == "open"
     assert "number" in result
+    
+    # Verify the issue was actually created by fetching it
+    verification = issues.get_issue(GetIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        issue_number=result["number"]
+    ))
+    assert verification["title"] == title
 ```
 
-### 3. Context Managers for Testing
+### 4. Test Fixtures and Helpers
+
+We use pytest fixtures to create test data and manage resources:
+
+```python
+@pytest.fixture
+def test_owner():
+    """Get the GitHub owner for test operations."""
+    return os.environ.get("GITHUB_TEST_OWNER", "test-owner")
+
+@pytest.fixture
+def test_repo():
+    """Get the GitHub repository for test operations."""
+    return os.environ.get("GITHUB_TEST_REPO", "test-repo")
+
+@pytest.fixture
+def test_cleanup():
+    """Fixture to track and clean up test resources."""
+    cleanup = TestCleanup()
+    yield cleanup
+    cleanup.cleanup_all()
+
+class TestCleanup:
+    """Helper to track and clean up test resources."""
+    
+    def __init__(self):
+        self.issues = []
+        self.comments = []
+        # Other resource types...
+    
+    def add_issue(self, owner, repo, issue_number):
+        """Track an issue for cleanup."""
+        self.issues.append((owner, repo, issue_number))
+    
+    def cleanup_all(self):
+        """Clean up all tracked resources."""
+        client = GitHubClient.get_instance()
+        
+        # Clean up issues
+        for owner, repo, issue_number in self.issues:
+            try:
+                repository = client.get_repo(f"{owner}/{repo}")
+                issue = repository.get_issue(issue_number)
+                if not issue.closed:
+                    issue.edit(state="closed")
+            except Exception as e:
+                logger.warning(f"Failed to clean up issue {owner}/{repo}#{issue_number}: {e}")
+        
+        # Clean up other resource types...
+```
+
+### 5. Context Managers for Environment Testing
+
+For testing environment-dependent code like command-line interfaces:
+
 ```python
 @contextmanager
 def capture_stdout():
@@ -673,6 +774,262 @@ def test_main_function():
     assert "version" in output.lower()
 ```
 
+### 6. Rate Limit Handling in Tests
+
+To handle GitHub API rate limits during tests:
+
+```python
+@pytest.mark.integration
+def test_rate_limited_operation(test_owner, test_repo):
+    """Test operation with retry for rate limits."""
+    max_retries = 3
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            params = ListIssuesParams(owner=test_owner, repo=test_repo)
+            result = issues.list_issues(params)
+            # Test passed
+            break
+        except GitHubError as e:
+            if "rate limit exceeded" in str(e).lower() and retry_count < max_retries - 1:
+                # Calculate backoff time (exponential)
+                wait_time = 2 ** retry_count * 5  # 5, 10, 20 seconds
+                logger.warning(f"Rate limited, retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+                retry_count += 1
+            else:
+                # Either not a rate limit error or we've used all retries
+                raise
+    
+    # Perform test assertions
+    assert isinstance(result, list)
+```
+
+### 7. Testing Error Conditions
+
+Test both success and error paths:
+
+```python
+def test_nonexistent_repository():
+    """Test behavior when repository doesn't exist."""
+    params = ListIssuesParams(
+        owner="non-existent-user-123456",  # Unlikely to exist
+        repo="non-existent-repo-123456"
+    )
+    
+    with pytest.raises(GitHubError) as exc_info:
+        issues.list_issues(params)
+    
+    assert "not found" in str(exc_info.value).lower()
+    assert exc_info.value.status == 404
+```
+
+### 8. Test Tagging and Identification
+
+Identify resources created by tests for easier tracking and cleanup:
+
+```python
+def create_test_issue(owner, repo, test_id):
+    """Create an issue with a unique test identifier."""
+    params = CreateIssueParams(
+        owner=owner,
+        repo=repo,
+        title=f"Test Issue {test_id}",
+        body=f"Test issue created by automated tests. Test ID: {test_id}"
+    )
+    return issues.create_issue(params)
+```
+
+### 9. Parameterized Tests
+
+Use pytest's parameterize feature for testing multiple scenarios:
+
+```python
+@pytest.mark.parametrize("state", ["open", "closed", "all"])
+def test_list_issues_with_different_states(test_owner, test_repo, state):
+    """Test listing issues with different state filters."""
+    params = ListIssuesParams(
+        owner=test_owner,
+        repo=test_repo,
+        state=state
+    )
+    
+    result = issues.list_issues(params)
+    
+    if state == "all":
+        # Should include both open and closed issues
+        assert any(issue["state"] == "open" for issue in result) or \
+               any(issue["state"] == "closed" for issue in result)
+    else:
+        # All issues should match the requested state
+        assert all(issue["state"] == state for issue in result)
+```
+
+### 10. Resource Management in Tests
+
+Implement robust resource management for tests to prevent test pollution:
+
+```python
+@pytest.fixture(scope="session")
+def test_environment():
+    """Set up test environment with resources that all tests can use."""
+    # Create session-level resources
+    client = GitHubClient.get_instance()
+    test_owner = os.environ.get("GITHUB_TEST_OWNER")
+    test_repo = os.environ.get("GITHUB_TEST_REPO")
+    
+    # Set up test data
+    test_resources = {}
+    
+    # Create a test issue that can be reused
+    repository = client.get_repo(f"{test_owner}/{test_repo}")
+    test_issue = repository.create_issue(
+        title="Test Issue for Integration Tests",
+        body="This is a persistent test issue used for integration tests."
+    )
+    test_resources["issue_number"] = test_issue.number
+    
+    # Return the resources
+    yield test_resources
+    
+    # We don't clean up session-level resources here because they are reused
+    # across multiple test runs
+```
+
+### 11. API Response Time Testing
+
+Test API response times to ensure proper handling:
+
+```python
+@pytest.mark.integration
+@pytest.mark.slow
+def test_list_issues_performance(test_owner, test_repo):
+    """Test that listing issues completes within a reasonable time."""
+    params = ListIssuesParams(
+        owner=test_owner,
+        repo=test_repo,
+        state="all"  # Fetch all issues to test performance with larger data set
+    )
+    
+    start_time = time.time()
+    results = issues.list_issues(params)
+    end_time = time.time()
+    
+    # Timing assertion: Operation should complete in under 5 seconds
+    assert end_time - start_time < 5.0
+    
+    # Results should be a list
+    assert isinstance(results, list)
+```
+
+### 12. CI/CD Test Configuration
+
+For CI/CD pipelines, configure tests to run efficiently:
+
+```yaml
+# Example GitHub Actions configuration
+name: Run Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run unit tests
+      run: pytest tests/unit/ -v
+    
+    - name: Run integration tests
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: pytest tests/integration/ -v --run-integration
+      env:
+        GITHUB_TEST_TOKEN: ${{ secrets.GITHUB_TEST_TOKEN }}
+        GITHUB_TEST_OWNER: ${{ secrets.GITHUB_TEST_OWNER }}
+        GITHUB_TEST_REPO: ${{ secrets.GITHUB_TEST_REPO }}
+```
+
+### 13. Testing Lifecycle Actions
+
+For comprehensive testing of resource lifecycles:
+
+```python
+@pytest.mark.integration
+def test_issue_lifecycle(test_owner, test_repo, test_cleanup):
+    """Test the full lifecycle of an issue."""
+    # 1. Create an issue
+    test_id = str(uuid.uuid4())[:8]
+    create_params = CreateIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        title=f"Lifecycle Test Issue {test_id}",
+        body=f"Testing complete issue lifecycle - {test_id}"
+    )
+    
+    created = issues.create_issue(create_params)
+    test_cleanup.add_issue(test_owner, test_repo, created["number"])
+    
+    # 2. Get the issue
+    get_params = GetIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        issue_number=created["number"]
+    )
+    retrieved = issues.get_issue(get_params)
+    assert retrieved["number"] == created["number"]
+    
+    # 3. Update the issue
+    update_params = UpdateIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        issue_number=created["number"],
+        title=f"Updated Lifecycle Test Issue {test_id}",
+        state="closed"
+    )
+    updated = issues.update_issue(update_params)
+    assert updated["title"] == update_params.title
+    assert updated["state"] == "closed"
+    
+    # 4. Add a comment
+    comment_params = IssueCommentParams(
+        owner=test_owner,
+        repo=test_repo,
+        issue_number=created["number"],
+        body=f"Test comment for issue lifecycle - {test_id}"
+    )
+    comment = issues.create_issue_comment(comment_params)
+    test_cleanup.add_comment(test_owner, test_repo, created["number"], comment["id"])
+    
+    # 5. Verify comment
+    assert comment["body"] == comment_params.body
+    
+    # 6. Re-open issue
+    reopen_params = UpdateIssueParams(
+        owner=test_owner,
+        repo=test_repo,
+        issue_number=created["number"],
+        state="open"
+    )
+    reopened = issues.update_issue(reopen_params)
+    assert reopened["state"] == "open"
+```
 ## Documentation Patterns
 
 ### 1. Function Documentation
@@ -838,79 +1195,145 @@ class PaginationModel(BaseModel):
         return v
 ```
 
-## Schema Validation Testing
-
-### 1. Basic Validation Testing
+### 5. URL Validation
 ```python
-def test_valid_data(valid_data):
-    """Test that valid data passes validation."""
-    params = SchemaModel(**valid_data)
-    assert params.field == valid_data["field"]
-
-def test_invalid_field_types(valid_base_data):
-    """Test that invalid field types raise validation errors."""
-    with pytest.raises(ValidationError) as exc_info:
-        SchemaModel(
-            **valid_base_data,
-            field=123  # Should be a string
-        )
-    assert "field" in str(exc_info.value).lower()
-
-def test_empty_string_validation(valid_base_data):
-    """Test that empty strings raise validation errors."""
-    with pytest.raises(ValidationError) as exc_info:
-        SchemaModel(
-            **valid_base_data,
-            field=""
-        )
-    assert "field cannot be empty" in str(exc_info.value).lower()
+class UrlModel(BaseModel):
+    url: str = Field(..., description="URL to a resource")
+    
+    @field_validator('url')
+    @classmethod
+    def validate_url(cls, v):
+        """Validate that URL is properly formatted."""
+        if not v:
+            raise ValueError("URL cannot be empty")
+            
+        # Simple URL validation to check for protocol and domain
+        if not (v.startswith('http://') or v.startswith('https://')):
+            raise ValueError("URL must start with http:// or https://")
+            
+        # Split URL to extract domain
+        try:
+            parsed = urlparse(v)
+            if not parsed.netloc:
+                raise ValueError("URL must contain a valid domain")
+        except Exception:
+            raise ValueError("Invalid URL format")
+            
+        return v
 ```
 
-### 2. Datetime Testing
+### 6. List Validation
 ```python
-def test_datetime_parsing(valid_base_data):
-    """Test that datetime strings are correctly parsed."""
-    # Test with various formats
-    params = DateTimeModel(
-        **valid_base_data,
-        since="2020-01-01T00:00:00Z"
+class ListModel(BaseModel):
+    labels: Optional[List[str]] = Field(
+        None, 
+        description="List of label names"
     )
-    assert isinstance(params.since, datetime)
     
-    # Test with negative timezone offset
-    params = DateTimeModel(
-        **valid_base_data,
-        since="2020-01-01T12:30:45-05:00"
-    )
-    assert isinstance(params.since, datetime)
-    
-    # Test with compact negative timezone offset
-    params = DateTimeModel(
-        **valid_base_data,
-        since="2020-01-01T12:30:45-0500"
-    )
-    assert isinstance(params.since, datetime)
-    
-    # Test with timezone format that has a colon (no normalization needed)
-    params = DateTimeModel(
-        **valid_base_data,
-        since="2020-01-01T12:30:45+05:00"
-    )
-    assert isinstance(params.since, datetime)
-    
-    # Test with timezone format that doesn't have 5 chars (e.g., +05)
-    params = DateTimeModel(
-        **valid_base_data,
-        since="2020-01-01T12:30:45+05"
-    )
-    assert isinstance(params.since, datetime)
-
-def test_invalid_datetime_format(valid_base_data):
-    """Test behavior with invalid datetime format."""
-    with pytest.raises(ValidationError) as exc_info:
-        DateTimeModel(
-            **valid_base_data,
-            since="2020-01-01"  # Missing time component
-        )
-    assert "Invalid ISO format datetime" in str(exc_info.value)
+    @field_validator('labels')
+    @classmethod
+    def validate_labels(cls, v):
+        """Validate that labels are properly formatted."""
+        if v is not None:
+            # Check if any label is empty
+            if any(not label.strip() for label in v):
+                raise ValueError("Labels cannot be empty strings")
+                
+            # Check for duplicates
+            if len(v) != len(set(v)):
+                raise ValueError("Labels must be unique")
+                
+        return v
 ```
+
+### 7. Validation Testing Patterns
+
+When testing validation in schemas:
+
+```python
+def test_schema_validation():
+    """Test schema validation rules."""
+    # Test valid data
+    valid_params = ListIssuesParams(owner="test-owner", repo="test-repo")
+    assert valid_params.owner == "test-owner"
+    
+    # Test invalid data
+    with pytest.raises(ValidationError) as exc_info:
+        ListIssuesParams(owner="", repo="test-repo")
+    assert "owner cannot be empty" in str(exc_info.value).lower()
+    
+    # Test field validators
+    with pytest.raises(ValidationError) as exc_info:
+        ListIssuesParams(
+            owner="test-owner", 
+            repo="test-repo",
+            state="invalid-state"
+        )
+    assert "invalid state" in str(exc_info.value).lower()
+    
+    # Test datetime validation
+    with pytest.raises(ValidationError) as exc_info:
+        ListIssuesParams(
+            owner="test-owner", 
+            repo="test-repo",
+            since="2021-01-01"  # Missing time component
+        )
+    assert "invalid iso format datetime" in str(exc_info.value).lower()
+```
+
+### 8. Model Composition with Inheritance
+
+Use inheritance to create composable schemas with shared validation:
+
+```python
+class PaginatedParams(BaseModel):
+    """Base class for paginated parameters."""
+    page: Optional[int] = Field(None, description="Page number (1-based)")
+    per_page: Optional[int] = Field(None, description="Results per page (max 100)")
+    
+    @field_validator('page')
+    @classmethod
+    def validate_page(cls, v):
+        if v is not None and v < 1:
+            raise ValueError("Page number must be a positive integer")
+        return v
+    
+    @field_validator('per_page')
+    @classmethod
+    def validate_per_page(cls, v):
+        if v is not None:
+            if v < 1:
+                raise ValueError("Results per page must be a positive integer")
+            if v > 100:
+                raise ValueError("Results per page cannot exceed 100")
+        return v
+
+class RepositoryParams(BaseModel):
+    """Base class for repository-related parameters."""
+    owner: str = Field(..., description="Repository owner")
+    repo: str = Field(..., description="Repository name")
+    
+    @field_validator('owner', 'repo')
+    @classmethod
+    def validate_not_empty(cls, v, info):
+        if not v.strip():
+            raise ValueError(f"{info.field_name} cannot be empty")
+        return v
+
+class ListIssuesParams(RepositoryParams, PaginatedParams):
+    """Parameters for listing issues in a repository."""
+    state: Optional[str] = Field(None, description="Issue state: open, closed, all")
+    sort: Optional[str] = Field(None, description="Sort field: created, updated, comments")
+    direction: Optional[str] = Field(None, description="Sort direction: asc, desc")
+    since: Optional[datetime] = Field(None, description="Only issues updated at or after this time")
+    labels: Optional[List[str]] = Field(None, description="Filter by label names")
+    
+    @field_validator('state')
+    @classmethod
+    def validate_state(cls, v):
+        if v is not None and v not in ["open", "closed", "all"]:
+            raise ValueError("Invalid state: must be one of: open, closed, all")
+        return v
+```
+
+This inheritance model allows for reusing validation logic across multiple parameter types while keeping the code DRY.
