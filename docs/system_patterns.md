@@ -444,6 +444,89 @@ except GithubException as e:
     raise GitHubError(str(e))
 ```
 
+#### Error Types and Handling
+
+The system defines several specific error types to provide clear, actionable feedback:
+
+1. **GitHubResourceNotFoundError (Status Code: 404)**
+   - Indicates the requested resource does not exist
+   - Common scenarios: Repository not found, issue not found, comment not found
+   - Example message: "Issue not found" or "Repository not found"
+
+2. **GitHubAuthenticationError (Status Code: 401)**
+   - Authentication failed or token is invalid
+   - Common scenarios: Invalid token, expired token, token lacks required scopes
+   - Example message: "Authentication failed. Please verify your GitHub token."
+
+3. **GitHubPermissionError (Status Code: 403)**
+   - User lacks permission for the requested operation
+   - Common scenarios: Insufficient repository permissions, organization access required
+   - Example message: "You don't have permission to perform this operation."
+
+4. **GitHubRateLimitError (Status Code: 403 with rate limit headers)**
+   - API rate limit exceeded
+   - Includes reset time in error object
+   - Example message: "API rate limit exceeded. Please wait before making more requests."
+   - Usage example:
+     ```python
+     except GitHubRateLimitError as e:
+         print(f"Rate limit exceeded. Resets at: {e.reset_at}")
+     ```
+
+5. **GitHubValidationError (Status Code: 422)**
+   - Request validation failed
+   - Common scenarios: Invalid field values, missing required fields
+   - Example format:
+     ```
+     Validation failed:
+     - title: cannot be blank (missing_field)
+     - labels: invalid format (invalid)
+     ```
+
+6. **GitHubError (Base error type)**
+   - Base error type for unhandled or unexpected errors
+   - Common scenarios: Network issues, server errors, unexpected API responses
+
+#### Error Handling Best Practices
+
+1. **Catch specific error types first:**
+   ```python
+   try:
+       # GitHub operation
+   except GitHubResourceNotFoundError:
+       # Handle 404
+   except GitHubValidationError:
+       # Handle validation
+   except GitHubError:
+       # Handle other errors
+   ```
+
+2. **Check error response data for additional context:**
+   ```python
+   except GitHubError as e:
+       if e.response:
+           # Handle with context
+       else:
+           # Handle generic error
+   ```
+
+3. **Handle rate limits gracefully:**
+   ```python
+   except GitHubRateLimitError as e:
+       wait_time = e.reset_at - datetime.now()
+       logger.warning(f"Rate limit hit. Waiting {wait_time}")
+       # Implement backoff strategy
+   ```
+
+4. **Resource Type Detection:**
+   The error handler automatically detects the type of resource from the error message or response data:
+   ```python
+   if "issue" in error_msg.lower():
+       resource_type = "issue"
+   elif "repository" in error_msg.lower():
+       resource_type = "repository"
+   ```
+
 ### 7. Pagination Handling
 ```python
 # In converters/common/pagination.py
@@ -482,6 +565,86 @@ def get_paginated_items(paginated_list, page=None, per_page=None):
     else:
         # No pagination, get all items (use with caution!)
         return list(paginated_list)
+```
+
+## Security Considerations
+
+### Authentication
+
+1. **Token Security**
+   - Personal Access Tokens (PATs) should never be committed to source control
+   - Set token via `GITHUB_PERSONAL_ACCESS_TOKEN` environment variable
+   - Use fine-grained tokens with minimal required permissions
+   - Example:
+     ```python
+     # Set token securely via environment
+     token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+     if not token:
+         raise GitHubError("Token not configured")
+     ```
+
+2. **Token Permissions**
+   - Repository permissions determine available operations:
+     - Read: View issues, comments, labels
+     - Write: Create/update issues, add labels
+     - Admin: Manage repository settings
+   - Operations fail with `GitHubPermissionError` if permissions are insufficient
+
+### Access Control
+
+1. **Repository Access**
+   - Private repositories return 404 "Not Found" instead of 401/403
+   - This is a GitHub security feature to prevent repository enumeration
+   - Same response whether repository doesn't exist or user lacks access
+   - Helps prevent information disclosure about private repositories
+
+2. **Rate Limiting**
+   - Rate limits help prevent abuse
+   - Limits tracked per token/IP
+   - Secondary rate limits may apply
+   - Rate limit errors include reset time
+   - Implement retry logic with backoff
+
+### Content Security
+
+1. **Content Sanitization**
+   - GitHub automatically sanitizes HTML content
+   - Script tags are removed
+   - javascript: URLs are blocked
+   - HTML is rendered as markdown
+
+2. **Input Validation**
+   - Use schema validation to enforce constraints
+   - Invalid input results in `GitHubValidationError`
+
+### Security Logging
+
+Important events to log:
+- Authentication failures
+- Permission denied errors
+- Rate limit hits
+- Invalid access attempts
+- Content validation failures
+
+Example logging:
+```python
+# Authentication failure
+logger.error("Authentication failed", extra={
+    "token_prefix": token[:4] if token else None,
+    "error": str(e)
+})
+
+# Permission denied
+logger.warning("Permission denied", extra={
+    "operation": operation_name,
+    "resource": resource_id
+})
+
+# Rate limit
+logger.debug("Rate limit hit", extra={
+    "reset_at": e.reset_at,
+    "operation": operation_name
+})
 ```
 
 ## System Flow
@@ -897,7 +1060,31 @@ def test_environment():
     # across multiple test runs
 ```
 
-### 11. API Response Time Testing
+### 11. Testing with Large Repositories
+
+When testing operations on repositories with many issues, it's important to use pagination to avoid performance problems:
+
+```python
+# Before (problematic with large repos):
+issues = list_issues(ListIssuesParams(
+    owner=owner,
+    repo=repo,
+    state="closed"
+))
+
+# After (works efficiently with large repos):
+issues = list_issues(ListIssuesParams(
+    owner=owner,
+    repo=repo,
+    state="closed",
+    per_page=20,    # Limit results to avoid hanging
+    page=1          # Only get first page
+))
+```
+
+This change ensures tests run efficiently even in repositories with hundreds or thousands of issues.
+
+### 12. API Response Time Testing
 
 Test API response times to ensure proper handling:
 
@@ -909,7 +1096,9 @@ def test_list_issues_performance(test_owner, test_repo):
     params = ListIssuesParams(
         owner=test_owner,
         repo=test_repo,
-        state="all"  # Fetch all issues to test performance with larger data set
+        state="all",  # Fetch all issues to test performance with larger data set
+        per_page=20,  # Limit results to avoid hanging with large repos
+        page=1        # Only get first page
     )
     
     start_time = time.time()
@@ -921,6 +1110,10 @@ def test_list_issues_performance(test_owner, test_repo):
     
     # Results should be a list
     assert isinstance(results, list)
+    
+    # Note: Always include pagination parameters when testing with repositories that may
+    # have a large number of issues (e.g., 400+). Without pagination, the code may
+    # attempt to retrieve all matching issues at once, causing tests to hang or timeout.
 ```
 
 ### 12. CI/CD Test Configuration
@@ -1030,6 +1223,77 @@ def test_issue_lifecycle(test_owner, test_repo, test_cleanup):
     reopened = issues.update_issue(reopen_params)
     assert reopened["state"] == "open"
 ```
+## Tool Reference
+
+The system provides a set of tools for interacting with GitHub's API. All tools follow consistent patterns for parameters and returns.
+
+### Issue Management Tools
+
+1. **create_issue**
+   - Creates a new issue in a repository
+   - Required parameters: `owner`, `repo`, `title`
+   - Optional parameters: `body`, `assignees`, `labels`, `milestone`
+   - Notes: 
+     - Non-existent labels will be created automatically
+     - HTML content in body will be sanitized and rendered as markdown
+
+2. **get_issue**
+   - Retrieves details about a specific issue
+   - Required parameters: `owner`, `repo`, `issue_number`
+   - Returns 404 if issue doesn't exist or for private repositories without access
+
+3. **update_issue**
+   - Updates an existing issue
+   - Required parameters: `owner`, `repo`, `issue_number`
+   - Optional parameters: `title`, `body`, `state`, `labels`, `assignees`, `milestone`
+   - Notes: Only provided fields will be updated
+
+4. **list_issues**
+   - Lists issues in a repository
+   - Required parameters: `owner`, `repo`
+   - Optional parameters: `state`, `labels`, `sort`, `direction`, `since`, `page`, `per_page`
+   - Defaults to open issues if state not provided
+
+### Comment Management Tools
+
+1. **add_issue_comment**
+   - Adds a comment to an issue
+   - Required parameters: `owner`, `repo`, `issue_number`, `body`
+
+2. **list_issue_comments**
+   - Lists comments on an issue
+   - Required parameters: `owner`, `repo`, `issue_number`
+   - Optional parameters: `since`, `page`, `per_page`
+
+3. **update_issue_comment**
+   - Updates an existing comment
+   - Required parameters: `owner`, `repo`, `issue_number`, `comment_id`, `body`
+
+4. **delete_issue_comment**
+   - Deletes a comment from an issue
+   - Required parameters: `owner`, `repo`, `issue_number`, `comment_id`
+
+### Label Management Tools
+
+1. **add_issue_labels**
+   - Adds labels to an issue
+   - Required parameters: `owner`, `repo`, `issue_number`, `labels`
+   - Notes: Non-existent labels are created automatically with default color
+
+2. **remove_issue_label**
+   - Removes a label from an issue
+   - Required parameters: `owner`, `repo`, `issue_number`, `label`
+   - Notes: Label name is case-sensitive
+
+### Content Handling
+
+All text content (issue body, comments) supports GitHub Flavored Markdown with features like:
+- Headers, lists, code blocks, tables
+- Task lists, mentions, references
+- Emoji shortcodes
+
+GitHub automatically processes HTML content, with most HTML tags removed for security.
+
 ## Documentation Patterns
 
 ### 1. Function Documentation

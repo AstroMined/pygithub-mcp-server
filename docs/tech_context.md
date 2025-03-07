@@ -198,6 +198,18 @@ mypy src
 - Consistent version handling
 - Automatic header management
 
+4. Error Handling
+- Specific error types for different HTTP status codes
+- Consistent error handling and formatting
+- Informative error messages with context
+- Special handling for rate limits, authentication, and permissions
+
+5. Security Considerations
+- Token-based authentication with environment variables
+- Permission-based access control
+- Content sanitization via GitHub
+- Rate limiting and abuse prevention
+
 ## Testing Strategy
 
 The project follows a comprehensive testing strategy detailed in ADR-002:
