@@ -75,6 +75,9 @@
   - Added support for running both unit and integration tests in coverage analysis
   - Added test templates that follow ADR-002 principles with dataclasses instead of mocks
   - Created interactive HTML and JSON coverage reports with module prioritization
+  - Removed redundant HTML coverage reporting from pytest-cov
+  - Documented clear workflow for viewing and using coverage reports
+  - Added comprehensive coverage analysis guide to test_improvement_plan.md
 
 - Testing infrastructure following ADR-002:
   - Integration test directory structure with application-layer organization
@@ -103,6 +106,8 @@
   - security.md: Authentication and content security
   - tool-reference.md: Detailed tool documentation
   - testing_strategy.md: Testing patterns and best practices
+  - Updated scripts/README.md with clear guidance on viewing reports
+  - Enhanced test_improvement_plan.md with coverage analysis workflow
 
 ## What's Left to Build
 
@@ -195,6 +200,7 @@ All unit and integration tests now pass with no warnings. The TestGitHubClient w
    - ✅ Fixed TestGitHubClient warning in unit tests
    - ✅ Improved coverage for converters/common/datetime.py (from 54% to 95%+)
    - ✅ Created test infrastructure for systematic coverage improvements
+   - ✅ Enhanced test coverage workflow with clear documentation
    - Improve coverage for tools/repositories/tools.py (currently 63%)
    - Enhance repositories.py coverage (currently 77%)
 2. Use coverage analyzer to prioritize test development

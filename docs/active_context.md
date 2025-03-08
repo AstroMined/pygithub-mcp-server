@@ -14,6 +14,13 @@ Key areas of current work:
 
 ## Recent Changes
 
+### Testing Infrastructure Improvements
+- Updated coverage reporting workflow with clear documentation
+- Removed redundant HTML coverage reporting from pytest-cov in pyproject.toml
+- Enhanced scripts/README.md with explicit guidance on viewing reports
+- Added comprehensive coverage analysis workflow to test_improvement_plan.md
+- Provided clear usage examples for analyze_coverage.py tool
+
 ### Test Suite Enhancements
 - Fixed TestGitHubClient warning by using underscore-prefixed class and proper fixture pattern
 - Enhanced datetime testing for all edge cases in converters/common/datetime.py

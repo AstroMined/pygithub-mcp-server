@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.20] - 2025-03-08
+
+### Changed
+- Improved coverage reporting workflow:
+  - Removed redundant HTML coverage reporting from pytest-cov configuration
+  - Consolidated all coverage reporting through the analyze_coverage.py script
+  - Eliminated duplication between pytest-cov HTML reports and analyzer reports
+  - Enhanced documentation for viewing and using coverage reports
+- Documentation improvements:
+  - Added "Viewing Generated Reports" section to scripts/README.md with clear instructions 
+  - Enhanced test_improvement_plan.md with comprehensive coverage analysis workflow
+  - Added step-by-step guidance for using reports to improve coverage
+  - Provided examples of coverage report usage patterns
+  - Documented browser-based report viewing without web server requirements
+
 ## [0.5.19] - 2025-03-08
 
 ### Added

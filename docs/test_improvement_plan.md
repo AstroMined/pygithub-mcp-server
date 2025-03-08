@@ -923,6 +923,66 @@ jobs:
         fail_ci_if_error: false
 ```
 
+## Coverage Analysis Workflow
+
+The project uses a two-part approach for managing and improving test coverage:
+
+### 1. Coverage Data Collection
+
+Coverage data is collected using pytest-cov when running tests:
+
+```bash
+# Run unit tests with coverage
+pytest
+
+# Include integration tests for more comprehensive coverage
+pytest --run-integration
+```
+
+This generates a `.coverage` file at the project root containing raw coverage data.
+
+### 2. Coverage Analysis and Reporting
+
+For analyzing coverage data, we use our custom analyzer script:
+
+```bash
+# Analyze existing coverage data and generate HTML report
+python scripts/analyze_coverage.py --html
+
+# Run tests and analyze in a single step
+python scripts/analyze_coverage.py --run-tests --html
+
+# Include integration tests in analysis
+python scripts/analyze_coverage.py --run-tests --include-integration --html
+```
+
+### Viewing Coverage Reports
+
+The analyzer generates two files:
+- `coverage_report.json` - Machine-readable JSON data
+- `coverage_report.html` - Interactive HTML report (when using --html flag)
+
+To view the HTML report, open `coverage_report.html` in any web browser:
+```bash
+# On Linux
+xdg-open coverage_report.html
+
+# On macOS
+open coverage_report.html
+
+# Or simply double-click the file in your file explorer
+```
+
+No web server is required - the HTML file can be viewed directly in a browser.
+
+### Using Coverage Reports Effectively
+
+1. **Identify Priority Areas**: Focus on "High Priority" modules first (coverage below 70%)
+2. **Examine Missing Lines**: Each module shows exactly which lines need test coverage
+3. **Implement Tests Strategically**: Address the most critical missing coverage first
+4. **Track Progress**: Re-run the analyzer after adding tests to verify improvements
+5. **Set Thresholds**: Use the `--threshold` parameter to enforce minimum coverage standards
+
 ## Implementation Timeline
 
 ### Phase 1 (Immediate)
@@ -942,6 +1002,23 @@ jobs:
 - Create coverage analyzer script
 - Implement CI/CD integration
 - Document test patterns and best practices
+
+## Test Coverage Report Example
+
+Below is an example of what the analyzer's output for high-priority modules might look like:
+
+```
+=== High Priority Modules ===
+src/pygithub_mcp_server/tools/repositories/tools.py: 63% coverage
+  Missing lines: 57-58, 111-112, 151-167, 246-262, 297-313, 346-362
+  Priority: Implement tests for repository creation, fork, and search functionality
+
+src/pygithub_mcp_server/tools/issues/tools.py: 79% coverage
+  Missing lines: 75-79, 112-113, 152-156, 193-197, 229-233
+  Priority: Focus on error handling tests for issue operations
+```
+
+This format makes it clear which specific code sections need testing attention.
 
 ## Completion Criteria
 

@@ -30,6 +30,39 @@ python scripts/analyze_coverage.py --run-tests --threshold 85
 - Can run tests or use existing .coverage file
 - HTML report with interactive details for each module
 
+#### Viewing Generated Reports:
+
+The `analyze_coverage.py` script generates two types of reports:
+
+1. **JSON Report** (default: `coverage_report.json`):
+   - Contains structured data about coverage metrics
+   - Useful for programmatic analysis or CI/CD pipelines
+
+2. **HTML Report** (when using `--html` flag):
+   - Interactive web-based report that can be opened in any browser
+   - No web server required - simply open the HTML file directly:
+     ```bash
+     # On Linux
+     xdg-open coverage_report.html
+     
+     # On macOS
+     open coverage_report.html
+     
+     # Or double-click the file in your file explorer
+     ```
+   - Features collapsible sections showing exact lines needing tests
+   - Color-coded priorities to focus testing efforts
+   - Progress bars showing coverage percentages
+
+#### Using Reports Effectively:
+
+The coverage analysis report is designed to help you focus your testing efforts:
+
+1. **Prioritized Modules**: Focus first on "High Priority" modules (under 70% coverage)
+2. **Missing Lines**: Each module shows exactly which lines need test coverage
+3. **Strategic Improvement**: Implement tests for the highest-priority modules first
+4. **Tracking Progress**: Re-run the analyzer to see your coverage improvements
+
 ### Test Generator
 
 The `generate_tool_tests.py` script creates standardized test files for new PyGithub MCP Server tools:
