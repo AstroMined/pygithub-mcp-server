@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.17] - 2025-03-07
+
+### Added
+- Created comprehensive test improvement plan in `docs/test_improvement_plan.md`
+- Developed detailed guidelines for integration tests in `tests/integration/README.md`
+- Implemented robust `test_cleanup` fixture with proper resource tracking
+- Added standardized `with_retry` mechanism for all GitHub API calls
+
+### Changed
+- Standardized integration test fixtures (test_owner, test_repo_name, unique_id)
+- Updated environment variable handling in tests to use early loading approach
+- Improved error handling in tests to use string matching instead of status code
+- Fixed TestGitHubClient warning by replacing dataclass with regular class
+
+### Fixed
+- Resolved skipped repository integration tests by standardizing environment variable handling
+- Fixed inconsistent fixture usage across integration tests
+- Improved test retry logic for rate limit handling
+- Enhanced error message checking in tests for better reliability
+
 ## [0.5.16] - 2025-03-07
 
 ### Changed

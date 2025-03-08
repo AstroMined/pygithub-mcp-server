@@ -76,6 +76,13 @@
   - Environment configuration for real API testing
   - Test documentation with patterns and best practices
 
+- Standardized integration test infrastructure:
+  - Created robust test_cleanup fixture for resource tracking
+  - Implemented standardized with_retry mechanism for API rate limits
+  - Established consistent fixture naming (test_owner, test_repo_name)
+  - Fixed skipped repository tests by standardizing environment handling
+  - Created comprehensive README.md for integration tests
+
 - Test coverage enhancements:
   - Improved converter tests using realistic data structures
   - Added integration tests for client module and error handlers
@@ -172,9 +179,13 @@ All integration test failures have been resolved with fixes for parameter valida
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Improve coverage for client/client.py (currently 34%)
-2. Improve coverage for operations/issues.py (currently 74%)
-3. Expand schema validation to all models
+1. Implement test improvement plan (see docs/test_improvement_plan.md):
+   - Fix TestGitHubClient warning in unit tests
+   - Improve coverage for converters/common/datetime.py (currently 54%)
+   - Improve coverage for tools/repositories/tools.py (currently 55%)
+   - Enhance repositories.py coverage (currently 77%)
+2. Standardize remaining integration tests to use common fixtures
+3. Create test helpers for common operations
 4. Implement more integration tests with real API testing
 5. Add performance optimizations
 6. Enhance documentation

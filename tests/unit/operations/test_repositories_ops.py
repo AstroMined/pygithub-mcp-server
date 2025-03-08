@@ -311,11 +311,12 @@ class GitHub:
         ]
 
 
-@dataclass
 class TestGitHubClient:
     """Test class for GitHub client."""
     
-    github: GitHub = field(default_factory=GitHub)
+    def __init__(self, github=None):
+        """Initialize the test GitHub client."""
+        self.github = github or GitHub()
     
     def get_repo(self, full_name: str):
         """Return test Repository object."""
