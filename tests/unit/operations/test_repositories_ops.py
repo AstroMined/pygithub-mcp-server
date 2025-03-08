@@ -311,8 +311,13 @@ class GitHub:
         ]
 
 
-class TestGitHubClient:
-    """Test class for GitHub client."""
+# Define the TestGitHubClient class properly to maintain compatibility
+class _TestGitHubClient:
+    """Test class for GitHub client.
+    
+    This is prefixed with _ to avoid pytest collection warnings.
+    Use the test_github_client fixture to get an instance.
+    """
     
     def __init__(self, github=None):
         """Initialize the test GitHub client."""
@@ -329,17 +334,24 @@ class TestGitHubClient:
             html_url=f"https://github.com/{full_name}"
         )
 
+@pytest.fixture
+def test_github_client():
+    """Test GitHub client fixture.
+    
+    Returns a properly initialized TestGitHubClient instance while
+    avoiding the pytest collection warning.
+    """
+    # Return an instance of the renamed class
+    return _TestGitHubClient(GitHub())
+
 
 # Tests using dataclasses instead of mocks
-def test_get_repository(monkeypatch):
+def test_get_repository(monkeypatch, test_github_client):
     """Test get_repository operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Call the operation
@@ -354,15 +366,12 @@ def test_get_repository(monkeypatch):
     assert result["html_url"] == "https://github.com/test-owner/test-repo"
 
 
-def test_create_repository(monkeypatch):
+def test_create_repository(monkeypatch, test_github_client):
     """Test create_repository operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -385,15 +394,12 @@ def test_create_repository(monkeypatch):
     assert result["html_url"] == "https://github.com/test-user/new-repo"
 
 
-def test_fork_repository(monkeypatch):
+def test_fork_repository(monkeypatch, test_github_client):
     """Test fork_repository operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -414,15 +420,12 @@ def test_fork_repository(monkeypatch):
     assert result["html_url"] == "https://github.com/test-org/test-repo"
 
 
-def test_search_repositories(monkeypatch):
+def test_search_repositories(monkeypatch, test_github_client):
     """Test search_repositories operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -443,15 +446,12 @@ def test_search_repositories(monkeypatch):
     assert result[1]["name"] == "repo2"
 
 
-def test_get_file_contents_file(monkeypatch):
+def test_get_file_contents_file(monkeypatch, test_github_client):
     """Test get_file_contents operation for a file."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -492,15 +492,12 @@ def test_get_file_contents_file(monkeypatch):
     assert result["content"] == "SGVsbG8gV29ybGQh"
 
 
-def test_get_file_contents_directory(monkeypatch):
+def test_get_file_contents_directory(monkeypatch, test_github_client):
     """Test get_file_contents operation for a directory."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -537,15 +534,12 @@ def test_get_file_contents_directory(monkeypatch):
     assert result["contents"][1]["name"] == "file2.py"
 
 
-def test_create_or_update_file(monkeypatch):
+def test_create_or_update_file(monkeypatch, test_github_client):
     """Test create_or_update_file operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -570,15 +564,12 @@ def test_create_or_update_file(monkeypatch):
     assert "html_url" in result["content"]
 
 
-def test_push_files(monkeypatch):
+def test_push_files(monkeypatch, test_github_client):
     """Test push_files operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -605,15 +596,12 @@ def test_push_files(monkeypatch):
     assert result["files"][1]["path"] == "src/main.py"
 
 
-def test_create_branch(monkeypatch):
+def test_create_branch(monkeypatch, test_github_client):
     """Test create_branch operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters
@@ -633,15 +621,12 @@ def test_create_branch(monkeypatch):
     assert "url" in result
 
 
-def test_list_commits(monkeypatch):
+def test_list_commits(monkeypatch, test_github_client):
     """Test list_commits operation."""
-    # Create test client
-    test_client = TestGitHubClient()
-    
-    # Monkey patch the get_instance method
+    # Monkey patch the get_instance method to return our fixture dictionary
     monkeypatch.setattr(
         "pygithub_mcp_server.client.client.GitHubClient.get_instance",
-        lambda: test_client
+        lambda: test_github_client
     )
     
     # Create parameters

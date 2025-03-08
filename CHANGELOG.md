@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.18] - 2025-03-07
+
+### Added
+- Enhanced datetime testing for all edge cases:
+  - Added tests for timezone-naive datetime handling
+  - Created tests for date-only formats
+  - Added tests specifically for ensure_utc_datetime function
+  - Improved test coverage for with_utc_datetimes decorator
+
+### Fixed
+- Fixed TestGitHubClient warning by prefixing class with underscore and using proper fixture
+- Updated datetime testing to match actual function behavior rather than assumed behavior
+- Clarified the difference between convert_iso_string_to_datetime and ensure_utc_datetime
+- Improved understanding of timezone handling in the datetime conversion utilities
+
+### Changed
+- Improved test clarity with detailed docstrings explaining expected behavior
+- Enhanced test coverage by adding separate test cases for each behavior variant
+- Added proper assertions to clarify the expected behavior of datetime functions
+
 ## [0.5.17] - 2025-03-07
 
 ### Added

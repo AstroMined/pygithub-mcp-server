@@ -100,8 +100,12 @@
 ## What's Left to Build
 
 ### Test Coverage Improvements
+- [x] Fixed TestGitHubClient warning in unit tests by using underscore prefix
+- [x] Improved converters/common/datetime.py from 54% to 95%+ coverage
 - [ ] Continue improving coverage for remaining modules:
   - [ ] client/client.py (currently 34%)
+  - [ ] tools/repositories/tools.py (currently 55%)
+  - [ ] operations/repositories.py (currently 77%)
   - [ ] operations/issues.py (currently 74%)
   - [ ] base.py (currently 73%)
   - [ ] responses.py (currently 78%)
@@ -161,7 +165,7 @@ We've successfully implemented:
 - ADR-006: Modular Tool Architecture
 - ADR-007: Pydantic-First Architecture
 
-All integration test failures have been resolved with fixes for parameter validation, empty string handling, pagination issues, and error formatting.
+All unit and integration tests now pass with no warnings. The TestGitHubClient warning has been resolved and test coverage for the datetime conversion module has been significantly improved. We've gained a better understanding of the separation between parsing (convert_iso_string_to_datetime) and normalization (ensure_utc_datetime) functions.
 
 ### Priorities
 1. Implement additional tool groups (repositories, pull_requests, etc.)
@@ -179,9 +183,9 @@ All integration test failures have been resolved with fixes for parameter valida
 5. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Implement test improvement plan (see docs/test_improvement_plan.md):
-   - Fix TestGitHubClient warning in unit tests
-   - Improve coverage for converters/common/datetime.py (currently 54%)
+1. Continue implementing test improvement plan (see docs/test_improvement_plan.md):
+   - ✅ Fixed TestGitHubClient warning in unit tests
+   - ✅ Improved coverage for converters/common/datetime.py (from 54% to 95%+)
    - Improve coverage for tools/repositories/tools.py (currently 55%)
    - Enhance repositories.py coverage (currently 77%)
 2. Standardize remaining integration tests to use common fixtures

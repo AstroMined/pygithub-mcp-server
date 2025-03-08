@@ -14,20 +14,29 @@ Key areas of current work:
 
 ## Recent Changes
 
+### Test Suite Enhancements
+- Fixed TestGitHubClient warning by using underscore-prefixed class and proper fixture pattern
+- Enhanced datetime testing for all edge cases in converters/common/datetime.py
+- Improved test coverage from 54% to 95%+ in converters/common/datetime.py
+- Added specific tests for all datetime conversion functions:
+  - convert_datetime: Simple ISO string conversion
+  - convert_iso_string_to_datetime: Flexible ISO parsing
+  - ensure_utc_datetime: Timezone normalization
+  - with_utc_datetimes: Parameter decoration
+
+### Test Improvement Implementation
+- Implemented Phase 1 of test improvement plan:
+  - Fixed TestGitHubClient warning by refactoring the class and fixture approach
+  - Improved datetime.py coverage with comprehensive test cases
+  - Added tests for each function's specific behavior
+  - Created clear separation between parsing (convert_iso_string_to_datetime) and normalization (ensure_utc_datetime) tests
+
 ### Integration Test Standardization
 - Fixed skipped repository integration tests by standardizing environment variable handling
 - Created robust `test_cleanup` fixture with proper resource tracking and cleanup
 - Added standardized `with_retry` mechanism for all GitHub API calls to handle rate limits
 - Developed consistent pattern for test fixtures (test_owner, test_repo_name, unique_id)
 - Created comprehensive documentation in `tests/integration/README.md` with best practices and examples
-- Fixed TestGitHubClient warning in unit tests by replacing dataclass with regular class
-
-### Test Improvement Planning
-- Analyzed test coverage gaps and prioritized improvement areas
-- Created detailed `docs/test_improvement_plan.md` with phased approach
-- Identified critical low-coverage modules: datetime.py (54%), tools/repositories/tools.py (55%)
-- Developed specific test examples and strategies for each improvement area
-- Established coverage targets and timeline for implementation
 
 ### Test Maintenance & Error Handling Improvements
 - Fixed repository tests to match operation function signatures
@@ -90,17 +99,17 @@ Key areas of current work:
 
 ## Next Steps
 
-1. Expand Modular Architecture:
-   - Implement additional tool groups (repositories, pull_requests, etc.)
+1. Continue Test Improvement Plan:
+   - Phase 2: Improve tools/repositories/tools.py coverage (55% → 80%+)
+   - Phase 2: Enhance repositories.py operations coverage (77% → 90%+)
+   - Phase 3: Standardize remaining integration tests with fixtures
+   - Phase 3: Create reusable test helpers for common operations
+
+2. Expand Modular Architecture:
+   - Implement additional tool groups (pull_requests, users, etc.)
    - Create consistent patterns for new tool groups
    - Develop configuration templates for different scenarios
    - Enhance modularity with pluggable architecture
-
-2. Testing Strategy Enhancement:
-   - Expand test coverage for configuration system
-   - Add real API tests for all tool modules
-   - Develop efficient testing patterns for tool groups
-   - Implement automated config validation tests
 
 3. Performance Optimization:
    - Optimize tool loading based on configuration
@@ -142,12 +151,22 @@ Key areas of current work:
 
 ## Implementation Lessons
 
+### Datetime Handling and Testing Lessons
+- Function roles should be clearly differentiated and documented:
+  - convert_iso_string_to_datetime: Parses ISO strings but doesn't enforce timezone awareness
+  - ensure_utc_datetime: Handles timezone normalization and adding UTC timezone to naive datetimes
+- Tests should match actual function behavior rather than assumed behavior
+- Pydantic schema validation is the proper layer for enforcing data requirements (not utility functions)
+- Utility functions should be flexible to support various internal use cases
+- Test failures often indicate misunderstood function behavior rather than bugs
+
 ### Real API Testing (ADR-002)
 - Real API testing provides higher confidence than mocked tests
 - Test fixtures with proper cleanup prevent test pollution
 - Tests should focus on behaviors rather than implementation details
 - Dataclasses can replace mock objects for cleaner, type-safe tests
 - Context managers simplify test environment setup and teardown
+- Tests should respect class hierarchies and implementation details
 
 ### Modular Tool Architecture (ADR-006)
 - Decorator-based registration simplifies tool management

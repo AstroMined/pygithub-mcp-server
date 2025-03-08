@@ -6,8 +6,10 @@ following the real API testing strategy from ADR-002.
 
 import pytest
 import json
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
+
 
 from pygithub_mcp_server.tools.repositories.tools import (
     get_repository,
@@ -722,6 +724,23 @@ def test_create_branch_tool_unexpected_error(setup_tests):
     assert result["is_error"] is True
 
 
+# Custom Validation Error class that mimics Pydantic's ValidationError should be defined before use
+@dataclass
+class ValidationErrorDetail:
+    """Test class for validation error detail."""
+    loc: List[str]
+    msg: str
+    type: str
+
+@dataclass
+class CustomValidationError(Exception):
+    """Test class for Pydantic validation errors."""
+    errors: List[ValidationErrorDetail]
+    
+    def __str__(self):
+        """Return string representation."""
+        return f"Validation error: {'; '.join(e.msg for e in self.errors)}"
+
 def test_list_commits_tool(setup_tests):
     """Test list_commits tool."""
     # Call the tool
@@ -745,3 +764,150 @@ def test_list_commits_tool(setup_tests):
     assert "author" in content[0]
     assert content[1]["sha"] == "def456"
     assert content[1]["message"] == "Second commit"
+
+
+def test_validation_error_handling(setup_tests):
+    """Test handling of validation errors."""
+    # Register validation error with our custom class
+    validation_error = CustomValidationError([
+        ValidationErrorDetail(
+            loc=["name"],
+            msg="field required",
+            type="value_error.missing"
+        )
+    ])
+    
+    register_create_repository(
+        {"name": "invalid-repo"},
+        validation_error=validation_error
+    )
+    
+    # Call the tool
+    result = create_repository({"name": "invalid-repo"})
+    
+    # Assert expected behavior
+    assert "content" in result
+    assert len(result["content"]) == 1
+    assert result["content"][0]["type"] == "error"
+    assert "validation error" in result["content"][0]["text"].lower()
+    assert "is_error" in result
+    assert result["is_error"] is True
+
+
+def test_get_repository_traceback_logging(setup_tests, caplog):
+    """Test traceback logging for unexpected errors."""
+    caplog.set_level(logging.ERROR)
+    
+    # Register unexpected error
+    unexpected_error = Exception("Unexpected server error")
+    register_get_repository(
+        {"owner": "error-traceback", "repo": "test-repo"}, 
+        other_error=unexpected_error
+    )
+    
+    # Call the tool
+    result = get_repository({"owner": "error-traceback", "repo": "test-repo"})
+    
+    # Assert expected behavior
+    assert "content" in result
+    assert len(result["content"]) == 1
+    assert result["content"][0]["type"] == "error"
+    assert "internal server error" in result["content"][0]["text"].lower()
+    assert "unexpected server error" in result["content"][0]["text"].lower()
+    assert "is_error" in result
+    assert result["is_error"] is True
+    
+    # Check logging
+    assert "Unexpected error" in caplog.text
+
+
+def test_different_github_error_types(setup_tests):
+    """Test handling of different GitHub error types."""
+    # Register different error types
+    not_authorized_error = GitHubError("Unauthorized", response={"status": 401})
+    register_get_repository(
+        {"owner": "unauthorized", "repo": "test-repo"},
+        github_error=not_authorized_error
+    )
+    
+    forbidden_error = GitHubError("Forbidden", response={"status": 403})
+    register_get_repository(
+        {"owner": "forbidden", "repo": "test-repo"},
+        github_error=forbidden_error
+    )
+    
+    validation_failed_error = GitHubError("Validation Failed", response={"status": 422})
+    register_get_repository(
+        {"owner": "validation-failed", "repo": "test-repo"},
+        github_error=validation_failed_error
+    )
+    
+    # Test unauthorized error
+    result = get_repository({"owner": "unauthorized", "repo": "test-repo"})
+    assert result["is_error"] is True
+    assert "unauthorized" in result["content"][0]["text"].lower()
+    
+    # Test forbidden error
+    result = get_repository({"owner": "forbidden", "repo": "test-repo"})
+    assert result["is_error"] is True
+    assert "forbidden" in result["content"][0]["text"].lower()
+    
+    # Test validation failed error
+    result = get_repository({"owner": "validation-failed", "repo": "test-repo"})
+    assert result["is_error"] is True
+    assert "validation failed" in result["content"][0]["text"].lower()
+
+
+def test_github_error_without_response(setup_tests):
+    """Test handling of GitHub error without response property."""
+    # Register error without response property
+    no_response_error = GitHubError("Generic GitHub error")  # No response property
+    register_get_repository(
+        {"owner": "no-response", "repo": "test-repo"},
+        github_error=no_response_error
+    )
+    
+    # Test error without response
+    result = get_repository({"owner": "no-response", "repo": "test-repo"})
+    assert result["is_error"] is True
+    assert "github error" in result["content"][0]["text"].lower()
+
+
+def test_empty_error_message(setup_tests):
+    """Test handling of error with empty message."""
+    # Register error with empty message
+    empty_message_error = Exception("")  # Empty error message
+    register_get_repository(
+        {"owner": "empty-message", "repo": "test-repo"},
+        other_error=empty_message_error
+    )
+    
+    # Test error with empty message
+    result = get_repository({"owner": "empty-message", "repo": "test-repo"})
+    assert result["is_error"] is True
+    assert "unexpected error occurred" in result["content"][0]["text"].lower()
+
+
+def test_search_repositories_missing_query(setup_tests):
+    """Test search_repositories tool with missing query parameter."""
+    # Register a validation error for missing query
+    validation_error = CustomValidationError([
+        ValidationErrorDetail(
+            loc=["query"],
+            msg="field required",
+            type="value_error.missing"
+        )
+    ])
+    
+    register_search_repositories({}, validation_error=validation_error)
+    
+    # Call the tool with empty params
+    result = search_repositories({})  # Missing required query parameter
+    
+    # Assert expected behavior
+    assert "content" in result
+    assert len(result["content"]) == 1
+    assert result["content"][0]["type"] == "error"
+    assert "validation error" in result["content"][0]["text"].lower()
+    assert "is_error" in result
+    assert result["is_error"] is True
