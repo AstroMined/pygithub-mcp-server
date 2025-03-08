@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.16] - 2025-03-07
+
+### Changed
+- Enhanced repository schema validation with strict mode and field validators
+- Added schema validators for path, branch, and other critical string fields
+- Updated system_patterns.md to include maintainable test strategies section
+- Improved documentation on matching mock function signatures to real implementations
+
+### Fixed
+- Fixed DEFAULT_CONFIG usage in configuration tests
+- Made tests more maintainable by using dynamic config validation instead of hardcoded values
+- Updated GitHubError constructor pattern in .clinerules documentation
+- Fixed repository tools tests to match operation function signatures
+- Eliminated all test failures with clean test suite
+
 ## [0.5.15] - 2025-03-07
 
 ### Added

@@ -53,6 +53,20 @@ This file contains project-specific preferences, troubleshooting tips, and pract
 - To increase verbosity for debugging, change both logger.setLevel() and logging.basicConfig() to DEBUG
 - To decrease logging during tests beyond what --log-level=INFO can do, ensure the server.py log level is appropriately set
 
+## Testing Guidelines and Patterns
+
+### Error Object Creation
+- Always use the correct GitHubError constructor pattern:
+  ```python
+  # CORRECT - status should be part of the response dict
+  error = GitHubError("Not found", response={"status": 404})
+  
+  # INCORRECT - status is not a parameter of GitHubError
+  error = GitHubError("Not found", status=404)  # This will fail!
+  ```
+- When creating error objects in tests, follow the same patterns used in production code
+- Check the appropriate constructor signatures in the exceptions module
+
 ## Common Troubleshooting
 
 ### MCP Server Issues

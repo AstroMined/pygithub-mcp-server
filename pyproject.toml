@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pygithub-mcp-server"
 # IMPORTANT: Keep version in sync with src/pygithub_mcp_server/version.py
 # TODO: Once project stabilizes, we'll use importlib.metadata to read version from here
-version = "0.5.15"
+version = "0.5.16"
 description = "GitHub MCP Server using PyGithub"
 requires-python = ">=3.10"
 dependencies = [

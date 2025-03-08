@@ -969,7 +969,33 @@ def test_rate_limited_operation(test_owner, test_repo):
     assert isinstance(result, list)
 ```
 
-### 7. Testing Error Conditions
+### 7. Maintainable Test Strategies
+
+Write tests that remain valid even as the codebase evolves:
+
+```python
+# BAD - Hardcoded expectations that break when defaults change
+assert config["tool_groups"]["repositories"]["enabled"] is False
+
+# GOOD - Dynamic checks that adapt to changes in defaults
+for group, settings in DEFAULT_CONFIG["tool_groups"].items():
+    assert config["tool_groups"][group]["enabled"] == settings["enabled"]
+```
+
+Always ensure mock functions match the actual function signatures:
+
+```python
+# BAD - Outdated mock that doesn't match the real method signature
+def get_repository_mock(params):  # Expecting a Pydantic model
+    # But the real function expects: get_repository(owner, repo)
+    # This will fail with: TypeError: ... takes 1 positional argument but 2 were given
+
+# GOOD - Correctly matching the function signature
+def get_repository_mock(owner, repo):  # Matches real signature
+    # Will work correctly with the actual implementation
+```
+
+### 8. Testing Error Conditions
 
 Test both success and error paths:
 

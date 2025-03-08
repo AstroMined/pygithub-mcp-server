@@ -85,9 +85,9 @@ class TestConfigSettings:
         # Verify default configuration is returned
         assert config is not None
         assert "tool_groups" in config
-        assert config["tool_groups"]["issues"]["enabled"] is True
-        assert config["tool_groups"]["repositories"]["enabled"] is False
-        assert config["tool_groups"]["pull_requests"]["enabled"] is False
+        # Check that values match DEFAULT_CONFIG (instead of hardcoded expectations)
+        for group, settings in DEFAULT_CONFIG["tool_groups"].items():
+            assert config["tool_groups"][group]["enabled"] == settings["enabled"]
     
     def test_environment_variable_override(self, clean_config_env):
         """Test environment variables override default configuration."""
@@ -172,8 +172,8 @@ class TestConfigSettings:
         config = load_config()
         
         # Verify defaults are used
-        assert config["tool_groups"]["issues"]["enabled"] is True
-        assert config["tool_groups"]["repositories"]["enabled"] is False
+        for group, settings in DEFAULT_CONFIG["tool_groups"].items():
+            assert config["tool_groups"][group]["enabled"] == settings["enabled"]
     
     def test_nonexistent_config_file(self, clean_config_env):
         """Test handling of nonexistent configuration file."""
@@ -184,5 +184,5 @@ class TestConfigSettings:
         config = load_config()
         
         # Verify defaults are used
-        assert config["tool_groups"]["issues"]["enabled"] is True
-        assert config["tool_groups"]["repositories"]["enabled"] is False
+        for group, settings in DEFAULT_CONFIG["tool_groups"].items():
+            assert config["tool_groups"][group]["enabled"] == settings["enabled"]

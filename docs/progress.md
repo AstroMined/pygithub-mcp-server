@@ -166,11 +166,10 @@ All integration test failures have been resolved with fixes for parameter valida
 
 ## Known Issues
 1. Some modules still have low test coverage
-2. Tests making assumptions about repository state
-3. Documentation could be more comprehensive
-4. Performance could be optimized
-5. Need to document synchronous operation benefits
-6. Need to update API examples for synchronous usage
+2. Documentation could be more comprehensive
+3. Performance could be optimized
+4. Need to document synchronous operation benefits
+5. Need to update API examples for synchronous usage
 
 ## Next Actions
 1. Improve coverage for client/client.py (currently 34%)

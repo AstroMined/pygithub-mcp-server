@@ -299,21 +299,21 @@ def setup_tests(monkeypatch):
     register_list_commits({"owner": "test-owner", "repo": "test-repo"}, result=commits_data)
     
     # Error case registrations
-    not_found_error = GitHubError("Repository not found", status=404)
+    not_found_error = GitHubError("Repository not found", response={"status": 404})
     register_get_repository({"owner": "not-found", "repo": "test-repo"}, github_error=not_found_error)
     
     validation_error = ValueError("Invalid repository name")
     register_create_repository({"name": ""}, validation_error=validation_error)
     
-    rate_limit_error = GitHubError("API rate limit exceeded", status=403)
+    rate_limit_error = GitHubError("API rate limit exceeded", response={"status": 403})
     register_search_repositories({"query": "rate-limited"}, github_error=rate_limit_error)
     
     unexpected_error = Exception("Unexpected error")
     register_create_branch({"owner": "error", "repo": "test-repo", "branch": "feature"}, other_error=unexpected_error)
     
     # Monkeypatch repository operations functions
-    def get_repository_mock(params):
-        key = f"get_repository:{params.get('owner')}:{params.get('repo')}"
+    def get_repository_mock(owner, repo):
+        key = f"get_repository:{owner}:{repo}"
         op = test_operations.get(key)
         if op is None:
             return None
