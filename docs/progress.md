@@ -69,6 +69,13 @@
   - list_commits: List repository commits
 
 ### Testing Improvements
+- Advanced test infrastructure:
+  - Created `scripts/analyze_coverage.py` to identify high-priority modules for testing
+  - Developed `scripts/generate_tool_tests.py` for generating standardized tests
+  - Added support for running both unit and integration tests in coverage analysis
+  - Added test templates that follow ADR-002 principles with dataclasses instead of mocks
+  - Created interactive HTML and JSON coverage reports with module prioritization
+
 - Testing infrastructure following ADR-002:
   - Integration test directory structure with application-layer organization
   - Tests organized by module layer (operations, tools, etc.)
@@ -102,13 +109,14 @@
 ### Test Coverage Improvements
 - [x] Fixed TestGitHubClient warning in unit tests by using underscore prefix
 - [x] Improved converters/common/datetime.py from 54% to 95%+ coverage
+- [x] Created comprehensive test infrastructure for systematic coverage improvements
 - [ ] Continue improving coverage for remaining modules:
-  - [ ] client/client.py (currently 34%)
-  - [ ] tools/repositories/tools.py (currently 55%)
+  - [ ] client/client.py (currently 87%)
+  - [ ] tools/repositories/tools.py (currently 63%)
   - [ ] operations/repositories.py (currently 77%)
-  - [ ] operations/issues.py (currently 74%)
-  - [ ] base.py (currently 73%)
-  - [ ] responses.py (currently 78%)
+  - [ ] operations/issues.py (currently 91%)
+  - [ ] utils/environment.py (currently 83%)
+  - [ ] tools/__init__.py (currently 80%)
 
 ### Schema Validation Expansion
 - [ ] Review all schema models for validation opportunities
@@ -186,10 +194,11 @@ All unit and integration tests now pass with no warnings. The TestGitHubClient w
 1. Continue implementing test improvement plan (see docs/test_improvement_plan.md):
    - ✅ Fixed TestGitHubClient warning in unit tests
    - ✅ Improved coverage for converters/common/datetime.py (from 54% to 95%+)
-   - Improve coverage for tools/repositories/tools.py (currently 55%)
+   - ✅ Created test infrastructure for systematic coverage improvements
+   - Improve coverage for tools/repositories/tools.py (currently 63%)
    - Enhance repositories.py coverage (currently 77%)
-2. Standardize remaining integration tests to use common fixtures
-3. Create test helpers for common operations
+2. Use coverage analyzer to prioritize test development
+3. Generate tests for highest-priority modules using the test generator
 4. Implement more integration tests with real API testing
 5. Add performance optimizations
 6. Enhance documentation

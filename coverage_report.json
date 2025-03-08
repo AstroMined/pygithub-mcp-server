@@ -1,0 +1,783 @@
+{
+  "timestamp": "2025-03-08 12:07:49",
+  "summary": {
+    "overall_coverage": 88.0,
+    "total_statements": 1826,
+    "total_missing": 215,
+    "modules_count": 44,
+    "high_priority_count": 1,
+    "medium_priority_count": 5,
+    "low_priority_count": 38
+  },
+  "high_priority_modules": [
+    {
+      "name": "src/pygithub_mcp_server/tools/repositories/tools.py",
+      "coverage": 63,
+      "statements": 182,
+      "missing": 68,
+      "missing_lines": "57-58, 111-112, 151-167, 210-214, 246-262, 297-313, 346-362, 395-396, 401-402, 443-459",
+      "parsed_lines": [
+        57,
+        58,
+        111,
+        112,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        210,
+        211,
+        212,
+        213,
+        214,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360,
+        361,
+        362,
+        395,
+        396,
+        401,
+        402,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459
+      ],
+      "missing_ranges": [
+        "57-58",
+        "111-112",
+        "151-167",
+        "210-214",
+        "246-262",
+        "297-313",
+        "346-362",
+        "395-396",
+        "401-402",
+        "443-459"
+      ]
+    }
+  ],
+  "medium_priority_modules": [
+    {
+      "name": "src/pygithub_mcp_server/operations/repositories.py",
+      "coverage": 77,
+      "statements": 150,
+      "missing": 32,
+      "missing_lines": "53-55, 81->83, 83->85, 85->89, 92-94, 116->120, 123-125, 153-155, 193-195, 225, 244-246, 277->271, 279-281, 294->297, 309-311, 337, 352-354, 377, 396-398",
+      "parsed_lines": [
+        396,
+        397,
+        398,
+        277,
+        279,
+        280,
+        153,
+        154,
+        155,
+        281,
+        294,
+        53,
+        54,
+        55,
+        309,
+        310,
+        311,
+        193,
+        194,
+        195,
+        81,
+        337,
+        83,
+        85,
+        92,
+        93,
+        94,
+        352,
+        225,
+        353,
+        354,
+        116,
+        244,
+        245,
+        246,
+        377,
+        123,
+        124,
+        125
+      ],
+      "missing_ranges": [
+        "53-55",
+        "81 (branch)",
+        "83 (branch)",
+        "85 (branch)",
+        "92-94",
+        "116 (branch)",
+        "123-125",
+        "153-155",
+        "193-195",
+        "244-246",
+        "277 (branch)",
+        "279-281",
+        "294 (branch)",
+        "309-311",
+        "352-354",
+        "396-398"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/tools/issues/tools.py",
+      "coverage": 79,
+      "statements": 183,
+      "missing": 39,
+      "missing_lines": "75-79, 112-113, 152-156, 193-197, 229-233, 304-308, 340-344, 376-380, 425-426",
+      "parsed_lines": [
+        152,
+        153,
+        154,
+        155,
+        156,
+        425,
+        426,
+        304,
+        305,
+        306,
+        307,
+        308,
+        193,
+        194,
+        195,
+        196,
+        197,
+        75,
+        76,
+        77,
+        78,
+        79,
+        340,
+        341,
+        342,
+        343,
+        344,
+        229,
+        230,
+        231,
+        232,
+        233,
+        112,
+        113,
+        376,
+        377,
+        378,
+        379,
+        380
+      ],
+      "missing_ranges": [
+        "75-79",
+        "112-113",
+        "152-156",
+        "193-197",
+        "229-233",
+        "304-308",
+        "340-344",
+        "376-380",
+        "425-426"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/tools/__init__.py",
+      "coverage": 80,
+      "statements": 68,
+      "missing": 11,
+      "missing_lines": "57->54, 68-76, 127, 130-131",
+      "parsed_lines": [
+        130,
+        131,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        57,
+        127
+      ],
+      "missing_ranges": [
+        "57 (branch)",
+        "68-76",
+        "130-131"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/version.py",
+      "coverage": 80,
+      "statements": 10,
+      "missing": 2,
+      "missing_lines": "48, 56",
+      "parsed_lines": [
+        48,
+        56
+      ],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/utils/environment.py",
+      "coverage": 83,
+      "statements": 52,
+      "missing": 6,
+      "missing_lines": "29, 34-37, 44->exit, 109, 112, 114->121",
+      "parsed_lines": [
+        34,
+        35,
+        36,
+        37,
+        44,
+        109,
+        112,
+        114,
+        29
+      ],
+      "missing_ranges": [
+        "34-37",
+        "44 (branch)",
+        "114 (branch)"
+      ]
+    }
+  ],
+  "low_priority_modules": [
+    {
+      "name": "src/pygithub_mcp_server/converters/common/pagination.py",
+      "coverage": 85,
+      "statements": 52,
+      "missing": 9,
+      "missing_lines": "41-43, 95-101",
+      "parsed_lines": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        41,
+        42,
+        43,
+        95
+      ],
+      "missing_ranges": [
+        "41-43",
+        "95-101"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/client/client.py",
+      "coverage": 87,
+      "statements": 61,
+      "missing": 6,
+      "missing_lines": "60, 91, 94, 122-124",
+      "parsed_lines": [
+        91,
+        124,
+        122,
+        123,
+        60,
+        94
+      ],
+      "missing_ranges": [
+        "122-124"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/errors/handlers.py",
+      "coverage": 88,
+      "statements": 106,
+      "missing": 13,
+      "missing_lines": "57->64, 61-62, 65->71, 68-70, 95, 97, 99, 118-121, 143-145",
+      "parsed_lines": [
+        65,
+        97,
+        99,
+        68,
+        69,
+        70,
+        121,
+        143,
+        144,
+        145,
+        118,
+        119,
+        120,
+        57,
+        61,
+        62,
+        95
+      ],
+      "missing_ranges": [
+        "57 (branch)",
+        "61-62",
+        "65 (branch)",
+        "68-70",
+        "118-121",
+        "143-145"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/operations/issues.py",
+      "coverage": 91,
+      "statements": 196,
+      "missing": 21,
+      "missing_lines": "77, 214-226, 239-241, 245-246, 402-404",
+      "parsed_lines": [
+        402,
+        403,
+        404,
+        77,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        239,
+        240,
+        241,
+        245,
+        246
+      ],
+      "missing_ranges": [
+        "214-226",
+        "239-241",
+        "245-246",
+        "402-404"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/responses.py",
+      "coverage": 92,
+      "statements": 16,
+      "missing": 1,
+      "missing_lines": "38",
+      "parsed_lines": [
+        38
+      ],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/server.py",
+      "coverage": 93,
+      "statements": 25,
+      "missing": 1,
+      "missing_lines": "20",
+      "parsed_lines": [
+        20
+      ],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/client/rate_limit.py",
+      "coverage": 94,
+      "statements": 53,
+      "missing": 3,
+      "missing_lines": "32-34, 46->49",
+      "parsed_lines": [
+        32,
+        33,
+        34,
+        46
+      ],
+      "missing_ranges": [
+        "32-34",
+        "46 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/config/settings.py",
+      "coverage": 94,
+      "statements": 33,
+      "missing": 1,
+      "missing_lines": "54->62, 59",
+      "parsed_lines": [
+        59,
+        54
+      ],
+      "missing_ranges": [
+        "54 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/common/datetime.py",
+      "coverage": 96,
+      "statements": 49,
+      "missing": 0,
+      "missing_lines": "66->81, 76->81, 130->128",
+      "parsed_lines": [
+        66,
+        76,
+        130
+      ],
+      "missing_ranges": [
+        "66 (branch)",
+        "76 (branch)",
+        "130 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/errors/formatters.py",
+      "coverage": 97,
+      "statements": 22,
+      "missing": 0,
+      "missing_lines": "33->47",
+      "parsed_lines": [
+        33
+      ],
+      "missing_ranges": [
+        "33 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/repositories.py",
+      "coverage": 97,
+      "statements": 138,
+      "missing": 2,
+      "missing_lines": "122->127, 124, 218->223, 220",
+      "parsed_lines": [
+        218,
+        122,
+        220,
+        124
+      ],
+      "missing_ranges": [
+        "122 (branch)",
+        "218 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/issues.py",
+      "coverage": 99,
+      "statements": 176,
+      "missing": 0,
+      "missing_lines": "259->264",
+      "parsed_lines": [
+        259
+      ],
+      "missing_ranges": [
+        "259 (branch)"
+      ]
+    },
+    {
+      "name": "src/pygithub_mcp_server/__init__.py",
+      "coverage": 100,
+      "statements": 4,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/__main__.py",
+      "coverage": 100,
+      "statements": 4,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/client/__init__.py",
+      "coverage": 100,
+      "statements": 3,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/config/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/__init__.py",
+      "coverage": 100,
+      "statements": 9,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/common/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/issues/__init__.py",
+      "coverage": 100,
+      "statements": 3,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/issues/comments.py",
+      "coverage": 100,
+      "statements": 6,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/issues/issues.py",
+      "coverage": 100,
+      "statements": 16,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/parameters.py",
+      "coverage": 100,
+      "statements": 70,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/repositories/__init__.py",
+      "coverage": 100,
+      "statements": 3,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/repositories/contents.py",
+      "coverage": 100,
+      "statements": 4,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/repositories/repositories.py",
+      "coverage": 100,
+      "statements": 4,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/users/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/converters/users/users.py",
+      "coverage": 100,
+      "statements": 6,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/errors/__init__.py",
+      "coverage": 100,
+      "statements": 4,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/errors/exceptions.py",
+      "coverage": 100,
+      "statements": 21,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/operations/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/__init__.py",
+      "coverage": 100,
+      "statements": 8,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/base.py",
+      "coverage": 100,
+      "statements": 27,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/pull_requests.py",
+      "coverage": 100,
+      "statements": 10,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/responses.py",
+      "coverage": 100,
+      "statements": 21,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/schemas/search.py",
+      "coverage": 100,
+      "statements": 14,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/tools/issues/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/tools/repositories/__init__.py",
+      "coverage": 100,
+      "statements": 5,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    },
+    {
+      "name": "src/pygithub_mcp_server/utils/__init__.py",
+      "coverage": 100,
+      "statements": 2,
+      "missing": 0,
+      "missing_lines": "",
+      "parsed_lines": [],
+      "missing_ranges": []
+    }
+  ]
+}
