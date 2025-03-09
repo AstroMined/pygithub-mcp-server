@@ -1,5 +1,7 @@
 # PyGithub MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@AstroMined/pygithub-mcp-server)](https://smithery.ai/server/@AstroMined/pygithub-mcp-server)
+
 A Model Context Protocol server that provides tools for interacting with the GitHub API through PyGithub. This server enables AI assistants to perform GitHub operations like managing issues, repositories, and pull requests.
 
 ## Features
@@ -143,6 +145,16 @@ All operations handle optional parameters intelligently:
 - Handles pagination automatically where applicable
 
 ## Installation
+
+### Installing via Smithery
+
+To install PyGithub MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@AstroMined/pygithub-mcp-server):
+
+```bash
+npx -y @smithery/cli install @AstroMined/pygithub-mcp-server --client claude
+```
+
+### Manual Installation
 
 1. Create and activate a virtual environment:
 ```bash
