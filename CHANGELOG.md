@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.21] - 2025-03-09
+
+### Added
+- Improved analyze_coverage.py script to better support test execution:
+  - Fixed test collection and execution for both unit and integration tests
+  - Simplified test execution by running all tests at once instead of module-by-module
+  - Enhanced debugging output for test execution commands
+  - Added elapsed time reporting for better visibility into test performance
+  - Improved failure parsing and reporting
+  - Enhanced script reliability by removing complex module-level test collection
+
+### Changed
+- Modified test execution approach for improved reliability:
+  - Replaced module-by-module approach with a more reliable full test execution
+  - Added better debug logging for test commands and collection
+  - Enhanced handling of test failures for more detailed reporting
+  - Improved test execution with better parameter handling
+  - Standardized on a simpler and more reliable test execution pattern
+
 ## [0.5.20] - 2025-03-08
 
 ### Changed

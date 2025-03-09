@@ -3,7 +3,8 @@
 Coverage Analysis Tool
 
 This script analyzes pytest coverage output to identify testing priorities and produce
-a detailed report of which modules and specific lines need testing attention.
+a detailed report of which modules and specific lines need testing attention. It also
+provides detailed test failure reporting for CI/CD integration.
 
 Usage:
     python scripts/analyze_coverage.py [--output coverage_report.json] [--run-tests]
@@ -13,16 +14,19 @@ Options:
     --run-tests      Run pytest with coverage before analysis (default: use existing .coverage)
     --html           Generate HTML report in addition to JSON
     --threshold PCT  Fail if coverage is below this percentage (default: none)
+    --junit-xml      Generate JUnit XML report for CI/CD integration
 """
 
 import os
 import re
 import sys
 import json
+import html
 import argparse
 import subprocess
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Set, Tuple
+from typing import List, Dict, Optional, Set, Tuple, Any
 from pathlib import Path
 from datetime import datetime
 
@@ -237,47 +241,152 @@ class CoverageReport:
             return f"{COLORS['green']}{self.overall_coverage:.2f}%{COLORS['reset']}"
 
 
-def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False) -> str:
+@dataclass
+class TestFailure:
+    """Information about a test failure."""
+    name: str
+    outcome: str
+    message: str
+    duration: float = 0.0
+    file: str = ""
+    line: int = 0
+
+    @property
+    def category(self) -> str:
+        """Classify the failure based on the error message."""
+        if "SyntaxError" in self.message:
+            return "syntax_error"
+        elif "AssertionError" in self.message:
+            return "assertion_failure"
+        elif any(err in self.message for err in ["ImportError", "ModuleNotFoundError"]):
+            return "import_error"
+        elif "timeout" in self.message.lower():
+            return "timeout_error"
+        else:
+            return "other"
+
+    @property
+    def module_name(self) -> str:
+        """Extract module name from test path."""
+        parts = self.name.split('::')[0].split('/')
+        if len(parts) > 1:
+            return parts[-1].replace('test_', '').replace('.py', '')
+        return ""
+
+def get_file_from_nodeid(nodeid: str) -> str:
+    """Extract file path from pytest nodeid."""
+    return nodeid.split("::")[0] if "::" in nodeid else nodeid
+
+def get_line_from_location(location: str) -> int:
+    """Extract line number from pytest location string."""
+    try:
+        return int(location.split(":")[-1]) if ":" in location else 0
+    except ValueError:
+        return 0
+
+def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False) -> Tuple[str, List[TestFailure]]:
     """
-    Run pytest with coverage and return the output.
+    Run pytest with coverage and return the output and test failures.
     
     Args:
         package_path: Path to the package to measure coverage for
         include_integration: Whether to run integration tests
         
     Returns:
-        The combined stdout and stderr from the coverage run
+        Tuple of (coverage_output, test_failures)
     """
+    print("Collecting tests... ", end="", flush=True)
+    
+    # First collect all tests to get a count
+    collect_cmd = ["python", "-m", "pytest", "tests", "--collect-only", "-q"]
     if include_integration:
-        print("Running unit AND integration tests with coverage... This may take a moment.")
+        collect_cmd.append("--run-integration")
     else:
-        print("Running unit tests with coverage... This may take a moment.")
+        collect_cmd.extend(["-m", "not integration"])
     
-    # First, make sure we're using the latest pytest and coverage
-    subprocess.run(["python", "-m", "pip", "install", "--upgrade", "pytest", "pytest-cov"], 
-                  stdout=subprocess.PIPE, 
-                  stderr=subprocess.PIPE)
+    print(f"\nDebug: Collection command: {' '.join(collect_cmd)}")
     
-    # Build command with optional integration tests flag
-    command = ["python", "-m", "pytest", f"--cov={package_path}", "--cov-report=term-missing"]
+    result = subprocess.run(collect_cmd, stdout=subprocess.PIPE, text=True)
+    print(f"Collection output: {result.stdout}")
+    
+    match = re.search(r'collected (\d+) items', result.stdout)
+    total_tests = int(match.group(1)) if match else 0
+    
+    print(f"Found {total_tests} tests")
+    if total_tests == 0:
+        print("No tests found!")
+        return "", []
+    
+    # Install required dependencies if needed
+    subprocess.run(["python", "-m", "pip", "install", "--quiet", "--upgrade", 
+                   "pytest", "pytest-cov", "pytest-json-report"],
+                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+    # Instead of running module by module, run all tests at once like the user's working command
+    print(f"Running all {total_tests} tests with coverage... This may take a while.")
+    
+    # Clear any existing coverage data
+    if os.path.exists(".coverage"):
+        os.remove(".coverage")
+    
+    # Build the test command - similar to the command that works manually
+    test_cmd = [
+        "python", "-m", "pytest",
+        "tests/unit/", "tests/integration/" if include_integration else "tests/unit/",
+        f"--cov={package_path}",
+        "--cov-report=term-missing",
+        "--json-report",
+        f"--json-report-file=test_results.json",
+        "-v"
+    ]
+    
     if include_integration:
-        command.append("--run-integration")
+        test_cmd.append("--run-integration")
     
-    # Run pytest with coverage
+    print(f"Debug: Running command: {' '.join(test_cmd)}")
+    
+    # Run tests with progress indicator
+    start_time = datetime.now()
     result = subprocess.run(
-        command,
+        test_cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
     )
+    end_time = datetime.now()
+    elapsed = (end_time - start_time).total_seconds()
     
-    # If tests fail, we still want to analyze coverage
-    if result.returncode != 0:
-        print(f"Warning: Tests completed with exit code {result.returncode}")
+    print(f"Tests completed in {elapsed:.1f} seconds")
     
-    # Combine stdout and stderr to catch all coverage output
+    # Collect output
     output = result.stdout + result.stderr
-    return output
+    
+    # Parse failures
+    failures = []
+    try:
+        if os.path.exists("test_results.json"):
+            with open("test_results.json") as f:
+                test_results = json.load(f)
+            
+            for test in test_results.get("tests", []):
+                if test.get("outcome") != "passed":
+                    # Create failure record
+                    failure = TestFailure(
+                        name=test.get("nodeid", "Unknown"),
+                        outcome=test.get("outcome", "error"),
+                        message=test.get("call", {}).get("longrepr", "No details available"),
+                        duration=test.get("duration", 0.0),
+                        file=get_file_from_nodeid(test.get("nodeid", "")),
+                        line=get_line_from_location(test.get("location", ""))
+                    )
+                    failures.append(failure)
+                    
+            if failures:
+                print(f"Found {len(failures)} test failures")
+    except Exception as e:
+        print(f"Error parsing test failures: {e}")
+    
+    return output, failures
 
 
 def parse_coverage_output(output: str) -> Tuple[List[ModuleCoverage], float, int, int]:
@@ -346,8 +455,8 @@ def generate_report(modules: List[ModuleCoverage], overall_coverage: float,
     return report
 
 
-def generate_html_report(report: CoverageReport, output_file: str) -> None:
-    """Generate an HTML report from the coverage data."""
+def generate_html_report(report: CoverageReport, output_file: str, test_failures: List[TestFailure] = None) -> None:
+    """Generate an HTML report from the coverage data and test failures."""
     html_file = output_file.replace('.json', '.html')
     
     html_content = f"""<!DOCTYPE html>
@@ -386,6 +495,14 @@ def generate_html_report(report: CoverageReport, output_file: str) -> None:
         .module-details {{ display: none; padding: 10px; background: #f9f9f9; border-left: 5px solid #ddd; margin: 10px 0; }}
         .toggle-details {{ cursor: pointer; color: #0066cc; user-select: none; }}
         .toggle-details:hover {{ text-decoration: underline; }}
+        .test-failures {{ margin-top: 30px; }}
+        .test-failure {{ background-color: #ffeeed; }}
+        .test-failure-message {{ font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }}
+        .tabs {{ display: flex; margin-bottom: 20px; }}
+        .tab {{ padding: 10px 20px; background-color: #f2f2f2; cursor: pointer; margin-right: 5px; border-radius: 5px 5px 0 0; }}
+        .tab.active {{ background-color: #007bff; color: white; }}
+        .tab-content {{ display: none; }}
+        .tab-content.active {{ display: block; }}
     </style>
 </head>
 <body>
@@ -393,27 +510,33 @@ def generate_html_report(report: CoverageReport, output_file: str) -> None:
         <h1>Coverage Analysis Report</h1>
         <p>Generated on: {report.timestamp}</p>
         
-        <div class="summary">
-            <div class="summary-item">
-                <h3>Overall Coverage</h3>
-                <div class="progress-bar">
-                    <div class="progress-value" style="width: {report.overall_coverage}%; background-color: {get_color_for_coverage(report.overall_coverage)};"></div>
-                </div>
-                <p>{report.overall_coverage:.2f}%</p>
-            </div>
-            
-            <div class="summary-item">
-                <h3>Statements</h3>
-                <p>{report.total_statements} total / {report.total_missing} missing</p>
-            </div>
-            
-            <div class="summary-item">
-                <h3>Priority Distribution</h3>
-                <p><span class="high">■</span> High: {report.high_priority.count} modules</p>
-                <p><span class="medium">■</span> Medium: {report.medium_priority.count} modules</p>
-                <p><span class="low">■</span> Low: {report.low_priority.count} modules</p>
-            </div>
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'coverage-tab')">Coverage Report</div>
+            <div class="tab" onclick="openTab(event, 'failures-tab')">Test Failures {f"({len(test_failures)})" if test_failures else ""}</div>
         </div>
+        
+        <div id="coverage-tab" class="tab-content active">
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>Overall Coverage</h3>
+                    <div class="progress-bar">
+                        <div class="progress-value" style="width: {report.overall_coverage}%; background-color: {get_color_for_coverage(report.overall_coverage)};"></div>
+                    </div>
+                    <p>{report.overall_coverage:.2f}%</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Statements</h3>
+                    <p>{report.total_statements} total / {report.total_missing} missing</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Priority Distribution</h3>
+                    <p><span class="high">■</span> High: {report.high_priority.count} modules</p>
+                    <p><span class="medium">■</span> Medium: {report.medium_priority.count} modules</p>
+                    <p><span class="low">■</span> Low: {report.low_priority.count} modules</p>
+                </div>
+            </div>
 """
 
     # Add High Priority Modules section
@@ -528,6 +651,69 @@ def generate_html_report(report: CoverageReport, output_file: str) -> None:
         </div>
 """
 
+    # Add Test Failures Tab
+    if test_failures:
+        failures_by_category = {}
+        for failure in test_failures:
+            cat = failure.category
+            if cat not in failures_by_category:
+                failures_by_category[cat] = []
+            failures_by_category[cat].append(failure)
+        
+        html_content += """
+        </div>
+        <div id="failures-tab" class="tab-content">
+            <h2>Test Failures Summary</h2>"""
+        
+        # Add summary by category
+        html_content += """
+            <div class="summary">"""
+        
+        for category, failures in failures_by_category.items():
+            html_content += f"""
+                <div class="summary-item">
+                    <h3>{category.replace('_', ' ').title()}</h3>
+                    <p>{len(failures)} failures</p>
+                </div>"""
+        
+        html_content += """
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Test</th>
+                    <th>Category</th>
+                    <th>Duration</th>
+                    <th>Details</th>
+                </tr>"""
+        
+        for i, failure in enumerate(test_failures):
+            html_content += f"""
+                <tr class="test-failure">
+                    <td>{failure.name}</td>
+                    <td>{failure.category.replace('_', ' ').title()}</td>
+                    <td>{failure.duration:.3f}s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-{i}')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-{i}" class="module-details">
+                            <div class="test-failure-message">{html.escape(failure.message)}</div>
+                        </div>
+                    </td>
+                </tr>"""
+        
+        html_content += """
+            </table>
+        </div>"""
+    else:
+        html_content += """
+        </div>
+        <div id="failures-tab" class="tab-content">
+            <h2>Test Failures</h2>
+            <p>No test failures found. All tests passed successfully!</p>
+        </div>"""
+
     # Add JavaScript and close HTML
     html_content += """
         <script>
@@ -551,6 +737,24 @@ def generate_html_report(report: CoverageReport, output_file: str) -> None:
                     button.textContent = 'Show';
                 }
             }
+            
+            function openTab(evt, tabName) {
+                // Hide all tab content
+                const tabContents = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].className = tabContents[i].className.replace(" active", "");
+                }
+                
+                // Remove active class from all tabs
+                const tabs = document.getElementsByClassName("tab");
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].className = tabs[i].className.replace(" active", "");
+                }
+                
+                // Show the current tab and add an "active" class to the button
+                document.getElementById(tabName).className += " active";
+                evt.currentTarget.className += " active";
+            }
         </script>
     </div>
 </body>
@@ -573,6 +777,69 @@ def get_color_for_coverage(coverage: float) -> str:
         return "#5cb85c"  # Green
 
 
+def generate_junit_xml(test_failures: List[TestFailure], output_file: str = "junit-report.xml") -> None:
+    """Generate JUnit XML report from test failures for CI/CD systems."""
+    root = ET.Element("testsuites")
+    testsuite = ET.SubElement(root, "testsuite", 
+                             name="PyTest",
+                             tests=str(len(test_failures)),
+                             failures=str(len([f for f in test_failures if f.outcome == "failed"])),
+                             errors=str(len([f for f in test_failures if f.outcome == "error"])),
+                             skipped=str(len([f for f in test_failures if f.outcome == "skipped"])))
+    
+    for failure in test_failures:
+        # Extract class and name from test ID
+        parts = failure.name.split("::")
+        classname = parts[0] if parts else "unknown"
+        testname = "::".join(parts[1:]) if len(parts) > 1 else failure.name
+        
+        testcase = ET.SubElement(testsuite, "testcase", 
+                                classname=classname,
+                                name=testname,
+                                time=str(failure.duration))
+        
+        if failure.outcome == "failed":
+            fail = ET.SubElement(testcase, "failure", message=failure.message[:100])
+            fail.text = failure.message
+        elif failure.outcome == "error":
+            error = ET.SubElement(testcase, "error", message=failure.message[:100])
+            error.text = failure.message
+        elif failure.outcome == "skipped":
+            ET.SubElement(testcase, "skipped")
+    
+    tree = ET.ElementTree(root)
+    tree.write(output_file)
+    
+    print(f"JUnit XML report generated: {output_file}")
+
+def output_github_actions_annotations(test_failures: List[TestFailure]) -> None:
+    """Output test failures as GitHub Actions annotations."""
+    for failure in test_failures:
+        test_name = failure.name
+        file_path = failure.file if failure.file else test_name.split("::")[0]
+        line_num = failure.line if failure.line else 1
+        message = failure.message.split("\n")[0] if failure.message else "Test failed"
+        
+        # Format for GitHub Actions
+        print(f"::error file={file_path},line={line_num}::{message}")
+
+def correlate_failures_with_coverage(test_failures: List[TestFailure], modules: List[ModuleCoverage]) -> Dict[str, List[TestFailure]]:
+    """Correlate test failures with coverage to identify problematic areas."""
+    correlation = {}
+    
+    # Extract module names from test failures
+    for failure in test_failures:
+        module_name = failure.module_name
+        
+        # Find corresponding source module in coverage data
+        for module in modules:
+            if module_name and module_name in module.name:
+                if module.name not in correlation:
+                    correlation[module.name] = []
+                correlation[module.name].append(failure)
+    
+    return correlation
+
 def main() -> int:
     """Main entry point for the script."""
     parser = argparse.ArgumentParser(description="Analyze pytest coverage and identify priority areas.")
@@ -581,12 +848,17 @@ def main() -> int:
     parser.add_argument("--include-integration", action="store_true", help="Include integration tests in coverage analysis")
     parser.add_argument("--html", action="store_true", help="Generate HTML report")
     parser.add_argument("--threshold", type=float, help="Fail if coverage is below this percentage")
+    parser.add_argument("--junit-xml", action="store_true", help="Generate JUnit XML report for CI/CD")
+    parser.add_argument("--github-actions", action="store_true", help="Output GitHub Actions annotations")
     
     args = parser.parse_args()
     
+    # Track test failures
+    test_failures = []
+    
     # Get coverage data
     if args.run_tests:
-        output = run_coverage(include_integration=args.include_integration)
+        output, test_failures = run_coverage(include_integration=args.include_integration)
     else:
         # Check if .coverage file exists
         if not os.path.exists(".coverage"):
@@ -614,16 +886,71 @@ def main() -> int:
     
     # Save the report to JSON
     with open(args.output, "w") as f:
-        json.dump(report.to_dict(), f, indent=2)
+        # Add test failures to the report
+        report_dict = report.to_dict()
+        if test_failures:
+            report_dict["test_failures"] = [
+                {
+                    "name": f.name,
+                    "outcome": f.outcome,
+                    "message": f.message,
+                    "duration": f.duration,
+                    "file": f.file,
+                    "line": f.line,
+                    "category": f.category
+                }
+                for f in test_failures
+            ]
+            
+            # Add correlation between failures and coverage
+            correlation = correlate_failures_with_coverage(test_failures, modules)
+            if correlation:
+                report_dict["failure_coverage_correlation"] = {
+                    module: [f.name for f in failures]
+                    for module, failures in correlation.items()
+                }
+        
+        json.dump(report_dict, f, indent=2)
     
     print(f"Coverage report saved to {args.output}")
     
     # Generate HTML report if requested
     if args.html:
-        generate_html_report(report, args.output)
+        generate_html_report(report, args.output, test_failures)
+    
+    # Generate JUnit XML report if requested
+    if args.junit_xml and test_failures:
+        generate_junit_xml(test_failures)
+    
+    # Output GitHub Actions annotations if requested
+    if args.github_actions and test_failures:
+        output_github_actions_annotations(test_failures)
     
     # Print a summary to the console
     report.print_summary()
+    
+    # Print test failure summary if there are failures
+    if test_failures:
+        print(f"\n{COLORS['bold']}Test Failure Summary:{COLORS['reset']}")
+        print(f"Total failures: {len(test_failures)}")
+        
+        # Group by category
+        by_category = {}
+        for failure in test_failures:
+            cat = failure.category
+            if cat not in by_category:
+                by_category[cat] = []
+            by_category[cat].append(failure)
+            
+        # Print count by category
+        for category, failures in by_category.items():
+            print(f"  {category.replace('_', ' ').title()}: {len(failures)}")
+            
+        # Print most recent failures (up to 5)
+        if test_failures:
+            print(f"\n{COLORS['bold']}Recent Test Failures:{COLORS['reset']}")
+            for failure in test_failures[:5]:  # Show at most 5
+                print(f"  {failure.name} - {failure.outcome}")
     
     # Check threshold if specified
     if args.threshold is not None and overall_coverage < args.threshold:

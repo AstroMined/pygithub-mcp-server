@@ -14,6 +14,15 @@ Key areas of current work:
 
 ## Recent Changes
 
+### Coverage Analysis Script Improvements
+- Improved the analyze_coverage.py script for better test execution:
+  - Fixed issues with test collection and execution for integration tests
+  - Refactored test execution to use a simpler, more reliable approach
+  - Simplified implementation by running all tests at once instead of module-by-module
+  - Enhanced debugging output for easier troubleshooting
+  - Added elapsed time reporting for test execution
+  - Improved failure parsing and reporting for better visibility
+
 ### Testing Infrastructure Improvements
 - Updated coverage reporting workflow with clear documentation
 - Removed redundant HTML coverage reporting from pytest-cov in pyproject.toml

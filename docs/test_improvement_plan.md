@@ -11,6 +11,36 @@ As of March 8, 2025, we have:
 - Standardized fixtures in `tests/integration/conftest.py`
 - Created comprehensive documentation for test patterns in `tests/integration/README.md`
 
+## Implementation Progress (March 8, 2025)
+
+We've made significant progress implementing the test improvement plan:
+
+1. Created targeted unit tests for `tools/repositories/tools.py` (High Priority):
+   - Created `tests/unit/tools/repositories/test_repositories_tools_edge_cases.py` with specific tests for:
+     - Repository creation error handling (lines 57-58)
+     - Fork repository errors (lines 111-112)
+     - Repository search edge cases (lines 151-167)
+     - File contents parameter validation (lines 210-214)
+     - File update error cases (lines 246-262)
+     - Push files validation (lines 297-313)
+     - Branch creation edge cases (lines 346-362)
+     - Commit list parameter validation (lines 395-396, 401-402)
+     - User repository listing (lines 443-459)
+
+2. Added integration tests in `tests/integration/tools/repositories/test_repositories_tools_integration.py`:
+   - Repository search with empty results (lines 151-167)
+   - Repository retrieval with real API
+   - Commit listing with real API
+   - File contents retrieval with real API
+   - Repository search with real API
+
+3. Key implementation approaches:
+   - Used dataclasses instead of mocks (per project preferences)
+   - Leveraged existing fixtures for integration tests
+   - Used `with_retry` decorator for handling rate limiting
+   - Created targeted tests for each missing coverage area
+   - Followed project patterns for test structure
+
 ## Current Coverage Analysis
 
 Based on the latest coverage report:
@@ -66,10 +96,23 @@ src/pygithub_mcp_server/version.py                                   10      2  
 TOTAL                                                              1826    215    420     42    88%
 ```
 
-### Priority Areas
+### Expected Coverage Improvements
+
+After implementing the planned tests, we expect to see:
+
+1. For `tools/repositories/tools.py`:
+   - Current: 63% coverage (68 missing lines)
+   - Expected: 85-90% coverage (reduced to ~20 missing lines)
+   - Key areas addressed: all identified missing ranges (57-58, 111-112, 151-167, etc.)
+
+2. Additional integration tests will indirectly improve coverage in:
+   - `operations/repositories.py`: expected to reach 85%+
+   - Other modules through shared code paths
+
+### Priority Areas (Updated)
 
 1. **High Priority (Coverage < 70%)**
-   - `tools/repositories/tools.py` (63%)
+   - ~~`tools/repositories/tools.py` (63%)~~ - **In Progress**: Implemented targeted tests, awaiting new coverage report
 
 2. **Medium Priority (Coverage 70-85%)**
    - `tools/issues/tools.py` (79%)
@@ -91,90 +134,45 @@ Our test improvement strategy covers three key dimensions:
 2. **Test Pattern Standardization** - Creating reusable patterns and fixtures
 3. **Test Infrastructure** - Building tooling to support maintainable tests
 
-### Phase 1: Coverage-Driven Improvements (Immediate Focus)
+### Phase 1: Coverage-Driven Improvements (In Progress)
 
 #### 1. Repository Tools Module (High Priority)
 
 **Target:** `tools/repositories/tools.py` (63% → 80%+)
 
 Missing lines analysis shows we need tests for:
-- Lines 57-58: Create repository error handling
-- Lines 111-112: Fork repository error paths
-- Lines 151-167: Repository search edge cases
-- Lines 210-214: File contents parameter validation
-- Lines 246-262: File update error cases
-- Lines 297-313: Push files validation
-- Lines 346-362: Branch creation edge cases
-- Lines 395-396, 401-402: Commit list parameter validation
-- Lines 443-459: User repository listing
+- ✅ Lines 57-58: Create repository error handling
+- ✅ Lines 111-112: Fork repository error paths
+- ✅ Lines 151-167: Repository search edge cases
+- ✅ Lines 210-214: File contents parameter validation
+- ✅ Lines 246-262: File update error cases
+- ✅ Lines 297-313: Push files validation
+- ✅ Lines 346-362: Branch creation edge cases
+- ✅ Lines 395-396, 401-402: Commit list parameter validation
+- ✅ Lines 443-459: User repository listing
 
-**Implementation Plan:**
+**Implementation Complete:** Created targeted tests for all identified missing coverage areas in:
+- `tests/unit/tools/repositories/test_repositories_tools_edge_cases.py`
+- `tests/integration/tools/repositories/test_repositories_tools_integration.py`
 
-1. Create a test file structure that mirrors the tool structure:
+**Implementation Approach:**
 
-```python
-# tests/unit/tools/repositories/test_tools.py
-import pytest
-from dataclasses import dataclass
-from pygithub_mcp_server.tools.repositories.tools import (
-    get_repository, create_repository, fork_repository,
-    search_repositories, get_file_contents, create_or_update_file
-)
-from pygithub_mcp_server.errors import GitHubError
+1. Created a test file structure that mirrors the tool structure:
+   - Separate test modules for edge cases and integration tests
+   - Clear naming convention for test functions targeting specific coverage gaps
 
-# Test fixtures and data classes
-@dataclass
-class MockRepository:
-    id: int
-    name: str
-    full_name: str
-    # Other required properties
-
-# Test cases for each tool function
-def test_create_repository_success():
-    """Test successful repository creation."""
-    # Setup dataclass test objects
-    repo = Repository(
-        id=12345,
-        name="test-repo",
-        full_name="test-owner/test-repo",
-        owner=RepositoryOwner(login="test-owner")
-    )
-    
-    # Test implementation using dataclasses
-    
-def test_create_repository_validation_error():
-    """Test repository creation with invalid parameters."""
-    # Test implementation with validation errors
-    
-def test_create_repository_api_error():
-    """Test repository creation with API error."""
-    # Test implementation with PyGithub exceptions
-```
-
-2. Create a standard test matrix for each tool function:
+2. Implemented a standard test matrix for each tool function:
    - Success path test
    - Validation error test
    - API error test
    - Parameter edge case tests
 
-3. Implement parameterized tests for common scenarios:
+3. Leveraged existing fixtures:
+   - Used `with_retry` for handling GitHub API rate limits
+   - Used `test_owner`, `test_repo_name` for integration tests
+   - Created targeted test fixtures for specific test scenarios
 
-```python
-@pytest.mark.parametrize("input_params,expected_error", [
-    ({"name": ""}, "name cannot be empty"),
-    ({"name": "repo", "description": 123}, "description must be a string"),
-    # Additional test cases
-])
-def test_create_repository_validation_errors(input_params, expected_error):
-    """Test repository creation validation errors."""
-    with pytest.raises(ValidationError) as exc_info:
-        # Create a Pydantic model with invalid parameters
-        CreateRepositoryParams(**input_params)
-    assert expected_error in str(exc_info.value)
-```
-
-#### 2. Repository Operations Module (Medium Priority)
+#### 2. Repository Operations Module (Medium Priority - Next Focus)
 
 **Target:** `operations/repositories.py` (77% → 90%+)
 
@@ -194,102 +192,21 @@ Missing lines analysis shows we need tests for:
 **Implementation Plan:**
 
 1. Create comprehensive test classes for each operation group:
+   - Follow the same approach used for repository tools
+   - Create targeted tests for each missing coverage area
+   - Leverage existing integration test fixtures
 
-```python
-# tests/unit/operations/test_repository_operations.py
-class TestRepositoryOperations:
-    """Test suite for repository operations."""
-    
-    def test_get_repository_success(self):
-        """Test successful repository retrieval."""
-        # Create dataclass representing PyGithub Repository
-        repo = Repository(
-            id=12345,
-            name="test-repo",
-            full_name="test-owner/test-repo",
-            owner=RepositoryOwner(login="test-owner")
-        )
-        
-        # Test implementation with dataclass
-    
-    def test_get_repository_not_found(self):
-        """Test repository not found error."""
-        # Create a GithubException to simulate not found
-        github_exception = GithubException(
-            404, 
-            {"message": "Not Found"}
-        )
-        
-        # Test implementation with exception
-        
-    def test_create_repository_validation(self):
-        """Test repository creation validation."""
-        # Test implementation with Pydantic validation
-        
-    # Additional tests for each operation
-```
+2. Focus on error conditions with appropriate error types:
+   - 400-level errors (Not Found, Unauthorized, etc.)
+   - Rate limiting errors
+   - Validation errors
+   - Network errors
 
-2. Implement tests for error conditions using mocked GitHub responses:
+3. Address conditional logic and edge cases:
+   - Test parameter handling paths
+   - Test branching logic through specific inputs
 
-```python
-def test_get_repository_rate_limit():
-    """Test handling of rate limit errors."""
-    params = RepositoryParams(owner="test-owner", repo="test-repo")
-    
-    # Create a GithubException to simulate rate limit
-    github_exception = GithubException(
-        403, 
-        {
-            "message": "API rate limit exceeded",
-            "documentation_url": "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"
-        }
-    )
-    
-    # Use patch to make PyGithub raise the exception
-    with patch('github.Github.get_repo', side_effect=github_exception):
-        with pytest.raises(GitHubError) as exc_info:
-            repositories.get_repository(params)
-            
-        error = exc_info.value
-        assert "rate limit exceeded" in str(error).lower()
-        assert error.status == 403
-        assert hasattr(error, "reset_at")
-```
-
-3. Focus on conditional logic and edge cases:
-
-```python
-@pytest.mark.parametrize("params,expected_kwargs", [
-    ({"owner": "owner", "repo": "repo"}, {}),
-    ({"owner": "owner", "repo": "repo", "branch": "main"}, {"branch": "main"}),
-    # Additional test cases
-])
-def test_get_file_contents_parameters(params, expected_kwargs):
-    """Test parameter handling for file contents retrieval using integration test."""
-    # This should be an integration test with real PyGithub objects
-    # Testing this would require actual GitHub API interaction
-    
-    # For unit testing parameter handling only:
-    with patch('pygithub_mcp_server.client.GitHubClient.get_instance') as client_instance:
-        # Setup a dataclass for the repository
-        repo = Repository(
-            id=12345,
-            name="test-repo",
-            full_name="owner/repo",
-            owner=RepositoryOwner(login="owner")
-        )
-        
-        # Configure the test
-        client_instance.return_value.get_repo.return_value = repo
-        
-        # Create Pydantic model and call operation
-        model = GetFileContentsParams(**params)
-        
-        # We can now verify parameter handling without using mocks
-        # This would be better as an integration test with real PyGithub
-```
-
-#### 3. Issues Tools Module (Medium Priority)
+#### 3. Issues Tools Module (Medium Priority - Upcoming Focus)
 
 **Target:** `tools/issues/tools.py` (79% → 90%+)
 

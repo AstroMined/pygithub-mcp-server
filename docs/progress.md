@@ -180,6 +180,8 @@ We've successfully implemented:
 
 All unit and integration tests now pass with no warnings. The TestGitHubClient warning has been resolved and test coverage for the datetime conversion module has been significantly improved. We've gained a better understanding of the separation between parsing (convert_iso_string_to_datetime) and normalization (ensure_utc_datetime) functions.
 
+We've made improvements to the testing infrastructure, particularly with the analyze_coverage.py script to better handle test collection and execution. The script now uses a simpler, more reliable approach to test execution by running all tests at once instead of the previous module-by-module approach. However, there appear to be some lingering issues with test execution within the script that need further investigation.
+
 ### Priorities
 1. Implement additional tool groups (repositories, pull_requests, etc.)
 2. Enhance testing coverage for the new architecture

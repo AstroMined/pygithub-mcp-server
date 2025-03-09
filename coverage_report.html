@@ -34,64 +34,49 @@
         .module-details { display: none; padding: 10px; background: #f9f9f9; border-left: 5px solid #ddd; margin: 10px 0; }
         .toggle-details { cursor: pointer; color: #0066cc; user-select: none; }
         .toggle-details:hover { text-decoration: underline; }
+        .test-failures { margin-top: 30px; }
+        .test-failure { background-color: #ffeeed; }
+        .test-failure-message { font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background-color: #f2f2f2; cursor: pointer; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .tab.active { background-color: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Coverage Analysis Report</h1>
-        <p>Generated on: 2025-03-08 12:07:49</p>
+        <p>Generated on: 2025-03-08 15:38:19</p>
         
-        <div class="summary">
-            <div class="summary-item">
-                <h3>Overall Coverage</h3>
-                <div class="progress-bar">
-                    <div class="progress-value" style="width: 88.0%; background-color: #5cb85c;"></div>
-                </div>
-                <p>88.00%</p>
-            </div>
-            
-            <div class="summary-item">
-                <h3>Statements</h3>
-                <p>1826 total / 215 missing</p>
-            </div>
-            
-            <div class="summary-item">
-                <h3>Priority Distribution</h3>
-                <p><span class="high">■</span> High: 1 modules</p>
-                <p><span class="medium">■</span> Medium: 5 modules</p>
-                <p><span class="low">■</span> Low: 38 modules</p>
-            </div>
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'coverage-tab')">Coverage Report</div>
+            <div class="tab" onclick="openTab(event, 'failures-tab')">Test Failures (7)</div>
         </div>
-
-        <h2 class="high">High Priority Modules</h2>
-        <table>
-            <tr>
-                <th>Module</th>
-                <th>Coverage</th>
-                <th>Missing / Total</th>
-                <th>Details</th>
-            </tr>
-
-            <tr class="priority-high">
-                <td>src/pygithub_mcp_server/tools/repositories/tools.py</td>
-                <td>
+        
+        <div id="coverage-tab" class="tab-content active">
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>Overall Coverage</h3>
                     <div class="progress-bar">
-                        <div class="progress-value" style="width: 63%; background-color: #d9534f;"></div>
+                        <div class="progress-value" style="width: 89.0%; background-color: #5cb85c;"></div>
                     </div>
-                    63%
-                </td>
-                <td>68 / 182</td>
-                <td><span class="toggle-details" onclick="toggleDetails('high-0')">Show Details</span></td>
-            </tr>
-            <tr>
-                <td colspan="4">
-                    <div id="high-0" class="module-details">
-                        <p><strong>Missing Lines:</strong> 57-58, 111-112, 151-167, 210-214, 246-262, 297-313, 346-362, 395-396, 401-402, 443-459</p>
-                        <p><strong>Ranges:</strong> 57-58, 111-112, 151-167, 210-214, 246-262, 297-313, 346-362, 395-396, 401-402, 443-459</p>
-                    </div>
-                </td>
-            </tr>
-</table>
+                    <p>89.00%</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Statements</h3>
+                    <p>1826 total / 190 missing</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Priority Distribution</h3>
+                    <p><span class="high">■</span> High: 0 modules</p>
+                    <p><span class="medium">■</span> Medium: 6 modules</p>
+                    <p><span class="low">■</span> Low: 38 modules</p>
+                </div>
+            </div>
+
         <h2 class="medium">Medium Priority Modules</h2>
         <table>
             <tr>
@@ -99,6 +84,26 @@
                 <th>Coverage</th>
                 <th>Missing / Total</th>
                 <th>Details</th>
+            </tr>
+
+            <tr class="priority-medium">
+                <td>src/pygithub_mcp_server/tools/repositories/tools.py</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-value" style="width: 76%; background-color: #f0ad4e;"></div>
+                    </div>
+                    76%
+                </td>
+                <td>43 / 182</td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-0')">Show Details</span></td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div id="medium-0" class="module-details">
+                        <p><strong>Missing Lines:</strong> 57-58, 152-153, 163-167, 210-214, 252-262, 303-313, 352-362, 455-459</p>
+                        <p><strong>Ranges:</strong> 57-58, 152-153, 163-167, 210-214, 252-262, 303-313, 352-362, 455-459</p>
+                    </div>
+                </td>
             </tr>
 
             <tr class="priority-medium">
@@ -110,11 +115,11 @@
                     77%
                 </td>
                 <td>32 / 150</td>
-                <td><span class="toggle-details" onclick="toggleDetails('medium-0')">Show Details</span></td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-1')">Show Details</span></td>
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="medium-0" class="module-details">
+                    <div id="medium-1" class="module-details">
                         <p><strong>Missing Lines:</strong> 53-55, 81->83, 83->85, 85->89, 92-94, 116->120, 123-125, 153-155, 193-195, 225, 244-246, 277->271, 279-281, 294->297, 309-311, 337, 352-354, 377, 396-398</p>
                         <p><strong>Ranges:</strong> 53-55, 81 (branch), 83 (branch), 85 (branch), 92-94, 116 (branch), 123-125, 153-155, 193-195, 244-246, 277 (branch), 279-281, 294 (branch), 309-311, 352-354, 396-398</p>
                     </div>
@@ -130,11 +135,11 @@
                     79%
                 </td>
                 <td>39 / 183</td>
-                <td><span class="toggle-details" onclick="toggleDetails('medium-1')">Show Details</span></td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-2')">Show Details</span></td>
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="medium-1" class="module-details">
+                    <div id="medium-2" class="module-details">
                         <p><strong>Missing Lines:</strong> 75-79, 112-113, 152-156, 193-197, 229-233, 304-308, 340-344, 376-380, 425-426</p>
                         <p><strong>Ranges:</strong> 75-79, 112-113, 152-156, 193-197, 229-233, 304-308, 340-344, 376-380, 425-426</p>
                     </div>
@@ -150,11 +155,11 @@
                     80%
                 </td>
                 <td>11 / 68</td>
-                <td><span class="toggle-details" onclick="toggleDetails('medium-2')">Show Details</span></td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-3')">Show Details</span></td>
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="medium-2" class="module-details">
+                    <div id="medium-3" class="module-details">
                         <p><strong>Missing Lines:</strong> 57->54, 68-76, 127, 130-131</p>
                         <p><strong>Ranges:</strong> 57 (branch), 68-76, 130-131</p>
                     </div>
@@ -170,11 +175,11 @@
                     80%
                 </td>
                 <td>2 / 10</td>
-                <td><span class="toggle-details" onclick="toggleDetails('medium-3')">Show Details</span></td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-4')">Show Details</span></td>
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="medium-3" class="module-details">
+                    <div id="medium-4" class="module-details">
                         <p><strong>Missing Lines:</strong> 48, 56</p>
                         <p><strong>Ranges:</strong> None</p>
                     </div>
@@ -190,11 +195,11 @@
                     83%
                 </td>
                 <td>6 / 52</td>
-                <td><span class="toggle-details" onclick="toggleDetails('medium-4')">Show Details</span></td>
+                <td><span class="toggle-details" onclick="toggleDetails('medium-5')">Show Details</span></td>
             </tr>
             <tr>
                 <td colspan="4">
-                    <div id="medium-4" class="module-details">
+                    <div id="medium-5" class="module-details">
                         <p><strong>Missing Lines:</strong> 29, 34-37, 44->exit, 109, 112, 114->121</p>
                         <p><strong>Ranges:</strong> 34-37, 44 (branch), 114 (branch)</p>
                     </div>
@@ -974,6 +979,138 @@
         </table>
         </div>
 
+        </div>
+        <div id="failures-tab" class="tab-content">
+            <h2>Test Failures Summary</h2>
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>Other</h3>
+                    <p>5 failures</p>
+                </div>
+                <div class="summary-item">
+                    <h3>Assertion Failure</h3>
+                    <p>2 failures</p>
+                </div>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Test</th>
+                    <th>Category</th>
+                    <th>Duration</th>
+                    <th>Details</th>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_search_repositories_empty_results</td>
+                    <td>Other</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-0')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-0" class="module-details">
+                            <div class="test-failure-message">tests/integration/tools/repositories/test_repositories_tools_integration.py:30: in test_search_repositories_empty_results
+    assert not result.get(&quot;is_error&quot;, False)
+E   AttributeError: &#x27;function&#x27; object has no attribute &#x27;get&#x27;</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_get_repository_integration</td>
+                    <td>Other</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-1')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-1" class="module-details">
+                            <div class="test-failure-message">tests/integration/tools/repositories/test_repositories_tools_integration.py:51: in test_get_repository_integration
+    assert not result.get(&quot;is_error&quot;, False)
+E   AttributeError: &#x27;function&#x27; object has no attribute &#x27;get&#x27;</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_list_commits_integration</td>
+                    <td>Other</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-2')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-2" class="module-details">
+                            <div class="test-failure-message">tests/integration/tools/repositories/test_repositories_tools_integration.py:72: in test_list_commits_integration
+    assert not result.get(&quot;is_error&quot;, False)
+E   AttributeError: &#x27;function&#x27; object has no attribute &#x27;get&#x27;</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_get_file_contents_integration</td>
+                    <td>Other</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-3')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-3" class="module-details">
+                            <div class="test-failure-message">tests/integration/tools/repositories/test_repositories_tools_integration.py:97: in test_get_file_contents_integration
+    if not result.get(&quot;is_error&quot;, False):
+E   AttributeError: &#x27;function&#x27; object has no attribute &#x27;get&#x27;</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_search_repositories_integration</td>
+                    <td>Other</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-4')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-4" class="module-details">
+                            <div class="test-failure-message">tests/integration/tools/repositories/test_repositories_tools_integration.py:129: in test_search_repositories_integration
+    assert not result.get(&quot;is_error&quot;, False)
+E   AttributeError: &#x27;function&#x27; object has no attribute &#x27;get&#x27;</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/unit/tools/repositories/test_repositories_tools_edge_cases.py::test_create_or_update_file_error_handling</td>
+                    <td>Assertion Failure</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-5')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-5" class="module-details">
+                            <div class="test-failure-message">tests/unit/tools/repositories/test_repositories_tools_edge_cases.py:233: in test_create_or_update_file_error_handling
+    assert result.get(&quot;is_error&quot;, False) is True
+E   AssertionError: assert False is True
+E    +  where False = &lt;built-in method get of dict object at 0x77e57d0df480&gt;(&#x27;is_error&#x27;, False)
+E    +    where &lt;built-in method get of dict object at 0x77e57d0df480&gt; = {&#x27;content&#x27;: [{&#x27;text&#x27;: &#x27;{}&#x27;, &#x27;type&#x27;: &#x27;text&#x27;}]}.get</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="test-failure">
+                    <td>tests/unit/tools/repositories/test_repositories_tools_edge_cases.py::test_push_files_error_handling</td>
+                    <td>Assertion Failure</td>
+                    <td>0.000s</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('failure-6')">Show Error</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="failure-6" class="module-details">
+                            <div class="test-failure-message">tests/unit/tools/repositories/test_repositories_tools_edge_cases.py:287: in test_push_files_error_handling
+    assert result.get(&quot;is_error&quot;, False) is True
+E   AssertionError: assert False is True
+E    +  where False = &lt;built-in method get of dict object at 0x77e57d070b40&gt;(&#x27;is_error&#x27;, False)
+E    +    where &lt;built-in method get of dict object at 0x77e57d070b40&gt; = {&#x27;content&#x27;: [{&#x27;text&#x27;: &#x27;{}&#x27;, &#x27;type&#x27;: &#x27;text&#x27;}]}.get</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
         <script>
             function toggleDetails(id) {
                 const element = document.getElementById(id);
@@ -994,6 +1131,24 @@
                     section.style.display = 'none';
                     button.textContent = 'Show';
                 }
+            }
+            
+            function openTab(evt, tabName) {
+                // Hide all tab content
+                const tabContents = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].className = tabContents[i].className.replace(" active", "");
+                }
+                
+                // Remove active class from all tabs
+                const tabs = document.getElementsByClassName("tab");
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].className = tabs[i].className.replace(" active", "");
+                }
+                
+                // Show the current tab and add an "active" class to the button
+                document.getElementById(tabName).className += " active";
+                evt.currentTarget.className += " active";
             }
         </script>
     </div>
