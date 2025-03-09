@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.22] - 2025-03-09
+
+### Added
+- Completely refactored coverage analysis tool into a proper Python package:
+  - Reorganized analyze_coverage.py into scripts/coverage/ package
+  - Created modular components with dedicated responsibilities:
+    - models.py: Data classes for coverage information
+    - runner.py: Test execution and collection
+    - parser.py: Coverage output parsing
+    - reports.py: Report generation (HTML, JSON, XML)
+    - cli.py: Command-line interface
+  - Implemented proper Python package structure
+  - Added direct module execution via __main__.py
+  - Created comprehensive package exports in __init__.py
+
+### Changed
+- Enhanced coverage analysis architecture:
+  - Separated concerns with dedicated modules
+  - Improved object model for coverage data
+  - Created cleaner interfaces between components
+  - Removed redundant duplicate code
+  - Enhanced error handling and reporting
+  - Fixed --run-integration flag handling in test collection
+  - Improved maintainability with modular design
+
+### Fixed
+- Fixed redundant --run-integration flag in test collection command
+
 ## [0.5.21] - 2025-03-09
 
 ### Added

@@ -14,38 +14,24 @@ Key areas of current work:
 
 ## Recent Changes
 
-### Coverage Analysis Script Improvements
-- Improved the analyze_coverage.py script for better test execution:
-  - Fixed issues with test collection and execution for integration tests
-  - Refactored test execution to use a simpler, more reliable approach
-  - Simplified implementation by running all tests at once instead of module-by-module
-  - Enhanced debugging output for easier troubleshooting
-  - Added elapsed time reporting for test execution
-  - Improved failure parsing and reporting for better visibility
+### Coverage Analysis Tool Refactoring
+- Reorganized `analyze_coverage.py` into a proper Python package:
+  - Created `scripts/coverage/` package with modular components
+  - Implemented dedicated modules for parser, runner, models, and reports
+  - Added comprehensive HTML reporting with test failure display
+  - Created clean package structure with well-defined interfaces
+  - Added explicit package exports in `__init__.py`
+  - Fixed issues with the --run-integration flag in test collection
+  - Created a direct module entry point using `__main__.py`
 
 ### Testing Infrastructure Improvements
-- Updated coverage reporting workflow with clear documentation
-- Removed redundant HTML coverage reporting from pytest-cov in pyproject.toml
-- Enhanced scripts/README.md with explicit guidance on viewing reports
-- Added comprehensive coverage analysis workflow to test_improvement_plan.md
-- Provided clear usage examples for analyze_coverage.py tool
-
-### Test Suite Enhancements
-- Fixed TestGitHubClient warning by using underscore-prefixed class and proper fixture pattern
-- Enhanced datetime testing for all edge cases in converters/common/datetime.py
-- Improved test coverage from 54% to 95%+ in converters/common/datetime.py
-- Added specific tests for all datetime conversion functions:
-  - convert_datetime: Simple ISO string conversion
-  - convert_iso_string_to_datetime: Flexible ISO parsing
-  - ensure_utc_datetime: Timezone normalization
-  - with_utc_datetimes: Parameter decoration
-
-### Test Improvement Implementation
-- Implemented Phase 1 of test improvement plan:
-  - Fixed TestGitHubClient warning by refactoring the class and fixture approach
-  - Improved datetime.py coverage with comprehensive test cases
-  - Added tests for each function's specific behavior
-  - Created clear separation between parsing (convert_iso_string_to_datetime) and normalization (ensure_utc_datetime) tests
+- Created a more maintainable and modular approach to coverage analysis:
+  - Separated concerns with dedicated modules for each responsibility
+  - Implemented a cleaner object model for coverage data
+  - Enhanced HTML reporting with interactive features
+  - Added proper packaging for easier imports
+  - Fixed redundant --run-integration flag in test collection
+  - Implemented readable priority categorization for modules
 
 ### Comprehensive Test Improvement Plan
 - Created detailed test improvement strategy with:
@@ -89,62 +75,35 @@ Key areas of current work:
 - Fixed naming conflicts and improved error handling
 - Made list operations consistently use the pagination utility
 
-### Fixed Tests for Large Repositories
-- Resolved tests hanging when accessing repositories with many issues
-- Added pagination parameters to all list_issues calls in tests
-- Updated testing documentation with pagination best practices
-- Ensured tests run efficiently regardless of repository size
-
-### Pydantic-First Architecture (ADR-007)
-- Refactored issue operations to accept Pydantic models directly
-- Updated tools to pass models directly to operations
-- Simplified error handling across all layers
-- Reduced code duplication by eliminating parameter unpacking
-- Enhanced type safety throughout the issue operations and tools
-
-### GitHub Issue Tools Fixes
-- Fixed parameter validation for required fields
-- Improved empty string handling in update_issue
-- Enhanced pagination in list operations
-- Updated error handling to maintain descriptive messages
-- Modified test assertions for user-friendly error formats
-
-### Integration Test Improvements
-- Enhanced tool decorator to convert dictionaries to Pydantic models
-- Fixed field name inconsistencies ("number" vs "issue_number")
-- Added timezone designation to ISO datetime strings
-- Made Pydantic an explicit dependency
-
-### Modular Tool Architecture (ADR-006)
-- Created configuration system in dedicated `config/` package
-- Implemented decorator-based tool registration system
-- Migrated issue tools to `tools/issues/tools.py`
-- Refactored server.py to use factory pattern
-- Added support for enabling/disabling tool groups via configuration
-- Created comprehensive testing strategy for modular architecture
-
 ## Next Steps
 
-1. Execute Enhanced Test Improvement Plan:
+1. Fix Coverage Analysis Tool Issues:
+   - Investigate and fix the inaccurate coverage report (currently showing 28% instead of expected ~90%)
+   - Review coverage configuration in pyproject.toml and the tool
+   - Add debug output to identify where the issue is occurring
+   - Ensure all modules are properly included in coverage calculation
+   - Verify the coverage data parsing logic in parser.py
+
+2. Execute Enhanced Test Improvement Plan:
    - Phase 1: Complete dataclass framework for PyGithub objects
    - Phase 2: Improve tools/repositories/tools.py coverage (63% → 80%+)
    - Phase 2: Enhance repositories.py operations coverage (77% → 90%+)
    - Phase 3: Standardize remaining integration tests with fixtures
    - Phase 3: Create test generation scripts for rapid test creation
 
-2. Expand Modular Architecture:
+3. Expand Modular Architecture:
    - Implement additional tool groups (pull_requests, users, etc.)
    - Create consistent patterns for new tool groups
    - Develop configuration templates for different scenarios
    - Enhance modularity with pluggable architecture
 
-3. Performance Optimization:
+4. Performance Optimization:
    - Optimize tool loading based on configuration
    - Implement lazy loading for tool groups
    - Add caching strategies for frequently accessed data
    - Improve memory usage for large number of tools
 
-4. Documentation:
+5. Documentation:
    - Create detailed guide for adding new tool groups
    - Document configuration best practices
    - Add examples for common configuration scenarios
@@ -152,31 +111,52 @@ Key areas of current work:
 
 ## Design Decisions
 
-### 1. Modular Architecture Approach
+### 1. Modular Coverage Analysis Architecture
+- Organize code into well-defined responsibilities (runner, parser, reporting)
+- Use dataclasses for structured coverage data representation
+- Implement a Python package structure for proper imports
+- Provide direct module execution capability through __main__.py
+- Remove external entry points in favor of module-based execution
+
+### 2. Modular Architecture Approach
 - Use decorator-based registration for tools
 - Organize tools by domain (issues, repositories, etc.)
 - Support selective enabling/disabling of tool groups
 - Maintain backward compatibility during transition
 
-### 2. Configuration System Design
+### 3. Configuration System Design
 - Support both file-based and environment variable configuration
 - Establish clear precedence rules for configuration sources
 - Provide sensible defaults for all settings
 - Document all configuration options clearly
 
-### 3. Testing Strategy
+### 4. Testing Strategy
 - Follow ADR-002's real API testing approach
 - Test configuration components without mocks
 - Create integration tests for tool functionality
 - Ensure proper cleanup of test resources
 
-### 4. Code Organization
+### 5. Code Organization
 - Group related tools in dedicated modules
 - Keep tool implementations separate from registration
 - Maintain clear separation between configuration and execution
 - Establish consistent patterns across all modules
 
 ## Implementation Lessons
+
+### Python Package Best Practices
+- Proper package structure improves import experience and usability
+- Direct module execution via __main__.py is cleaner than external scripts
+- Package exports in __init__.py make the API clear and discoverable
+- Separation of concerns with dedicated modules enhances maintainability
+- Good object model design simplifies data flow and transformation
+
+### Coverage Analysis Challenges
+- Coverage calculation is sensitive to test execution approach
+- Existing .coverage data files can lead to inaccurate results
+- Direct coverage.py invocation may produce different results than pytest-cov
+- Coverage configuration in pyproject.toml needs careful alignment with analysis tools
+- Multiple coverage outputs (HTML, JSON, terminal) require careful configuration to avoid conflicts
 
 ### Datetime Handling and Testing Lessons
 - Function roles should be clearly differentiated and documented:

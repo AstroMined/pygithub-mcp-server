@@ -70,12 +70,15 @@
 
 ### Testing Improvements
 - Advanced test infrastructure:
-  - Created `scripts/analyze_coverage.py` to identify high-priority modules for testing
-  - Developed `scripts/generate_tool_tests.py` for generating standardized tests
-  - Added support for running both unit and integration tests in coverage analysis
+  - Developed modular coverage analysis package in `scripts/coverage/`:
+    - Dedicated modules for test running, parsing, reporting, and data modeling
+    - Interactive HTML reports with test failure display
+    - JSON reporting for CI/CD integration
+    - Priority-based module categorization
+    - Module-specific test execution support
+    - Package structure with proper imports via `__main__.py`
+  - Created `scripts/generate_tool_tests.py` for generating standardized tests
   - Added test templates that follow ADR-002 principles with dataclasses instead of mocks
-  - Created interactive HTML and JSON coverage reports with module prioritization
-  - Removed redundant HTML coverage reporting from pytest-cov
   - Documented clear workflow for viewing and using coverage reports
   - Added comprehensive coverage analysis guide to test_improvement_plan.md
 
@@ -102,10 +105,6 @@
 
 ### Documentation
 - Created comprehensive documentation guides:
-  - error-handling.md: Error types and handling patterns
-  - security.md: Authentication and content security
-  - tool-reference.md: Detailed tool documentation
-  - testing_strategy.md: Testing patterns and best practices
   - Updated scripts/README.md with clear guidance on viewing reports
   - Enhanced test_improvement_plan.md with coverage analysis workflow
 
@@ -115,6 +114,7 @@
 - [x] Fixed TestGitHubClient warning in unit tests by using underscore prefix
 - [x] Improved converters/common/datetime.py from 54% to 95%+ coverage
 - [x] Created comprehensive test infrastructure for systematic coverage improvements
+- [ ] Fix coverage analysis tool accuracy issue (currently reporting 28% instead of ~90%)
 - [ ] Continue improving coverage for remaining modules:
   - [ ] client/client.py (currently 87%)
   - [ ] tools/repositories/tools.py (currently 63%)
@@ -178,39 +178,50 @@ We've successfully implemented:
 - ADR-006: Modular Tool Architecture
 - ADR-007: Pydantic-First Architecture
 
-All unit and integration tests now pass with no warnings. The TestGitHubClient warning has been resolved and test coverage for the datetime conversion module has been significantly improved. We've gained a better understanding of the separation between parsing (convert_iso_string_to_datetime) and normalization (ensure_utc_datetime) functions.
+All unit and integration tests now pass with no warnings. The TestGitHubClient warning has been resolved and test coverage for the datetime conversion module has been significantly improved.
 
-We've made improvements to the testing infrastructure, particularly with the analyze_coverage.py script to better handle test collection and execution. The script now uses a simpler, more reliable approach to test execution by running all tests at once instead of the previous module-by-module approach. However, there appear to be some lingering issues with test execution within the script that need further investigation.
+We've refactored the analyze_coverage.py script into a proper Python package with modular components for better maintainability and extensibility. The coverage analysis tool now has a cleaner architecture with separate modules for running tests, parsing coverage data, generating reports, and modeling coverage information. However, there appears to be an issue with the coverage reporting accuracy, showing around 28% when the actual coverage is expected to be closer to 90%.
 
 ### Priorities
-1. Implement additional tool groups (repositories, pull_requests, etc.)
-2. Enhance testing coverage for the new architecture
-3. Create documentation for adding new tool groups
-4. Optimize performance for tool loading
-5. Continue improving test coverage for low-coverage modules
-6. Prepare for PyPI publication
+1. Fix the inaccurate coverage reporting in the coverage analysis tool
+2. Implement additional tool groups (repositories, pull_requests, etc.)
+3. Enhance testing coverage for the new architecture
+4. Create documentation for adding new tool groups
+5. Optimize performance for tool loading
+6. Continue improving test coverage for low-coverage modules
+7. Prepare for PyPI publication
 
 ## Known Issues
-1. Some modules still have low test coverage
-2. Documentation could be more comprehensive
-3. Performance could be optimized
-4. Need to document synchronous operation benefits
-5. Need to update API examples for synchronous usage
+1. Coverage analysis tool reports inaccurate coverage percentage (~28% vs expected ~90%)
+2. Some modules still have low test coverage
+3. Documentation could be more comprehensive
+4. Performance could be optimized
+5. Need to document synchronous operation benefits
+6. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. Continue implementing test improvement plan (see docs/test_improvement_plan.md):
+1. Debug and fix coverage analysis tool accuracy:
+   - Investigate how coverage data is being calculated
+   - Check configuration in pyproject.toml
+   - Add debug output to see coverage command execution
+   - Ensure proper parsing of coverage output
+   - Fix module filtering in coverage calculation
+
+2. Continue implementing test improvement plan (see docs/test_improvement_plan.md):
    - ✅ Fixed TestGitHubClient warning in unit tests
    - ✅ Improved coverage for converters/common/datetime.py (from 54% to 95%+)
    - ✅ Created test infrastructure for systematic coverage improvements
    - ✅ Enhanced test coverage workflow with clear documentation
+   - ✅ Refactored analyze_coverage.py into a proper modular package
    - Improve coverage for tools/repositories/tools.py (currently 63%)
    - Enhance repositories.py coverage (currently 77%)
-2. Use coverage analyzer to prioritize test development
-3. Generate tests for highest-priority modules using the test generator
-4. Implement more integration tests with real API testing
-5. Add performance optimizations
-6. Enhance documentation
-7. Prepare for PyPI publication
+
+3. Use coverage analyzer to prioritize test development
+4. Generate tests for highest-priority modules using the test generator
+5. Implement more integration tests with real API testing
+6. Add performance optimizations
+7. Enhance documentation
+8. Prepare for PyPI publication
 
 ## Dependencies
 - Git repository at github.com/AstroMined/pygithub-mcp-server

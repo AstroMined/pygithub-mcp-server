@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coverage Analysis Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .summary { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+        .summary-item { background: #f5f5f5; padding: 15px; border-radius: 5px; flex: 1; min-width: 200px; }
+        .high { color: #d9534f; }
+        .medium { color: #f0ad4e; }
+        .low { color: #5cb85c; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .progress-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 10px;
+        }
+        .priority-high { background-color: #ffeeed; }
+        .priority-medium { background-color: #fff8ee; }
+        .priority-low { background-color: #efffee; }
+        .module-details { display: none; padding: 10px; background: #f9f9f9; border-left: 5px solid #ddd; margin: 10px 0; }
+        .toggle-details { cursor: pointer; color: #0066cc; user-select: none; }
+        .toggle-details:hover { text-decoration: underline; }
+        .test-failures { margin-top: 30px; }
+        .test-failure { background-color: #ffeeed; }
+        .test-failure-message { font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background-color: #f2f2f2; cursor: pointer; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .tab.active { background-color: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coverage Analysis Report</h1>
+        <p>Generated on: {{ report.timestamp }}</p>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'coverage-tab')">Coverage Report</div>
+            <div class="tab" onclick="openTab(event, 'failures-tab')">Test Failures {% if test_failures %}({{ test_failures|length }}){% endif %}</div>
+        </div>
+        
+        <div id="coverage-tab" class="tab-content active">
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>Overall Coverage</h3>
+                    <div class="progress-bar">
+                        <div class="progress-value" style="width: {{ report.overall_coverage }}%; background-color: {{ get_color_for_coverage(report.overall_coverage) }};"></div>
+                    </div>
+                    <p>{{ "%.2f"|format(report.overall_coverage) }}%</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Statements</h3>
+                    <p>{{ report.total_statements }} total / {{ report.total_missing }} missing</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Priority Distribution</h3>
+                    <p><span class="high">■</span> High: {{ report.high_priority.count }} modules</p>
+                    <p><span class="medium">■</span> Medium: {{ report.medium_priority.count }} modules</p>
+                    <p><span class="low">■</span> Low: {{ report.low_priority.count }} modules</p>
+                </div>
+            </div>
+            
+            {% if report.high_priority.count > 0 %}
+            <h2 class="high">High Priority Modules</h2>
+            <table>
+                <tr>
+                    <th>Module</th>
+                    <th>Coverage</th>
+                    <th>Missing / Total</th>
+                    <th>Details</th>
+                </tr>
+                {% for module in report.high_priority.modules %}
+                <tr class="priority-high">
+                    <td>{{ module.name }}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: {{ module.coverage }}%; background-color: {{ get_color_for_coverage(module.coverage) }};"></div>
+                        </div>
+                        {{ module.coverage }}%
+                    </td>
+                    <td>{{ module.missing }} / {{ module.statements }}</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-{{ loop.index0 }}')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-{{ loop.index0 }}" class="module-details">
+                            <p><strong>Missing Lines:</strong> {{ module.missing_lines }}</p>
+                            <p><strong>Ranges:</strong> {% if module.missing_line_ranges %}{{ module.missing_line_ranges|join(', ') }}{% else %}None{% endif %}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+            
+            {% if report.medium_priority.count > 0 %}
+            <h2 class="medium">Medium Priority Modules</h2>
+            <table>
+                <tr>
+                    <th>Module</th>
+                    <th>Coverage</th>
+                    <th>Missing / Total</th>
+                    <th>Details</th>
+                </tr>
+                {% for module in report.medium_priority.modules %}
+                <tr class="priority-medium">
+                    <td>{{ module.name }}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: {{ module.coverage }}%; background-color: {{ get_color_for_coverage(module.coverage) }};"></div>
+                        </div>
+                        {{ module.coverage }}%
+                    </td>
+                    <td>{{ module.missing }} / {{ module.statements }}</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-{{ loop.index0 }}')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-{{ loop.index0 }}" class="module-details">
+                            <p><strong>Missing Lines:</strong> {{ module.missing_lines }}</p>
+                            <p><strong>Ranges:</strong> {% if module.missing_line_ranges %}{{ module.missing_line_ranges|join(', ') }}{% else %}None{% endif %}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+            
+            {% if report.low_priority.count > 0 %}
+            <h2 class="low">Low Priority Modules <span class="toggle-details" onclick="toggleLowPriority()">Show</span></h2>
+            <div id="low-priority-section" style="display: none;">
+                <table>
+                    <tr>
+                        <th>Module</th>
+                        <th>Coverage</th>
+                        <th>Missing / Total</th>
+                        <th>Details</th>
+                    </tr>
+                    {% for module in report.low_priority.modules %}
+                    <tr class="priority-low">
+                        <td>{{ module.name }}</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: {{ module.coverage }}%; background-color: {{ get_color_for_coverage(module.coverage) }};"></div>
+                            </div>
+                            {{ module.coverage }}%
+                        </td>
+                        <td>{{ module.missing }} / {{ module.statements }}</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-{{ loop.index0 }}')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-{{ loop.index0 }}" class="module-details">
+                                <p><strong>Missing Lines:</strong> {{ module.missing_lines }}</p>
+                                <p><strong>Ranges:</strong> {% if module.missing_line_ranges %}{{ module.missing_line_ranges|join(', ') }}{% else %}None{% endif %}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div id="failures-tab" class="tab-content">
+            <h2>Test Failures Summary</h2>
+            
+            {% if test_failures %}
+                {# Group failures by category #}
+                {% set categories = {} %}
+                {% for failure in test_failures %}
+                    {% set cat = failure.category %}
+                    {% if cat not in categories %}
+                        {% set _ = categories.update({cat: []}) %}
+                    {% endif %}
+                    {% set _ = categories[cat].append(failure) %}
+                {% endfor %}
+                
+                <div class="summary">
+                {% for category, failures in categories.items() %}
+                    <div class="summary-item">
+                        <h3>{{ category|replace('_', ' ')|title }}</h3>
+                        <p>{{ failures|length }} failures</p>
+                    </div>
+                {% endfor %}
+                </div>
+                
+                <table>
+                    <tr>
+                        <th>Test</th>
+                        <th>Category</th>
+                        <th>Duration</th>
+                        <th>Details</th>
+                    </tr>
+                    {% for failure in test_failures %}
+                    <tr class="test-failure">
+                        <td>{{ failure.name }}</td>
+                        <td>{{ failure.category|replace('_', ' ')|title }}</td>
+                        <td>{{ "%.3f"|format(failure.duration) }}s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-{{ loop.index0 }}')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-{{ loop.index0 }}" class="module-details">
+                                <div class="test-failure-message">{{ failure.message }}</div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No test failures found. All tests passed successfully!</p>
+            {% endif %}
+        </div>
+        
+        <script>
+            function toggleDetails(id) {
+                const element = document.getElementById(id);
+                if (element.style.display === 'none' || !element.style.display) {
+                    element.style.display = 'block';
+                } else {
+                    element.style.display = 'none';
+                }
+            }
+            
+            function toggleLowPriority() {
+                const section = document.getElementById('low-priority-section');
+                const button = document.querySelector('h2.low .toggle-details');
+                if (section.style.display === 'none') {
+                    section.style.display = 'block';
+                    button.textContent = 'Hide';
+                } else {
+                    section.style.display = 'none';
+                    button.textContent = 'Show';
+                }
+            }
+            
+            function openTab(evt, tabName) {
+                // Hide all tab content
+                const tabContents = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].className = tabContents[i].className.replace(" active", "");
+                }
+                
+                // Remove active class from all tabs
+                const tabs = document.getElementsByClassName("tab");
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].className = tabs[i].className.replace(" active", "");
+                }
+                
+                // Show the current tab and add an "active" class to the button
+                document.getElementById(tabName).className += " active";
+                evt.currentTarget.className += " active";
+            }
+        </script>
+    </div>
+</body>
+</html>
