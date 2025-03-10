@@ -10,6 +10,7 @@ import sys
 import json
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Optional, Any
+import jinja2
 
 from .models import CoverageReport, TestFailure, get_color_for_coverage
 
@@ -22,15 +23,6 @@ def generate_html_report(report: CoverageReport, output_file: str, test_failures
         output_file: Path to save the HTML report (usually .html extension)
         test_failures: Optional list of test failures to include
     """
-    # Check for Jinja2
-    try:
-        import jinja2
-    except ImportError:
-        print("Installing Jinja2...")
-        import subprocess
-        subprocess.run([sys.executable, "-m", "pip", "install", "jinja2"], 
-                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        import jinja2
         
     html_file = output_file.replace('.json', '.html')
     

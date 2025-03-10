@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.23] - 2025-03-09
+
+### Added
+- Added Jinja2 to test dependencies to support HTML coverage report generation
+
+### Fixed
+- Fixed coverage analysis tool accuracy issue:
+  - Improved test grouping logic to handle nested directory structures properly
+  - Added support for deeper test paths like `tests/unit/schemas/repositories/`
+  - Fixed grouping logic to use full path for module keys
+  - Created fallback group for tests that don't match the expected structure
+  - Added diagnostic output to show test grouping information
+  - Improved test collection consistency to include all tests
+
 ## [0.5.22] - 2025-03-09
 
 ### Added

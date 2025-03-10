@@ -14,7 +14,7 @@ Key areas of current work:
 
 ## Recent Changes
 
-### Coverage Analysis Tool Refactoring
+### Coverage Analysis Tool Improvements
 - Reorganized `analyze_coverage.py` into a proper Python package:
   - Created `scripts/coverage/` package with modular components
   - Implemented dedicated modules for parser, runner, models, and reports
@@ -23,6 +23,12 @@ Key areas of current work:
   - Added explicit package exports in `__init__.py`
   - Fixed issues with the --run-integration flag in test collection
   - Created a direct module entry point using `__main__.py`
+- Fixed test grouping logic for accurate coverage reporting:
+  - Improved directory structure handling for nested test paths
+  - Fixed coverage calculation to properly include all tests
+  - Added fallback grouping for tests with non-standard paths
+  - Added detailed diagnostic logging to track test grouping
+  - Added Jinja2 dependency for HTML report generation
 
 ### Testing Infrastructure Improvements
 - Created a more maintainable and modular approach to coverage analysis:

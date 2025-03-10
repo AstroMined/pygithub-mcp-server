@@ -44,7 +44,7 @@ def collect_tests(include_integration: bool = False) -> List[str]:
     else:
         collect_cmd.extend(["-m", "not integration"])
     
-    print(f"Debug: Collection command: {' '.join(collect_cmd)}")
+    # print(f"Debug: Collection command: {' '.join(collect_cmd)}")
     
     try:
         result = subprocess.run(collect_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -80,6 +80,7 @@ def group_tests_by_module(test_list: List[str]) -> Dict[str, Dict]:
         Dictionary mapping module names to test information
     """
     modules = {}
+    ungrouped_tests = []
     
     for test_path in test_list:
         if not test_path:
@@ -92,16 +93,14 @@ def group_tests_by_module(test_list: List[str]) -> Dict[str, Dict]:
             # Get module path - categorize by directory and file
             test_path = parts[0]
             
-            # Extract the category (e.g., unit/errors, integration/client)
+            # Extract the category from path
             if '/' in test_path:
-                # Extract test category from path like "tests/unit/errors/test_handlers.py"
                 path_parts = test_path.split('/')
-                if len(path_parts) >= 3:
-                    # For example: "unit/errors" or "integration/client"
-                    module_key = f"{path_parts[1]}/{path_parts[2]}"
-                    
-                    # Add human readable name for the module
-                    module_name = f"{path_parts[1].capitalize()} {path_parts[2].capitalize()}"
+                if len(path_parts) >= 3 and path_parts[0] == "tests":
+                    # Create a key based on the full path excluding "tests/" and the filename
+                    # E.g., "unit/schemas/repositories" or "integration/operations/issues"
+                    module_key = '/'.join(path_parts[1:-1])  # Exclude filename
+                    module_name = ' '.join(part.capitalize() for part in path_parts[1:-1])
                     
                     # Add to modules dictionary with count
                     if module_key not in modules:
@@ -111,6 +110,19 @@ def group_tests_by_module(test_list: List[str]) -> Dict[str, Dict]:
                         }
                     
                     modules[module_key]["tests"].append(test_path)
+                else:
+                    # Keep track of tests that don't fit the expected structure
+                    ungrouped_tests.append(test_path)
+            else:
+                # Keep track of tests without path separators (unlikely but possible)
+                ungrouped_tests.append(test_path)
+    
+    # Add ungrouped tests as a separate module if there are any
+    if ungrouped_tests:
+        modules["other"] = {
+            "name": "Other Tests",
+            "tests": ungrouped_tests,
+        }
     
     # Add counts to each module
     for key in modules:
@@ -148,7 +160,7 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
     if include_integration:
         module_cmd.append("--run-integration")
         
-    print(f"Debug: Running module command: {' '.join(module_cmd)}")
+    # print(f"Debug: Running module command: {' '.join(module_cmd)}")
     
     # Run tests for this module
     start_time = datetime.now()
@@ -232,6 +244,19 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
     # Group tests by module
     modules = group_tests_by_module(test_list)
     
+    # Debug: Print grouping information
+    print("\nTest grouping debug info:")
+    print(f"Total tests collected: {total_tests}")
+    grouped_tests = sum(module_info["count"] for module_info in modules.values())
+    print(f"Tests assigned to groups: {grouped_tests}")
+    print(f"Number of test groups: {len(modules)}")
+    if grouped_tests < total_tests:
+        print(f"Warning: {total_tests - grouped_tests} tests were not assigned to any group!")
+    print("Groups created:")
+    for key in sorted(modules.keys()):
+        print(f"  {key}: {modules[key]['count']} tests")
+    print("")
+    
     if not modules:
         print("Warning: Could not group tests by module. Running all tests at once.")
         # Fallback to running all tests at once
@@ -247,7 +272,7 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         if include_integration:
             all_cmd.append("--run-integration")
             
-        print(f"Debug: Running fallback command: {' '.join(all_cmd)}")
+        # print(f"Debug: Running fallback command: {' '.join(all_cmd)}")
         
         result = subprocess.run(
             all_cmd,
