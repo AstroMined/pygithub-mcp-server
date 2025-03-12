@@ -2,6 +2,10 @@
 
 A Model Context Protocol server that provides tools for interacting with the GitHub API through PyGithub. This server enables AI assistants to perform GitHub operations like managing issues, repositories, and pull requests.
 
+<a href="https://glama.ai/mcp/servers/orj9keaji9">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/orj9keaji9/badge" alt="PyGithub Server MCP server" />
+</a>
+
 ## Features
 
 - Modular Tool Architecture:
