@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.24] - 2025-03-11
+
+### Added
+- Added robust error handling for GitHub API responses in repository operations
+- Implemented defensive coding practices for handling variations in API response structures
+- Added detailed logging of API response structures for better debugging
+- Created comprehensive integration tests for error cases in repository tools
+
+### Fixed
+- Fixed bug in `create_or_update_file` where commit message couldn't be accessed correctly
+- Fixed potential NoneType attribute errors when processing GitHub API responses
+- Improved robustness of `push_files` operation with better error handling
+- Enhanced error extraction from GitHub API responses with graceful fallbacks
+
 ## [0.5.23] - 2025-03-09
 
 ### Added

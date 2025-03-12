@@ -150,6 +150,22 @@ Key areas of current work:
 
 ## Implementation Lessons
 
+### Robust GitHub API Response Handling
+- GitHub API responses may have different structures in different contexts:
+  - Some responses have direct properties (e.g., `result["commit"].message`)
+  - Others use nested objects (e.g., `result["commit"].commit.message`)
+  - Properties may sometimes be `None` or missing
+- Defensive coding practices are essential when accessing GitHub API responses:
+  - Always check for attributes using `hasattr()` before accessing them
+  - Provide fallbacks for when attributes are missing or `None`
+  - Log the structure of API responses in debug mode for better troubleshooting
+  - Use graceful degradation to maintain functionality even with incomplete data
+  - Catch specific exceptions like AttributeError and KeyError to prevent cascading failures
+- Layer-specific error handling improves code robustness:
+  - Operations layer should handle API response variations
+  - Tools layer should present consistent response formats to clients
+  - Logging should occur at both layers with appropriate detail levels
+
 ### Python Package Best Practices
 - Proper package structure improves import experience and usability
 - Direct module execution via __main__.py is cleaner than external scripts

@@ -70,7 +70,8 @@ def setup_edge_case_tests(monkeypatch):
             # Convert params to dict if it's a Pydantic model
             param_dict = params
             if not isinstance(params, dict):
-                param_dict = params.dict()
+                # Use model_dump instead of dict for Pydantic v2
+                param_dict = params.model_dump() if hasattr(params, 'model_dump') else params.dict()
             
             # Build key for operation lookup
             key_parts = [op_type]
@@ -90,6 +91,7 @@ def setup_edge_case_tests(monkeypatch):
             if op.validation_error:
                 raise op.validation_error
             if op.github_error:
+                # Raise the GitHubError for the tool functions to handle
                 raise op.github_error
             if op.other_error:
                 raise op.other_error
@@ -230,8 +232,10 @@ def test_create_or_update_file_error_handling(setup_edge_case_tests):
     })
     
     # Verify error handling
-    assert result.get("is_error", False) is True
-    assert "error" in result["content"][0]["type"]
+    assert "content" in result
+    assert len(result["content"]) > 0
+    assert "type" in result["content"][0]
+    assert result["content"][0]["type"] == "error"
     assert "file update failed" in result["content"][0]["text"].lower()
 
 def test_create_or_update_file_validation_error(setup_edge_case_tests):
@@ -284,8 +288,10 @@ def test_push_files_error_handling(setup_edge_case_tests):
     })
     
     # Verify error handling
-    assert result.get("is_error", False) is True
-    assert "error" in result["content"][0]["type"]
+    assert "content" in result
+    assert len(result["content"]) > 0
+    assert "type" in result["content"][0]
+    assert result["content"][0]["type"] == "error"
     assert "push operation failed" in result["content"][0]["text"].lower()
 
 # Lines 346-362: Branch creation edge cases

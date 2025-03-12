@@ -228,17 +228,65 @@ def create_or_update_file(params: CreateOrUpdateFileParams) -> Dict[str, Any]:
         result = repository.create_file(**kwargs)
         
         logger.debug(f"File created/updated successfully: {params.path}")
+        
+        # Log detailed information about the response structure for debugging
+        logger.debug(f"Commit result type: {type(result['commit']).__name__}")
+        if hasattr(result['commit'], 'commit'):
+            logger.debug(f"Has nested commit: {result['commit'].commit is not None}")
+        
+        # Extract commit information safely with fallbacks
+        commit_sha = None
+        commit_message = None
+        commit_url = None
+        
+        try:
+            # Get commit SHA
+            if hasattr(result["commit"], "sha"):
+                commit_sha = result["commit"].sha
+            
+            # Get commit message with multiple fallbacks
+            if hasattr(result["commit"], "commit") and result["commit"].commit is not None:
+                if hasattr(result["commit"].commit, "message"):
+                    commit_message = result["commit"].commit.message
+            if commit_message is None and hasattr(result["commit"], "message"):
+                commit_message = result["commit"].message
+            if commit_message is None:
+                commit_message = params.message  # Fall back to the provided commit message
+            
+            # Get commit URL
+            if hasattr(result["commit"], "html_url"):
+                commit_url = result["commit"].html_url
+        except (AttributeError, KeyError) as e:
+            logger.warning(f"Error extracting commit details: {e}")
+            # Continue execution even if we can't get all commit details
+        
+        # Extract content information safely
+        content_sha = None
+        content_size = None
+        content_url = None
+        
+        try:
+            if hasattr(result["content"], "sha"):
+                content_sha = result["content"].sha
+            if hasattr(result["content"], "size"):
+                content_size = result["content"].size
+            if hasattr(result["content"], "html_url"):
+                content_url = result["content"].html_url
+        except (AttributeError, KeyError) as e:
+            logger.warning(f"Error extracting content details: {e}")
+            # Continue execution even if we can't get all content details
+        
         return {
             "commit": {
-                "sha": result["commit"].sha,
-                "message": result["commit"].message,
-                "html_url": result["commit"].html_url
+                "sha": commit_sha,
+                "message": commit_message,
+                "html_url": commit_url
             },
             "content": {
                 "path": params.path,
-                "sha": result["content"].sha,
-                "size": result["content"].size,
-                "html_url": result["content"].html_url
+                "sha": content_sha,
+                "size": content_size,
+                "html_url": content_url
             }
         }
     except GithubException as e:
@@ -295,9 +343,21 @@ def push_files(params: PushFilesParams) -> Dict[str, Any]:
                 kwargs["sha"] = file_shas[file_content.path]
             
             result = repository.create_file(**kwargs)
+            
+            # Extract content SHA safely
+            content_sha = None
+            try:
+                if hasattr(result["content"], "sha"):
+                    content_sha = result["content"].sha
+                elif isinstance(result["content"], dict) and "sha" in result["content"]:
+                    content_sha = result["content"]["sha"]
+            except (AttributeError, KeyError, TypeError) as e:
+                logger.warning(f"Error extracting content SHA for {file_content.path}: {e}")
+                # If we can't get the SHA, we'll proceed without it
+            
             results.append({
                 "path": file_content.path,
-                "sha": result["content"].sha
+                "sha": content_sha
             })
         
         logger.debug(f"Files pushed successfully to {params.owner}/{params.repo}")
