@@ -69,6 +69,16 @@
   - list_commits: List repository commits
 
 ### Testing Improvements
+- Test migration strategy implementation:
+  - Created comprehensive test migration plan (docs/test_migration_plan.md)
+  - Designed a four-phase migration approach (Analysis, Development, Verification, Cleanup)
+  - Developed a specialized test coverage analyzer tool for test migration
+  - Implemented initial integration tests to replace unit tests
+  - Established standard patterns for integration test development
+  - Created a module-by-module migration plan with clear priorities
+  - Documented risks and mitigation strategies for the migration
+  - Set up success criteria for verifying the migration's effectiveness
+
 - Advanced test infrastructure:
   - Developed modular coverage analysis package in `scripts/coverage/`:
     - Dedicated modules for test running, parsing, reporting, and data modeling
@@ -200,14 +210,15 @@ We've refactored the analyze_coverage.py script into a proper Python package wit
 6. Need to update API examples for synchronous usage
 
 ## Next Actions
-1. ✅ Debug and fix coverage analysis tool accuracy:
-   - ✅ Investigated how coverage data is being calculated
-   - ✅ Checked configuration in pyproject.toml
-   - ✅ Added debug output to see coverage command execution
-   - ✅ Ensured proper parsing of coverage output
-   - ✅ Fixed module filtering in coverage calculation
+1. Fix integration test failures and complete test migration:
+   - Troubleshoot and fix failing integration tests
+   - Redesign the approach for tool registration testing
+   - Continue with coverage analysis to ensure adequate coverage
+   - Fix incorrect module imports in integration tests
+   - Enhance error handling in integration tests
+   - Implement tests for remaining high-priority modules
 
-2. Continue implementing test improvement plan (see docs/test_improvement_plan.md):
+2. Continue implementing test improvement plan (see docs/test_improvement_plan.md and docs/test_migration_plan.md):
    - ✅ Fixed TestGitHubClient warning in unit tests
    - ✅ Improved coverage for converters/common/datetime.py (from 54% to 95%+)
    - ✅ Created test infrastructure for systematic coverage improvements

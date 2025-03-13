@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pygithub-mcp-server"
 # IMPORTANT: Keep version in sync with src/pygithub_mcp_server/version.py
 # TODO: Once project stabilizes, we'll use importlib.metadata to read version from here
-version = "0.5.24"
+version = "0.5.25"
 description = "GitHub MCP Server using PyGithub"
 requires-python = ">=3.10"
 dependencies = [
@@ -22,14 +22,12 @@ test = [
     "pytest-mock>=3.12.0",
     "pytest-json-report>=1.5.0",
     "jinja2>=3.0.0",
+    "coverage>=7.0.0",
 ]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = """
-    --cov=src/pygithub_mcp_server
-    --cov-report=term-missing
-    --cov-branch
     --tb=short
 """
 testpaths = ["tests"]
@@ -37,7 +35,7 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 markers = [
-    "integration: marks tests that use real GitHub API"
+    "integration: marks tests that use real PyGitHub API",
 ]
 
 # Log settings
@@ -49,6 +47,7 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 [tool.coverage.run]
 branch = true
 source = ["src/pygithub_mcp_server"]
+dynamic_context = "test_function"
 
 [tool.coverage.report]
 exclude_lines = [
@@ -59,6 +58,9 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 show_missing = true
+
+[tool.coverage.html]
+show_contexts = true
 
 [project.scripts]
 pygithub-mcp-server = "pygithub_mcp_server.__main__:main"

@@ -14,6 +14,26 @@ Key areas of current work:
 
 ## Recent Changes
 
+### Test Migration Plan Development
+- Created a comprehensive test migration plan to replace brittle unit tests with integration tests:
+  - Documented all unit tests targeted for replacement with appropriate priorities
+  - Designed a four-phase migration approach (Analysis, Development, Verification, Cleanup)
+  - Created a module-by-module implementation plan with clear priorities
+  - Established standard patterns for integration test development
+  - Defined clear success criteria for the migration process
+  - Identified risks and mitigation strategies for the migration
+  - Created a timeline and resource allocation for the work
+- Developed a specialized coverage analysis tool for test migration:
+  - Created `scripts/coverage/test_coverage_analyzer.py` for test-specific coverage
+  - Implemented test case extraction and mapping functionality
+  - Added support for comparing unit and integration test coverage
+  - Created detailed reporting for coverage gaps between test suites
+- Implemented initial integration tests to replace unit tests:
+  - Added `test_files_operations_integration.py` for file-related operations
+  - Created `test_branch_operations_integration.py` for branch operations
+  - Both follow real API testing principles from ADR-002
+  - Include robust error handling and API retry mechanisms
+
 ### Coverage Analysis Tool Improvements
 - Reorganized `analyze_coverage.py` into a proper Python package:
   - Created `scripts/coverage/` package with modular components
@@ -149,6 +169,23 @@ Key areas of current work:
 - Establish consistent patterns across all modules
 
 ## Implementation Lessons
+
+### Integration Test Development Learnings
+- Integration tests require careful attention to environment setup:
+  - Each test should create unique resources to avoid conflicts
+  - Resource cleanup is essential to prevent test pollution
+  - Rate limit handling is critical for reliable test execution
+  - Tests must be resilient to network and API failures
+- Test design patterns should focus on real behaviors:
+  - Each test should validate a specific behavior or scenario
+  - Tests should be readable and maintainable
+  - Standard fixtures improve consistency and reduce duplication
+  - Error handling should be comprehensive and informative
+- Balancing test coverage with performance:
+  - Group related test operations to minimize API calls
+  - Use conditional requests with ETags to reduce rate limit impact
+  - Organize tests to minimize setup/teardown overhead
+  - Consider caching strategies for frequently accessed data
 
 ### Robust GitHub API Response Handling
 - GitHub API responses may have different structures in different contexts:

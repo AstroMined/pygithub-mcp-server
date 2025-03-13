@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.25] - 2025-03-12
+
+### Added
+- Created comprehensive test migration plan to replace brittle mocked unit tests with integration tests:
+  - Developed docs/test_migration_plan.md with detailed migration approach
+  - Created specialized coverage analysis tool in scripts/coverage/test_coverage_analyzer.py
+  - Implemented initial integration tests following ADR-002 principles:
+    - Added test_files_operations_integration.py for file operations
+    - Created test_branch_operations_integration.py for branch operations
+  - Established standard patterns for integration test development
+  - Documented risks and mitigation strategies for the migration process
+
+### Changed
+- Enhanced testing strategy to follow ADR-002 more consistently:
+  - Moved away from brittle mock-based testing approach
+  - Standardized on real API testing with robust fixtures and cleanup
+  - Established test patterns for future development
+  - Updated Memory Bank documents to reflect new testing approach
+  - Set clear priorities and migration path for test improvements
+
 ## [0.5.24] - 2025-03-11
 
 ### Added

@@ -92,6 +92,7 @@ class TestCreateErrorResponse:
         except ValueError as e:
             response = create_error_response(e)
         
+        # pylint: disable=used-before-assignment
         assert response["is_error"]
         assert len(response["content"]) == 1
         assert response["content"][0]["type"] == "text"

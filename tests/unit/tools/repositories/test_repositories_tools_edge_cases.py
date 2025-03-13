@@ -210,34 +210,6 @@ def test_get_file_contents_parameter_validation(setup_edge_case_tests):
     assert "error" in result["content"][0]["type"]
     assert "validation error" in result["content"][0]["text"].lower()
 
-# Lines 246-262: File update error cases
-def test_create_or_update_file_error_handling(setup_edge_case_tests):
-    """Test create_or_update_file error handling (lines 246-262)."""
-    # Register a GitHub API error for file update
-    github_error = GitHubError("File update failed", response={"status": 422, "message": "Validation Failed", "errors": [{"resource": "File", "field": "sha", "code": "required"}]})
-    register_operation(
-        "create_or_update_file", 
-        {"owner": "test-owner", "repo": "test-repo", "path": "README.md"}, 
-        github_error=github_error
-    )
-    
-    # Call the tool
-    result = create_or_update_file({
-        "owner": "test-owner", 
-        "repo": "test-repo", 
-        "path": "README.md",
-        "content": "# Updated content",
-        "message": "Update README",
-        "branch": "main"
-    })
-    
-    # Verify error handling
-    assert "content" in result
-    assert len(result["content"]) > 0
-    assert "type" in result["content"][0]
-    assert result["content"][0]["type"] == "error"
-    assert "file update failed" in result["content"][0]["text"].lower()
-
 def test_create_or_update_file_validation_error(setup_edge_case_tests):
     """Test create_or_update_file validation error (lines 246-262)."""
     # Call with missing required parameters
@@ -267,32 +239,6 @@ def test_push_files_validation_error(setup_edge_case_tests):
     assert result.get("is_error", False) is True
     assert "error" in result["content"][0]["type"]
     assert "validation error" in result["content"][0]["text"].lower()
-
-def test_push_files_error_handling(setup_edge_case_tests):
-    """Test push_files error handling (lines 297-313)."""
-    # Register a GitHub API error for push files
-    github_error = GitHubError("Push operation failed", response={"status": 422, "message": "Validation Failed"})
-    register_operation(
-        "push_files", 
-        {"owner": "test-owner", "repo": "error-repo"}, 
-        github_error=github_error
-    )
-    
-    # Call the tool
-    result = push_files({
-        "owner": "test-owner", 
-        "repo": "error-repo",
-        "branch": "main",
-        "files": [{"path": "test.txt", "content": "test"}],
-        "message": "Add test file"
-    })
-    
-    # Verify error handling
-    assert "content" in result
-    assert len(result["content"]) > 0
-    assert "type" in result["content"][0]
-    assert result["content"][0]["type"] == "error"
-    assert "push operation failed" in result["content"][0]["text"].lower()
 
 # Lines 346-362: Branch creation edge cases
 def test_create_branch_validation_error(setup_edge_case_tests):
