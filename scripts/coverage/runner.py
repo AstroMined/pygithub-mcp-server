@@ -63,7 +63,20 @@ def collect_tests(include_integration: bool = False, only_integration: bool = Fa
             print(f"Collection stderr: {result.stderr.strip()}")
         
         # Each line in the output should be a test ID in the quiet mode
-        test_list = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        raw_test_list = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        
+        # Deduplicate test files by extracting the file path and creating a unique set
+        unique_test_files = set()
+        test_list = []
+        
+        for test_id in raw_test_list:
+            # Extract file path from test ID (everything before ::)
+            file_path = test_id.split("::")[0] if "::" in test_id else test_id
+            
+            # Only add each file once
+            if file_path not in unique_test_files:
+                unique_test_files.add(file_path)
+                test_list.append(file_path)
         
         # Count total tests
         total_tests = len(test_list)
@@ -138,7 +151,7 @@ def group_tests_by_module(test_list: List[str]) -> Dict[str, Dict]:
         
     return modules
 
-def run_module_tests(module_name: str, test_files: List[str], package_path: str, include_integration: bool, only_integration: bool = False) -> Tuple[str, List[TestFailure], int]:
+def run_module_tests(module_name: str, test_files: List[str], package_path: str, include_integration: bool, only_integration: bool = False, show_output: bool = False) -> Tuple[str, List[TestFailure], int]:
     """
     Run tests for a specific module with coverage.
     
@@ -148,6 +161,7 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
         package_path: Path to the package to measure coverage for
         include_integration: Whether to run integration tests
         only_integration: Whether to run only integration tests
+        show_output: Whether to show real-time test output
         
     Returns:
         Tuple of (output, failures, test_count)
@@ -171,26 +185,46 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
     if include_integration or only_integration:
         module_cmd.append("--run-integration")
         
+    # If showing output, add -v flag
+    if show_output:
+        module_cmd.append("-v")
+
     # print(f"Debug: Running module command: {' '.join(module_cmd)}")
     
     # Run tests for this module
     start_time = datetime.now()
-    result = subprocess.run(
-        module_cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
+    
+    if show_output:
+        # Don't capture output - display it in real-time
+        print(f"\n{'='*60}\nRunning tests with real-time output\n{'='*60}")
+        result = subprocess.run(
+            module_cmd,
+            text=True
+        )
+    else:
+        # Standard behavior - capture output
+        result = subprocess.run(
+            module_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
     end_time = datetime.now()
     elapsed = (end_time - start_time).total_seconds()
     
     return_code = result.returncode
     print(f"Module tests completed in {elapsed:.1f} seconds (Return code: {return_code})")
     
-    # If output is too long, truncate it
-    output_sample = (result.stdout + result.stderr)
-    if len(output_sample) > 500:
-        output_sample = output_sample[:500] + "... [truncated]"
+    # Handle output differently based on capture mode
+    if show_output:
+        # When showing output in real-time, stdout and stderr are None
+        output_sample = "Output shown in real-time (not captured)"
+    else:
+        # Only when capturing output
+        output_sample = (result.stdout + result.stderr)
+        if len(output_sample) > 500:
+            output_sample = output_sample[:500] + "... [truncated]"
         
     if return_code != 0 and return_code != 5:  # 5 is test failures
         print(f"Warning: Module tests returned non-zero exit code. Output sample:\n{output_sample}")
@@ -233,7 +267,7 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
         
     return output_sample, failures, len(test_files)
 
-def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False, only_integration: bool = False) -> Tuple[str, List[TestFailure]]:
+def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False, only_integration: bool = False, show_output: bool = False) -> Tuple[str, List[TestFailure]]:
     """
     Run pytest with coverage and return the output and test failures.
     
@@ -241,6 +275,7 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         package_path: Path to the package to measure coverage for
         include_integration: Whether to run integration tests
         only_integration: Whether to run only integration tests
+        show_output: Whether to show real-time test output
         
     Returns:
         Tuple of (coverage_output, test_failures)
@@ -300,24 +335,42 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
             if include_integration:
                 all_cmd.append("--run-integration")
             
+        # If showing output, add -v flag
+        if show_output:
+            all_cmd.append("-v")
+
         # print(f"Debug: Running fallback command: {' '.join(all_cmd)}")
         
-        result = subprocess.run(
-            all_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        if show_output:
+            # Don't capture output - display it in real-time
+            print(f"\n{'='*60}\nRunning all tests with real-time output\n{'='*60}")
+            result = subprocess.run(
+                all_cmd,
+                text=True
+            )
+        else:
+            # Standard behavior - capture output
+            result = subprocess.run(
+                all_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
         
         # Print return code to help debug issues
         print(f"Return code: {result.returncode}")
         
-        # If there's an error, show a sample of the output to help diagnose
-        if result.returncode != 0:
-            output_sample = result.stdout + result.stderr
-            if len(output_sample) > 500:
-                output_sample = output_sample[:500] + "... [truncated]"
-            print(f"Command output sample:\n{output_sample}")
+        # Handle output differently based on capture mode
+        if show_output:
+            # When showing output in real-time, stdout and stderr are None
+            output_sample = "Output shown in real-time (not captured)"
+        else:
+            # Only when capturing output
+            if result.returncode != 0:
+                output_sample = (result.stdout + result.stderr)
+                if len(output_sample) > 500:
+                    output_sample = output_sample[:500] + "... [truncated]"
+                print(f"Command output sample:\n{output_sample}")
         
         # Generate coverage report
         cov_report = subprocess.run(
@@ -377,7 +430,8 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
             test_list,
             package_path,
             include_integration,
-            only_integration
+            only_integration,
+            show_output
         )
         
         # Add failures to the list

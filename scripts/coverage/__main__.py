@@ -42,6 +42,8 @@ def main() -> int:
                         help="Generate JUnit XML report for CI/CD integration")
     parser.add_argument("--package-path", default="src/pygithub_mcp_server",
                         help="Path to the package to measure coverage for")
+    parser.add_argument("--show-output", action="store_true", 
+                        help="Show real-time test output (similar to pytest -s)")
     
     args = parser.parse_args()
     
@@ -54,7 +56,8 @@ def main() -> int:
         coverage_output, test_failures = run_coverage(
             package_path=args.package_path,
             include_integration=args.include_integration,
-            only_integration=args.only_integration
+            only_integration=args.only_integration,
+            show_output=args.show_output
         )
     else:
         # Just generate coverage report from existing .coverage data

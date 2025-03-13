@@ -87,6 +87,9 @@
     - Priority-based module categorization
     - Module-specific test execution support
     - Package structure with proper imports via `__main__.py`
+    - Real-time output display with `--show-output` flag for debugging test execution
+    - Deduplication of test files to prevent duplicate test runs
+    - Smart handling of output capture vs. real-time display modes
   - Created `scripts/generate_tool_tests.py` for generating standardized tests
   - Added test templates that follow ADR-002 principles with dataclasses instead of mocks
   - Documented clear workflow for viewing and using coverage reports

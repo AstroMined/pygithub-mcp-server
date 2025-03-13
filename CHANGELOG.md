@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.27] - 2025-03-13
+
+### Added
+- Added real-time output display capability to the coverage analysis tool:
+  - Implemented `--show-output` flag in scripts/coverage/__main__.py for real-time test output
+  - Improved test visibility for debugging long-running tests and rate limit issues
+  - Enhanced subprocess management to support both capturing and real-time output modes
+
+### Fixed
+- Fixed test duplication issue in the coverage analysis tool:
+  - Added deduplication of test files in the collection phase
+  - Prevented test files from being executed multiple times
+  - Improved stability by properly handling None values in output processing
+  - Fixed TypeError when accessing stdout/stderr in real-time output mode
+
 ## [0.5.26] - 2025-03-12
 
 ### Fixed

@@ -63,6 +63,12 @@ Key areas of current work:
   - Added fallback grouping for tests with non-standard paths
   - Added detailed diagnostic logging to track test grouping
   - Added Jinja2 dependency for HTML report generation
+- Added real-time output display capability to debug test execution:
+  - Implemented `--show-output` flag to display real-time test output
+  - Fixed test execution to avoid duplicating test runs
+  - Added proper handling for both captured and real-time output modes
+  - Improved error messages and diagnostic information during test runs
+  - Enhanced stability by properly handling None values in output processing
 
 ### Testing Infrastructure Improvements
 - Created a more maintainable and modular approach to coverage analysis:
