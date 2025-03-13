@@ -14,6 +14,20 @@ Key areas of current work:
 
 ## Recent Changes
 
+### Repository Operations Test Fixes
+- Fixed integration test failures in repository operations:
+  - Fixed `test_update_file_integration` by properly distinguishing between file creation and update in `create_or_update_file()`:
+    - Now uses `repository.update_file()` when a SHA is provided (for updates)
+    - Uses `repository.create_file()` when no SHA is provided (for new files)
+  - Fixed `test_push_files_error_handling` by adding proper validation:
+    - Implemented early validation for empty file content
+    - Improved error handling with explicit GitHubError exceptions
+    - Enhanced error propagation for invalid content
+  - Improved error handling in repository operations:
+    - Added validation before making API calls
+    - Enhanced defensive coding practices
+    - Improved error message clarity
+
 ### Test Migration Plan Development
 - Created a comprehensive test migration plan to replace brittle unit tests with integration tests:
   - Documented all unit tests targeted for replacement with appropriate priorities

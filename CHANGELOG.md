@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.26] - 2025-03-12
+
+### Fixed
+- Fixed `test_update_file_integration` failure:
+  - Modified `create_or_update_file()` to properly distinguish between creating and updating files
+  - Now uses `repository.update_file()` when a SHA is provided (for updates)
+  - Continues to use `repository.create_file()` when no SHA is provided (for new files)
+- Fixed `test_push_files_error_handling` failure:
+  - Added proper content validation to the `push_files()` function
+  - Implemented early validation for empty file content before attempting GitHub API calls
+  - Improved error handling with explicit GitHubError for invalid content
+- Enhanced defensive coding practices for the repository operation module:
+  - Added input validation before making API calls
+  - Improved error propagation from PyGithub to GitHubError instances
+
 ## [0.5.25] - 2025-03-12
 
 ### Added

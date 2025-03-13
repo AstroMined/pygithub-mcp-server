@@ -220,12 +220,13 @@ def create_or_update_file(params: CreateOrUpdateFileParams) -> Dict[str, Any]:
             "branch": params.branch
         }
         
-        # Add SHA if updating an existing file
+        # Determine whether to create or update based on sha presence
         if params.sha:
-            kwargs["sha"] = params.sha
-        
-        # Create or update file
-        result = repository.create_file(**kwargs)
+            # Update existing file
+            result = repository.update_file(sha=params.sha, **kwargs)
+        else:
+            # Create new file
+            result = repository.create_file(**kwargs)
         
         logger.debug(f"File created/updated successfully: {params.path}")
         
@@ -310,6 +311,12 @@ def push_files(params: PushFilesParams) -> Dict[str, Any]:
         GitHubError: If file push fails
     """
     logger.debug(f"Pushing {len(params.files)} files to {params.owner}/{params.repo}")
+    
+    # Validate file content first
+    for file_content in params.files:
+        if not file_content.content:
+            raise GitHubError("File content cannot be empty")
+    
     try:
         client = GitHubClient.get_instance()
         repository = client.get_repo(f"{params.owner}/{params.repo}")

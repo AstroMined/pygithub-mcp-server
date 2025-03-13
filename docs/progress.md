@@ -125,6 +125,10 @@
 - [x] Improved converters/common/datetime.py from 54% to 95%+ coverage
 - [x] Created comprehensive test infrastructure for systematic coverage improvements
 - [x] Fixed coverage analysis tool accuracy issue (was reporting 28% instead of ~90%)
+- [x] Fixed integration test issues in repository operations:
+  - [x] Fixed `test_update_file_integration` by properly handling file creation vs update
+  - [x] Fixed `test_push_files_error_handling` with proper content validation
+  - [x] Improved error handling in repository operations
 - [ ] Continue improving coverage for remaining modules:
   - [ ] client/client.py (currently 87%)
   - [x] tools/repositories/tools.py (improved error handling robustness)
