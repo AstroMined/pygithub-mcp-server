@@ -1,0 +1,3145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coverage Analysis Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .summary { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+        .summary-item { background: #f5f5f5; padding: 15px; border-radius: 5px; flex: 1; min-width: 200px; }
+        .high { color: #d9534f; }
+        .medium { color: #f0ad4e; }
+        .low { color: #5cb85c; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .progress-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 10px;
+        }
+        .priority-high { background-color: #ffeeed; }
+        .priority-medium { background-color: #fff8ee; }
+        .priority-low { background-color: #efffee; }
+        .module-details { display: none; padding: 10px; background: #f9f9f9; border-left: 5px solid #ddd; margin: 10px 0; }
+        .toggle-details { cursor: pointer; color: #0066cc; user-select: none; }
+        .toggle-details:hover { text-decoration: underline; }
+        .test-failures { margin-top: 30px; }
+        .test-failure { background-color: #ffeeed; }
+        .test-failure-message { font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background-color: #f2f2f2; cursor: pointer; margin-right: 5px; border-radius: 5px 5px 0 0; }
+        .tab.active { background-color: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coverage Analysis Report</h1>
+        <p>Generated on: 2025-03-12 23:39:11</p>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'coverage-tab')">Coverage Report</div>
+            <div class="tab" onclick="openTab(event, 'failures-tab')">Test Failures (115)</div>
+        </div>
+        
+        <div id="coverage-tab" class="tab-content active">
+            <div class="summary">
+                <div class="summary-item">
+                    <h3>Overall Coverage</h3>
+                    <div class="progress-bar">
+                        <div class="progress-value" style="width: 27.0%; background-color: #d9534f;"></div>
+                    </div>
+                    <p>27.00%</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Statements</h3>
+                    <p>1869 total / 1262 missing</p>
+                </div>
+                
+                <div class="summary-item">
+                    <h3>Priority Distribution</h3>
+                    <p><span class="high">■</span> High: 23 modules</p>
+                    <p><span class="medium">■</span> Medium: 6 modules</p>
+                    <p><span class="low">■</span> Low: 15 modules</p>
+                </div>
+            </div>
+            
+            
+            <h2 class="high">High Priority Modules</h2>
+            <table>
+                <tr>
+                    <th>Module</th>
+                    <th>Coverage</th>
+                    <th>Missing / Total</th>
+                    <th>Details</th>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/__main__.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 0%; background-color: #d9534f;"></div>
+                        </div>
+                        0%
+                    </td>
+                    <td>4 / 4</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-0')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-0" class="module-details">
+                            <p><strong>Missing Lines:</strong> 6-11</p>
+                            <p><strong>Ranges:</strong> 6-11</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/errors/handlers.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 5%; background-color: #d9534f;"></div>
+                        </div>
+                        5%
+                    </td>
+                    <td>98 / 106</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-1')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-1" class="module-details">
+                            <p><strong>Missing Lines:</strong> 38-145, 158-177</p>
+                            <p><strong>Ranges:</strong> 38-145, 158-177</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/parameters.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 7%; background-color: #d9534f;"></div>
+                        </div>
+                        7%
+                    </td>
+                    <td>61 / 70</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-2')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-2" class="module-details">
+                            <p><strong>Missing Lines:</strong> 23-34, 46-65, 77-101, 113-134, 149-160</p>
+                            <p><strong>Ranges:</strong> 23-34, 46-65, 77-101, 113-134, 149-160</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/common/datetime.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 9%; background-color: #d9534f;"></div>
+                        </div>
+                        9%
+                    </td>
+                    <td>42 / 49</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-3')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-3" class="module-details">
+                            <p><strong>Missing Lines:</strong> 21, 42-84, 102-115, 124-135</p>
+                            <p><strong>Ranges:</strong> 42-84, 102-115, 124-135</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/operations/repositories.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 9%; background-color: #d9534f;"></div>
+                        </div>
+                        9%
+                    </td>
+                    <td>170 / 193</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-4')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-4" class="module-details">
+                            <p><strong>Missing Lines:</strong> 48-55, 70-94, 109-125, 140-155, 170-195, 210-295, 313-378, 393-421, 436-465</p>
+                            <p><strong>Ranges:</strong> 48-55, 70-94, 109-125, 140-155, 170-195, 210-295, 313-378, 393-421, 436-465</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/operations/issues.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 10%; background-color: #d9534f;"></div>
+                        </div>
+                        10%
+                    </td>
+                    <td>173 / 196</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-5')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-5" class="module-details">
+                            <p><strong>Missing Lines:</strong> 49-77, 92-98, 113-169, 184-246, 261-268, 283-307, 322-330, 342-349, 364-377, 389-404</p>
+                            <p><strong>Ranges:</strong> 49-77, 92-98, 113-169, 184-246, 261-268, 283-307, 322-330, 342-349, 364-377, 389-404</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/common/pagination.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 11%; background-color: #d9534f;"></div>
+                        </div>
+                        11%
+                    </td>
+                    <td>45 / 52</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-6')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-6" class="module-details">
+                            <p><strong>Missing Lines:</strong> 28-43, 61-101</p>
+                            <p><strong>Ranges:</strong> 28-43, 61-101</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/errors/formatters.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 11%; background-color: #d9534f;"></div>
+                        </div>
+                        11%
+                    </td>
+                    <td>18 / 22</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-7')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-7" class="module-details">
+                            <p><strong>Missing Lines:</strong> 29-47, 59</p>
+                            <p><strong>Ranges:</strong> 29-47</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/client/rate_limit.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 14%; background-color: #d9534f;"></div>
+                        </div>
+                        14%
+                    </td>
+                    <td>43 / 53</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-8')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-8" class="module-details">
+                            <p><strong>Missing Lines:</strong> 27-34, 45-56, 73-85, 109-137</p>
+                            <p><strong>Ranges:</strong> 27-34, 45-56, 73-85, 109-137</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/config/settings.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 16%; background-color: #d9534f;"></div>
+                        </div>
+                        16%
+                    </td>
+                    <td>25 / 33</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-9')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-9" class="module-details">
+                            <p><strong>Missing Lines:</strong> 43-78</p>
+                            <p><strong>Ranges:</strong> 43-78</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/tools/repositories/tools.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 16%; background-color: #d9534f;"></div>
+                        </div>
+                        16%
+                    </td>
+                    <td>153 / 182</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-10')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-10" class="module-details">
+                            <p><strong>Missing Lines:</strong> 44-72, 92-120, 139-167, 186-214, 234-262, 285-313, 334-362, 382-410, 431-459</p>
+                            <p><strong>Ranges:</strong> 44-72, 92-120, 139-167, 186-214, 234-262, 285-313, 334-362, 382-410, 431-459</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/tools/issues/tools.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 17%; background-color: #d9534f;"></div>
+                        </div>
+                        17%
+                    </td>
+                    <td>151 / 183</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-11')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-11" class="module-details">
+                            <p><strong>Missing Lines:</strong> 51-79, 103-121, 140-156, 181-197, 217-233, 255-271, 292-308, 328-344, 364-380, 400-434, 445-462</p>
+                            <p><strong>Ranges:</strong> 51-79, 103-121, 140-156, 181-197, 217-233, 255-271, 292-308, 328-344, 364-380, 400-434, 445-462</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/responses.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 21%; background-color: #d9534f;"></div>
+                        </div>
+                        21%
+                    </td>
+                    <td>11 / 16</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-12')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-12" class="module-details">
+                            <p><strong>Missing Lines:</strong> 29-40, 56-59</p>
+                            <p><strong>Ranges:</strong> 29-40, 56-59</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/tools/__init__.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 24%; background-color: #d9534f;"></div>
+                        </div>
+                        24%
+                    </td>
+                    <td>46 / 68</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-13')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-13" class="module-details">
+                            <p><strong>Missing Lines:</strong> 53-78, 94-96, 108-136</p>
+                            <p><strong>Ranges:</strong> 53-78, 94-96, 108-136</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/client/client.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 32%; background-color: #d9534f;"></div>
+                        </div>
+                        32%
+                    </td>
+                    <td>38 / 61</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-14')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-14" class="module-details">
+                            <p><strong>Missing Lines:</strong> 40-42, 51-55, 59-69, 77-78, 90-96, 108, 119-124, 138-145</p>
+                            <p><strong>Ranges:</strong> 40-42, 51-55, 59-69, 77-78, 90-96, 119-124, 138-145</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/users/users.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 38%; background-color: #d9534f;"></div>
+                        </div>
+                        38%
+                    </td>
+                    <td>3 / 6</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-15')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-15" class="module-details">
+                            <p><strong>Missing Lines:</strong> 21-24</p>
+                            <p><strong>Ranges:</strong> 21-24</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/tools/repositories/__init__.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 40%; background-color: #d9534f;"></div>
+                        </div>
+                        40%
+                    </td>
+                    <td>3 / 5</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-16')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-16" class="module-details">
+                            <p><strong>Missing Lines:</strong> 15-29</p>
+                            <p><strong>Ranges:</strong> 15-29</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/utils/environment.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 41%; background-color: #d9534f;"></div>
+                        </div>
+                        41%
+                    </td>
+                    <td>26 / 52</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-17')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-17" class="module-details">
+                            <p><strong>Missing Lines:</strong> 29, 34-37, 44-&gt;exit, 52-&gt;46, 65-68, 84-89, 106-121</p>
+                            <p><strong>Ranges:</strong> 34-37, 44 (branch), 52 (branch), 65-68, 84-89, 106-121</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/schemas/repositories.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 49%; background-color: #d9534f;"></div>
+                        </div>
+                        49%
+                    </td>
+                    <td>51 / 138</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-18')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-18" class="module-details">
+                            <p><strong>Missing Lines:</strong> 28-30, 36-38, 44-46, 52-54, 70-72, 78-80, 86-88, 106-108, 114-116, 122-127, 146-148, 163-165, 192-194, 210-212, 218-223</p>
+                            <p><strong>Ranges:</strong> 28-30, 36-38, 44-46, 52-54, 70-72, 78-80, 86-88, 106-108, 114-116, 122-127, 146-148, 163-165, 192-194, 210-212, 218-223</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/schemas/issues.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 50%; background-color: #d9534f;"></div>
+                        </div>
+                        50%
+                    </td>
+                    <td>65 / 176</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-19')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-19" class="module-details">
+                            <p><strong>Missing Lines:</strong> 42-44, 85-87, 93-95, 101-103, 109-111, 117-122, 142-156, 197-200, 206-208, 223-225, 251-253, 259-264, 284-298, 314-316, 340-342, 357-359</p>
+                            <p><strong>Ranges:</strong> 42-44, 85-87, 93-95, 101-103, 109-111, 117-122, 142-156, 197-200, 206-208, 223-225, 251-253, 259-264, 284-298, 314-316, 340-342, 357-359</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/schemas/base.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 55%; background-color: #d9534f;"></div>
+                        </div>
+                        55%
+                    </td>
+                    <td>9 / 27</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-20')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-20" class="module-details">
+                            <p><strong>Missing Lines:</strong> 22-24, 30-32, 47-49</p>
+                            <p><strong>Ranges:</strong> 22-24, 30-32, 47-49</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/converters/issues/issues.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 56%; background-color: #d9534f;"></div>
+                        </div>
+                        56%
+                    </td>
+                    <td>6 / 16</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-21')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-21" class="module-details">
+                            <p><strong>Missing Lines:</strong> 26, 43-46, 67, 105</p>
+                            <p><strong>Ranges:</strong> 43-46</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-high">
+                    <td>src/pygithub_mcp_server/server.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 67%; background-color: #d9534f;"></div>
+                        </div>
+                        67%
+                    </td>
+                    <td>8 / 25</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('high-22')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="high-22" class="module-details">
+                            <p><strong>Missing Lines:</strong> 20, 44-61</p>
+                            <p><strong>Ranges:</strong> 44-61</p>
+                        </div>
+                    </td>
+                </tr>
+                
+            </table>
+            
+            
+            
+            <h2 class="medium">Medium Priority Modules</h2>
+            <table>
+                <tr>
+                    <th>Module</th>
+                    <th>Coverage</th>
+                    <th>Missing / Total</th>
+                    <th>Details</th>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/converters/repositories/contents.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 75%; background-color: #f0ad4e;"></div>
+                        </div>
+                        75%
+                    </td>
+                    <td>1 / 4</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-0')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-0" class="module-details">
+                            <p><strong>Missing Lines:</strong> 24</p>
+                            <p><strong>Ranges:</strong> None</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/converters/repositories/repositories.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 75%; background-color: #f0ad4e;"></div>
+                        </div>
+                        75%
+                    </td>
+                    <td>1 / 4</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-1')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-1" class="module-details">
+                            <p><strong>Missing Lines:</strong> 24</p>
+                            <p><strong>Ranges:</strong> None</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/errors/exceptions.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 76%; background-color: #f0ad4e;"></div>
+                        </div>
+                        76%
+                    </td>
+                    <td>5 / 21</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-2')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-2" class="module-details">
+                            <p><strong>Missing Lines:</strong> 21-22, 64-67</p>
+                            <p><strong>Ranges:</strong> 21-22, 64-67</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/schemas/responses.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 78%; background-color: #f0ad4e;"></div>
+                        </div>
+                        78%
+                    </td>
+                    <td>3 / 21</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-3')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-3" class="module-details">
+                            <p><strong>Missing Lines:</strong> 23-25</p>
+                            <p><strong>Ranges:</strong> 23-25</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/version.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 80%; background-color: #f0ad4e;"></div>
+                        </div>
+                        80%
+                    </td>
+                    <td>2 / 10</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-4')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-4" class="module-details">
+                            <p><strong>Missing Lines:</strong> 48, 56</p>
+                            <p><strong>Ranges:</strong> None</p>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="priority-medium">
+                    <td>src/pygithub_mcp_server/converters/issues/comments.py</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 83%; background-color: #f0ad4e;"></div>
+                        </div>
+                        83%
+                    </td>
+                    <td>1 / 6</td>
+                    <td><span class="toggle-details" onclick="toggleDetails('medium-5')">Show Details</span></td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <div id="medium-5" class="module-details">
+                            <p><strong>Missing Lines:</strong> 24</p>
+                            <p><strong>Ranges:</strong> None</p>
+                        </div>
+                    </td>
+                </tr>
+                
+            </table>
+            
+            
+            
+            <h2 class="low">Low Priority Modules <span class="toggle-details" onclick="toggleLowPriority()">Show</span></h2>
+            <div id="low-priority-section" style="display: none;">
+                <table>
+                    <tr>
+                        <th>Module</th>
+                        <th>Coverage</th>
+                        <th>Missing / Total</th>
+                        <th>Details</th>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 4</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-0')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-0" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/client/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 3</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-1')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-1" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/config/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-2')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-2" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/converters/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 9</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-3')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-3" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/converters/common/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-4')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-4" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/converters/issues/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 3</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-5')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-5" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/converters/repositories/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 3</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-6')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-6" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/converters/users/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-7')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-7" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/errors/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 4</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-8')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-8" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/operations/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-9')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-9" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/schemas/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 8</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-10')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-10" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/schemas/pull_requests.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 10</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-11')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-11" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/schemas/search.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 14</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-12')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-12" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/tools/issues/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-13')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-13" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="priority-low">
+                        <td>src/pygithub_mcp_server/utils/__init__.py</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: 100%; background-color: #5cb85c;"></div>
+                            </div>
+                            100%
+                        </td>
+                        <td>0 / 2</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('low-14')">Show Details</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="low-14" class="module-details">
+                                <p><strong>Missing Lines:</strong> </p>
+                                <p><strong>Ranges:</strong> None</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </div>
+            
+        </div>
+        
+        <div id="failures-tab" class="tab-content">
+            <h2>Test Failures Summary</h2>
+            
+            
+                
+                
+                
+                    
+                    
+                        
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                
+                <div class="summary">
+                
+                    <div class="summary-item">
+                        <h3>Other</h3>
+                        <p>115 failures</p>
+                    </div>
+                
+                </div>
+                
+                <table>
+                    <tr>
+                        <th>Test</th>
+                        <th>Category</th>
+                        <th>Duration</th>
+                        <th>Details</th>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_singleton_pattern</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-0')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-0" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_direct_instantiation</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-1')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-1" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_github_property</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-2')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-2" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_get_repo_success</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-3')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-3" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_get_repo_not_found</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-4')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-4" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_client.py::test_get_repo_invalid_name</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-5')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-5" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_check_rate_limit_real_api</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-6')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-6" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_exponential_backoff</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-7')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-7" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_exponential_backoff_max_attempts</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-8')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-8" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_wait_for_rate_limit_reset_past_time</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-9')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-9" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_wait_for_rate_limit_reset_future_time</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-10')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-10" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_handle_rate_limit_with_backoff_test_mode</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-11')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-11" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_handle_rate_limit_with_backoff_max_attempts</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-12')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-12" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_handle_rate_limit_with_exception_reset_time</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-13')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-13" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/client/test_rate_limit.py::TestRateLimit::test_handle_rate_limit_without_reset_time</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-14')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-14" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/converters/common/test_pagination_integration.py::test_pagination_with_real_api</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-15')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-15" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/converters/common/test_pagination_integration.py::test_pagination_with_converted_items</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-16')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-16" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_handle_github_exception_not_found</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-17')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-17" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_handle_github_exception_invalid_input</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-18')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-18" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_handle_github_exception_rate_limit</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-19')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-19" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_format_validation_error</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-20')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-20" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_format_validation_error_no_errors</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-21')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-21" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/errors/test_handlers_integration.py::test_format_validation_error_no_data</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-22')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-22" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_add_issue_comment</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-23')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-23" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_list_issue_comments</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-24')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-24" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_update_issue_comment</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-25')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-25" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_delete_issue_comment</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-26')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-26" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_list_issue_comments_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-27')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-27" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_comments.py::test_comment_lifecycle</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-28')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-28" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_create.py::test_create_issue_required_params</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-29')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-29" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_create.py::test_create_issue_all_params</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-30')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-30" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_create.py::test_create_and_verify_issue</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-31')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-31" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_labels.py::test_add_issue_labels</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-32')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-32" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_labels.py::test_remove_issue_label</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-33')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-33" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_labels.py::test_add_issue_labels_multiple_calls</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-34')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-34" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_labels.py::test_remove_nonexistent_label</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-35')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-35" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_labels.py::test_label_lifecycle</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-36')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-36" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_lifecycle.py::test_issue_lifecycle</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-37')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-37" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_basic</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-38')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-38" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_state_filter</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-39')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-39" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_pagination</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-40')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-40" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_labels_filter</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-41')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-41" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_sort_and_direction</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-42')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-42" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_list.py::test_list_issues_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-43')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-43" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_state</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-44')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-44" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_sort</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-45')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-45" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_direction</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-46')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-46" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_page</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-47')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-47" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_per_page</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-48')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-48" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_labels</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-49')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-49" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_invalid_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-50')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-50" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_update_issue_with_no_changes</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-51')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-51" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_update_issue_invalid_milestone</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-52')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-52" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_create_issue_invalid_milestone</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-53')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-53" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issue_comments_invalid_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-54')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-54" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_parameter_validation.py::TestIssueOperationsValidation::test_list_issues_timezone_handling</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-55')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-55" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_simple.py::test_simple_issue_creation</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-56')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-56" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_simple.py::test_simple_list_issues</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-57')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-57" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_simple.py::test_list_issues_with_state</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-58')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-58" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_title</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-59')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-59" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_body</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-60')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-60" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_state</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-61')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-61" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_labels</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-62')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-62" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_multiple_fields</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-63')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-63" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/issues/test_update.py::test_update_issue_no_changes</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-64')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-64" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_branch_operations_integration.py::test_create_branch_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-65')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-65" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_branch_operations_integration.py::test_create_branch_error_handling</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-66')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-66" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_branch_operations_integration.py::test_create_branch_and_list_commits</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-67')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-67" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_files_operations_integration.py::test_create_file_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-68')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-68" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_files_operations_integration.py::test_update_file_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-69')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-69" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_files_operations_integration.py::test_push_files_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-70')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-70" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_files_operations_integration.py::test_push_files_error_handling</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-71')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-71" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_repositories_integration.py::test_get_repository_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-72')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-72" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_repositories_integration.py::test_search_repositories_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-73')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-73" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_repositories_integration.py::test_get_file_contents_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-74')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-74" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/operations/repositories/test_repositories_integration.py::test_list_commits_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-75')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-75" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/test_server.py::TestServer::test_create_server_basic</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-76')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-76" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/test_server.py::TestServer::test_server_tools_callable</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-77')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-77" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/test_server.py::TestServer::test_server_metadata</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-78')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-78" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/test_server.py::TestServer::test_server_with_custom_env</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-79')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-79" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/test_server.py::TestServer::test_server_logging_initialization</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-80')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-80" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_create_issue_missing_required_params</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-81')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-81" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_create_issue_invalid_repo</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-82')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-82" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_get_issue_invalid_number</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-83')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-83" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_update_issue_nonexistent</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-84')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-84" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_update_issue_empty_values</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-85')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-85" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_add_issue_comment_invalid_issue</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-86')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-86" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issue_comments_invalid_issue</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-87')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-87" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issue_comments_pagination</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-88')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-88" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_update_comment_nonexistent</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-89')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-89" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_delete_comment_nonexistent</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-90')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-90" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_add_labels_nonexistent_issue</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-91')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-91" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_remove_label_nonexistent_issue</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-92')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-92" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_remove_nonexistent_label</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-93')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-93" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issues_pagination</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-94')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-94" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issues_invalid_params</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-95')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-95" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issues_invalid_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-96')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-96" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_error_cases.py::TestIssueToolsErrorHandling::test_list_issue_comments_invalid_since</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-97')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-97" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_issue_tools.py::TestIssueTools::test_issue_lifecycle</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-98')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-98" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/issues/test_issue_tools.py::TestIssueTools::test_list_issues</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-99')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-99" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_get_repository_not_found</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-100')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-100" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_create_or_update_file_validation_error</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-101')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-101" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_list_commits_validation_error</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-102')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-102" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_push_files_validation_error</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-103')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-103" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_create_branch_validation_error</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-104')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-104" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_create_or_update_file_missing_sha</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-105')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-105" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_create_branch_already_exists</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-106')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-106" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_get_file_contents_not_found</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-107')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-107" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_update_existing_file_missing_sha</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-108')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-108" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_errors.py::test_search_repositories_invalid_query</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-109')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-109" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_search_repositories_empty_results</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-110')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-110" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_get_repository_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-111')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-111" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_list_commits_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-112')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-112" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_get_file_contents_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-113')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-113" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr class="test-failure">
+                        <td>tests/integration/tools/repositories/test_repositories_tools_integration.py::test_search_repositories_integration</td>
+                        <td>Other</td>
+                        <td>0.000s</td>
+                        <td><span class="toggle-details" onclick="toggleDetails('failure-114')">Show Error</span></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div id="failure-114" class="module-details">
+                                <div class="test-failure-message">No details available</div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </table>
+            
+        </div>
+        
+        <script>
+            function toggleDetails(id) {
+                const element = document.getElementById(id);
+                if (element.style.display === 'none' || !element.style.display) {
+                    element.style.display = 'block';
+                } else {
+                    element.style.display = 'none';
+                }
+            }
+            
+            function toggleLowPriority() {
+                const section = document.getElementById('low-priority-section');
+                const button = document.querySelector('h2.low .toggle-details');
+                if (section.style.display === 'none') {
+                    section.style.display = 'block';
+                    button.textContent = 'Hide';
+                } else {
+                    section.style.display = 'none';
+                    button.textContent = 'Show';
+                }
+            }
+            
+            function openTab(evt, tabName) {
+                // Hide all tab content
+                const tabContents = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].className = tabContents[i].className.replace(" active", "");
+                }
+                
+                // Remove active class from all tabs
+                const tabs = document.getElementsByClassName("tab");
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].className = tabs[i].className.replace(" active", "");
+                }
+                
+                // Show the current tab and add an "active" class to the button
+                document.getElementById(tabName).className += " active";
+                evt.currentTarget.className += " active";
+            }
+        </script>
+    </div>
+</body>
+</html>

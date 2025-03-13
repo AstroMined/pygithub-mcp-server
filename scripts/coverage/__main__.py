@@ -34,6 +34,8 @@ def main() -> int:
                         help="Generate HTML report in addition to JSON")
     parser.add_argument("--include-integration", action="store_true", 
                         help="Include integration tests in the coverage analysis")
+    parser.add_argument("--only-integration", action="store_true", 
+                        help="Run only integration tests in the coverage analysis")
     parser.add_argument("--threshold", type=float, 
                         help="Fail if coverage is below this percentage")
     parser.add_argument("--junit-xml", 
@@ -51,7 +53,8 @@ def main() -> int:
         print(f"Running tests with coverage for {args.package_path}")
         coverage_output, test_failures = run_coverage(
             package_path=args.package_path,
-            include_integration=args.include_integration
+            include_integration=args.include_integration,
+            only_integration=args.only_integration
         )
     else:
         # Just generate coverage report from existing .coverage data

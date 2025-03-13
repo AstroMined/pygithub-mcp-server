@@ -25,12 +25,13 @@ def get_line_from_location(location: str) -> int:
     except ValueError:
         return 0
 
-def collect_tests(include_integration: bool = False) -> List[str]:
+def collect_tests(include_integration: bool = False, only_integration: bool = False) -> List[str]:
     """
     Collect all test nodeids.
     
     Args:
         include_integration: Whether to include integration tests
+        only_integration: Whether to run only integration tests
         
     Returns:
         List of test nodeids
@@ -38,11 +39,18 @@ def collect_tests(include_integration: bool = False) -> List[str]:
     print("Collecting tests... ")
     
     # First collect all tests to get a count
-    collect_cmd = ["python", "-m", "pytest", "tests", "--collect-only", "-q"]
-    if include_integration:
-        collect_cmd.append("--run-integration")
+    collect_cmd = ["python", "-m", "pytest", "--collect-only", "-q"]
+    
+    if only_integration:
+        # When only_integration is True, we only want to run integration tests
+        collect_cmd.extend(["tests/integration", "--run-integration"])
     else:
-        collect_cmd.extend(["-m", "not integration"])
+        # Normal collection mode
+        collect_cmd.append("tests")
+        if include_integration:
+            collect_cmd.append("--run-integration")
+        else:
+            collect_cmd.extend(["-m", "not integration"])
     
     # print(f"Debug: Collection command: {' '.join(collect_cmd)}")
     
@@ -130,7 +138,7 @@ def group_tests_by_module(test_list: List[str]) -> Dict[str, Dict]:
         
     return modules
 
-def run_module_tests(module_name: str, test_files: List[str], package_path: str, include_integration: bool) -> Tuple[str, List[TestFailure], int]:
+def run_module_tests(module_name: str, test_files: List[str], package_path: str, include_integration: bool, only_integration: bool = False) -> Tuple[str, List[TestFailure], int]:
     """
     Run tests for a specific module with coverage.
     
@@ -139,6 +147,7 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
         test_files: List of test files to run
         package_path: Path to the package to measure coverage for
         include_integration: Whether to run integration tests
+        only_integration: Whether to run only integration tests
         
     Returns:
         Tuple of (output, failures, test_count)
@@ -157,7 +166,9 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
     # Add test files to the command
     module_cmd.extend(test_files)
     
-    if include_integration:
+    # Always add --run-integration when we're running only integration tests
+    # or when include_integration is True
+    if include_integration or only_integration:
         module_cmd.append("--run-integration")
         
     # print(f"Debug: Running module command: {' '.join(module_cmd)}")
@@ -186,17 +197,29 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
     
     # Parse failures for this module
     failures = []
+    passed_tests = 0
     try:
+        module_result_file = f"test_results_{module_name.replace(' ', '_').lower()}.json"
+        # Rename the test_results.json to a module-specific file
         if os.path.exists("test_results.json"):
-            with open("test_results.json") as f:
+            os.rename("test_results.json", module_result_file)
+            with open(module_result_file) as f:
                 test_results = json.load(f)
             
+            # Check total tests collected
+            total_tests = test_results.get("summary", {}).get("collected", 0)
+            print(f"Test results report: collected {total_tests} tests")
+            
+            # Look at test outcomes
             for test in test_results.get("tests", []):
-                if test.get("outcome") != "passed":
+                outcome = test.get("outcome")
+                if outcome == "passed":
+                    passed_tests += 1
+                elif outcome in ["failed", "error", "skipped", "xfailed"]:
                     # Create failure record
                     failure = TestFailure(
                         name=test.get("nodeid", "Unknown"),
-                        outcome=test.get("outcome", "error"),
+                        outcome=outcome,
                         message=test.get("call", {}).get("longrepr", "No details available"),
                         duration=test.get("duration", 0.0),
                         file=get_file_from_nodeid(test.get("nodeid", "")),
@@ -204,20 +227,20 @@ def run_module_tests(module_name: str, test_files: List[str], package_path: str,
                     )
                     failures.append(failure)
             
-            if failures:
-                print(f"Found {len(failures)} test failures in this module")
+            print(f"Test results: {passed_tests} passed, {len(failures)} failed/skipped")
     except Exception as e:
         print(f"Error parsing test failures for module {module_name}: {e}")
         
     return output_sample, failures, len(test_files)
 
-def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False) -> Tuple[str, List[TestFailure]]:
+def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integration: bool = False, only_integration: bool = False) -> Tuple[str, List[TestFailure]]:
     """
     Run pytest with coverage and return the output and test failures.
     
     Args:
         package_path: Path to the package to measure coverage for
         include_integration: Whether to run integration tests
+        only_integration: Whether to run only integration tests
         
     Returns:
         Tuple of (coverage_output, test_failures)
@@ -232,7 +255,7 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         os.remove(".coverage")
         
     # Collect tests
-    test_list = collect_tests(include_integration)
+    test_list = collect_tests(include_integration, only_integration)
     
     if not test_list:
         print("No tests found or test collection failed!")
@@ -262,15 +285,20 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         # Fallback to running all tests at once
         all_cmd = [
             "python", "-m", "pytest",
-            "tests/",
             f"--cov={package_path}",
             "--cov-report=term",  # Don't use term-missing to avoid stdout clutter
             "--json-report",
             f"--json-report-file=test_results.json",
         ]
         
-        if include_integration:
+        # Determine which tests to run
+        if only_integration:
+            all_cmd.append("tests/integration/")
             all_cmd.append("--run-integration")
+        else:
+            all_cmd.append("tests/")
+            if include_integration:
+                all_cmd.append("--run-integration")
             
         # print(f"Debug: Running fallback command: {' '.join(all_cmd)}")
         
@@ -301,17 +329,26 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         
         # Parse failures
         failures = []
+        passed_tests = 0
         try:
             if os.path.exists("test_results.json"):
                 with open("test_results.json") as f:
                     test_results = json.load(f)
                 
+                # Check test collection info
+                total_tests = test_results.get("summary", {}).get("collected", 0)
+                print(f"Test results report: collected {total_tests} tests")
+                
+                # Look at test outcomes
                 for test in test_results.get("tests", []):
-                    if test.get("outcome") != "passed":
+                    outcome = test.get("outcome")
+                    if outcome == "passed":
+                        passed_tests += 1
+                    elif outcome in ["failed", "error", "skipped", "xfailed"]:
                         # Create failure record
                         failure = TestFailure(
                             name=test.get("nodeid", "Unknown"),
-                            outcome=test.get("outcome", "error"),
+                            outcome=outcome,
                             message=test.get("call", {}).get("longrepr", "No details available"),
                             duration=test.get("duration", 0.0),
                             file=get_file_from_nodeid(test.get("nodeid", "")),
@@ -319,8 +356,7 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
                         )
                         failures.append(failure)
                 
-                if failures:
-                    print(f"Found {len(failures)} test failures")
+                print(f"Test results: {passed_tests} passed, {len(failures)} failed/skipped")
         except Exception as e:
             print(f"Error parsing test failures: {e}")
             
@@ -340,7 +376,8 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
             module_name,
             test_list,
             package_path,
-            include_integration
+            include_integration,
+            only_integration
         )
         
         # Add failures to the list
@@ -349,6 +386,67 @@ def run_coverage(package_path: str = "src/pygithub_mcp_server", include_integrat
         # Update progress
         tests_completed += test_count
         print(f"{tests_completed} of {total_tests} Tests Complete")
+    
+    # Merge all test result files into a consolidated report
+    merged_results = {
+        "created": datetime.now().timestamp(),
+        "duration": 0,
+        "exitcode": 0,
+        "root": os.getcwd(),
+        "environment": {},
+        "summary": {
+            "total": total_tests,
+            "collected": total_tests
+        },
+        "tests": [],
+        "warnings": []
+    }
+    
+    # Look for module-specific result files and merge them
+    total_tests_found = 0
+    total_passed = 0
+    for filename in os.listdir():
+        if filename.startswith("test_results_") and filename.endswith(".json"):
+            try:
+                with open(filename) as f:
+                    module_results = json.load(f)
+                    
+                # Add tests from this module
+                if "tests" in module_results:
+                    merged_results["tests"].extend(module_results["tests"])
+                    total_tests_found += len(module_results.get("tests", []))
+                    # Count passed tests
+                    for test in module_results.get("tests", []):
+                        if test.get("outcome") == "passed":
+                            total_passed += 1
+                
+                # Merge warnings
+                if "warnings" in module_results:
+                    for warning in module_results.get("warnings", []):
+                        if warning not in merged_results["warnings"]:
+                            merged_results["warnings"].append(warning)
+                
+                # Track longest duration
+                merged_results["duration"] = max(merged_results["duration"], 
+                                               module_results.get("duration", 0))
+            except Exception as e:
+                print(f"Error merging test results from {filename}: {e}")
+    
+    # Write the consolidated test_results.json
+    try:
+        with open("test_results.json", "w") as f:
+            json.dump(merged_results, f, indent=2)
+        print(f"Consolidated test results: found {total_tests_found} tests, {total_passed} passed, {len(all_failures)} failed/skipped")
+        
+        # Clean up individual module result files
+        for filename in os.listdir():
+            if filename.startswith("test_results_") and filename.endswith(".json"):
+                try:
+                    os.remove(filename)
+                except Exception as e:
+                    print(f"Warning: Could not remove {filename}: {e}")
+    except Exception as e:
+        print(f"Error creating consolidated test results: {e}")
     
     # Generate a final coverage report
     print("Generating final coverage report...")

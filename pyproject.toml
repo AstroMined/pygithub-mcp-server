@@ -47,7 +47,7 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 [tool.coverage.run]
 branch = true
 source = ["src/pygithub_mcp_server"]
-dynamic_context = "test_function"
+# Removed dynamic_context which conflicts with pytest-cov's --cov-context option
 
 [tool.coverage.report]
 exclude_lines = [
